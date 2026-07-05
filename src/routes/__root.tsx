@@ -11,8 +11,6 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { CinematicBackground } from "../components/cinematic-bg";
-import { CinematicParticles } from "../components/cinematic-particles";
 
 function NotFoundComponent() {
   return (
@@ -158,9 +156,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <CinematicBackground />
-      <CinematicParticles count={80} color="arcane" />
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,_#200a3b,_#05070d_40%,_#05070d_100%)]" />
       <Outlet />
     </QueryClientProvider>
   );

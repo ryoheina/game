@@ -1,0 +1,1 @@
+import{_ as e,x as t}from"./index-CfHm2htk.js";var n=t(),r=()=>(0,n.jsx)(e,{});export{r as component};

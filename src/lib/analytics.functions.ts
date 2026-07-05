@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { getClientMeta } from "./ua";
+import { ADMIN_SECRET } from "./admin";
 
 export const trackVisit = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ sessionId: z.string().min(8).max(64), path: z.string().max(500) }).parse(d))

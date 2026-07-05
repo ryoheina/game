@@ -1,65 +1,8 @@
 import { D as isRedirect, k as parseRedirect } from "../_libs/@tanstack/react-router+[...].mjs";
 import { a as defaultSerovalPlugins, c as makeSerovalPlugin, i as mergeHeaders } from "../_libs/@tanstack/router-core+[...].mjs";
 import { t as createMiddleware } from "./createStart-Dt05N14y.mjs";
-import { n as toResponse, t as H3Event } from "../_libs/h3-v2.mjs";
 import { AsyncLocalStorage } from "node:async_hooks";
-//#region node_modules/.nitro/vite/services/ssr/assets/esm-9EjmF9OT.js
-var GLOBAL_EVENT_STORAGE_KEY = Symbol.for("tanstack-start:event-storage");
-var globalObj$1 = globalThis;
-if (!globalObj$1[GLOBAL_EVENT_STORAGE_KEY]) globalObj$1[GLOBAL_EVENT_STORAGE_KEY] = new AsyncLocalStorage();
-var eventStorage = globalObj$1[GLOBAL_EVENT_STORAGE_KEY];
-function isPromiseLike(value) {
-	return typeof value.then === "function";
-}
-function getSetCookieValues(headers) {
-	const headersWithSetCookie = headers;
-	if (typeof headersWithSetCookie.getSetCookie === "function") return headersWithSetCookie.getSetCookie();
-	const value = headers.get("set-cookie");
-	return value ? [value] : [];
-}
-function mergeEventResponseHeaders(response, event) {
-	if (response.ok) return;
-	const eventSetCookies = getSetCookieValues(event.res.headers);
-	if (eventSetCookies.length === 0) return;
-	const responseSetCookies = getSetCookieValues(response.headers);
-	response.headers.delete("set-cookie");
-	for (const cookie of responseSetCookies) response.headers.append("set-cookie", cookie);
-	for (const cookie of eventSetCookies) response.headers.append("set-cookie", cookie);
-}
-function attachResponseHeaders(value, event) {
-	if (isPromiseLike(value)) return value.then((resolved) => {
-		if (resolved instanceof Response) mergeEventResponseHeaders(resolved, event);
-		return resolved;
-	});
-	if (value instanceof Response) mergeEventResponseHeaders(value, event);
-	return value;
-}
-function requestHandler(handler) {
-	return (request, requestOpts) => {
-		let h3Event;
-		try {
-			h3Event = new H3Event(request);
-		} catch (error) {
-			if (error instanceof URIError) return new Response(null, {
-				status: 400,
-				statusText: "Bad Request"
-			});
-			throw error;
-		}
-		return toResponse(attachResponseHeaders(eventStorage.run({ h3Event }, () => handler(request, requestOpts)), h3Event), h3Event);
-	};
-}
-function getH3Event() {
-	const event = eventStorage.getStore();
-	if (!event) throw new Error(`No StartEvent found in AsyncLocalStorage. Make sure you are using the function within the server runtime.`);
-	return event.h3Event;
-}
-function getRequest() {
-	return getH3Event().req;
-}
-function getResponse() {
-	return getH3Event().res;
-}
+//#region node_modules/.nitro/vite/services/ssr/assets/esm-Dova13aH.js
 var TSS_FORMDATA_CONTEXT = "__TSS_CONTEXT";
 var TSS_SERVER_FUNCTION = Symbol.for("TSS_SERVER_FUNCTION");
 var TSS_SERVER_FUNCTION_FACTORY = Symbol.for("TSS_SERVER_FUNCTION_FACTORY");
@@ -372,4 +315,4 @@ function getDefaultSerovalPlugins() {
 	return [...(getStartOptions()?.serializationAdapters)?.map(makeSerovalPlugin) ?? [], ...defaultSerovalPlugins];
 }
 //#endregion
-export { safeObjectMerge as _, X_TSS_RAW_RESPONSE as a, createNullProtoObject as c, getDefaultSerovalPlugins as d, getRequest as f, runWithStartContext as g, requestHandler as h, TSS_SERVER_FUNCTION as i, createServerFn as l, getStartContext as m, TSS_CONTENT_TYPE_FRAMED_VERSIONED as n, X_TSS_SERIALIZED as o, getResponse as p, TSS_FORMDATA_CONTEXT as r, createCsrfMiddleware as s, FrameType as t, flattenMiddlewares as u };
+export { X_TSS_RAW_RESPONSE as a, createNullProtoObject as c, getDefaultSerovalPlugins as d, getStartContext as f, TSS_SERVER_FUNCTION as i, createServerFn as l, safeObjectMerge as m, TSS_CONTENT_TYPE_FRAMED_VERSIONED as n, X_TSS_SERIALIZED as o, runWithStartContext as p, TSS_FORMDATA_CONTEXT as r, createCsrfMiddleware as s, FrameType as t, flattenMiddlewares as u };

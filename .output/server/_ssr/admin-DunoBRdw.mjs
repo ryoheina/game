@@ -1,10 +1,10 @@
 import { a as __toESM } from "../_runtime.mjs";
-import { o as require_jsx_runtime, s as require_react } from "../_libs/@react-three/fiber+[...].mjs";
+import { i as require_react, r as require_jsx_runtime, t as useQuery } from "../_libs/react+tanstack__react-query.mjs";
 import { D as isRedirect, _ as useRouter, g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-import { t as getAdminStats } from "./analytics.functions-Dhm407dA.mjs";
+import { t as ADMIN_SECRET } from "./admin-CZ92_GKT.mjs";
+import { t as getAdminStats } from "./analytics.functions-Bq1tf5Ye.mjs";
 import { n as MouseGlow } from "./fx-DmVqfUhc.mjs";
-import { t as useQuery } from "../_libs/tanstack__react-query.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-D--l8NME.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-DunoBRdw.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function useServerFn(serverFn) {
@@ -29,7 +29,7 @@ function Admin() {
 	const fetchStats = useServerFn(getAdminStats);
 	const { data, isLoading, error, refetch } = useQuery({
 		queryKey: ["admin-stats"],
-		queryFn: () => fetchStats(),
+		queryFn: () => fetchStats({ data: { secret: ADMIN_SECRET } }),
 		enabled: authorized === true,
 		refetchInterval: 15e3
 	});

@@ -1,11 +1,12 @@
 import { a as __toESM } from "../_runtime.mjs";
-import { o as require_jsx_runtime, s as require_react } from "../_libs/@react-three/fiber+[...].mjs";
-import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-import { n as submitContact, r as trackVisit } from "./analytics.functions-Dhm407dA.mjs";
-import { n as MouseGlow, r as Particles, t as Fog } from "./fx-DmVqfUhc.mjs";
 import { i as AnimatePresence, n as useScroll, r as motion, t as useTransform } from "../_libs/framer-motion.mjs";
+import { i as require_react, r as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
+import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
+import { t as ADMIN_SECRET } from "./admin-CZ92_GKT.mjs";
+import { n as submitContact, r as trackVisit } from "./analytics.functions-Bq1tf5Ye.mjs";
+import { n as MouseGlow, r as Particles, t as Fog } from "./fx-DmVqfUhc.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-CxYxAhim.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-CTR5yjk-.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -1078,13 +1079,13 @@ function Home() {
 		return () => clearInterval(heartbeat);
 	}, []);
 	(0, import_react.useEffect)(() => {
-		const secret = "20070925";
+		const secret = ADMIN_SECRET;
 		const onKeyDown = (e) => {
 			const target = e.target;
 			if (!target) return;
 			if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable) return;
 			if (/^[0-9]$/.test(e.key)) {
-				typedSecret.current = (typedSecret.current + e.key).slice(-8);
+				typedSecret.current = (typedSecret.current + e.key).slice(-secret.length);
 				if (typedSecret.current === secret) {
 					localStorage.setItem("loe_admin_secret", secret);
 					typedSecret.current = "";
