@@ -15,6 +15,7 @@ function Auth() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -26,21 +27,29 @@ function Auth() {
     e.preventDefault();
     setBusy(true);
     setErr(null);
+    setInfo(null);
     try {
       if (!email || !password) {
         throw new Error("Email and password are required.");
       }
 
       if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        if (!data.session) {
+          throw new Error("Unable to sign in. Check your credentials and try again.");
+        }
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: window.location.origin + "/admin" },
         });
         if (error) throw error;
+        if (!data.session) {
+          setInfo("Check your email to confirm your account before signing in.");
+          return;
+        }
       }
 
       navigate({ to: "/admin", replace: true });
@@ -84,6 +93,7 @@ function Auth() {
             className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none ring-1 ring-white/10 focus:ring-[color:var(--arcane)]"
           />
           {err && <div className="text-sm text-[color:var(--ember)]">{err}</div>}
+          {info && <div className="text-sm text-[color:var(--lime)]">{info}</div>}
           <button
             disabled={busy}
             className="w-full rounded-full bg-gradient-to-r from-[color:var(--arcane)] to-[color:var(--gold)] px-6 py-3 text-sm uppercase tracking-[0.25em] text-black transition hover:scale-[1.01] disabled:opacity-60"

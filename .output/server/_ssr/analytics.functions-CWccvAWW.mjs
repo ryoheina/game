@@ -2,7 +2,7 @@ import { f as getRequest, i as TSS_SERVER_FUNCTION, l as createServerFn } from "
 import { t as requireSupabaseAuth } from "./auth-middleware-DZO41X7i.mjs";
 import { n as stringType, t as objectType } from "../_libs/zod.mjs";
 import { t as getClientMeta } from "./ua-VZAcffKf.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-B5he0NS3.js
+//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-CWccvAWW.js
 var createServerRpc = (serverFnMeta, splitImportFn) => {
 	const url = "/_serverFn/" + serverFnMeta.id;
 	return Object.assign(splitImportFn, {
@@ -16,7 +16,7 @@ var trackVisit_createServerFn_handler = createServerRpc({
 	name: "trackVisit",
 	filename: "src/lib/analytics.functions.ts"
 }, (opts) => trackVisit.__executeServer(opts));
-var trackVisit = createServerFn({ method: "POST" }).inputValidator((d) => objectType({
+var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType({
 	sessionId: stringType().min(8).max(64),
 	path: stringType().max(500)
 }).parse(d)).handler(trackVisit_createServerFn_handler, async ({ data }) => {
@@ -49,7 +49,7 @@ var submitContact_createServerFn_handler = createServerRpc({
 	name: "submitContact",
 	filename: "src/lib/analytics.functions.ts"
 }, (opts) => submitContact.__executeServer(opts));
-var submitContact = createServerFn({ method: "POST" }).inputValidator((d) => objectType({
+var submitContact = createServerFn({ method: "POST" }).validator((d) => objectType({
 	name: stringType().trim().min(1).max(120),
 	email: stringType().trim().email().max(200),
 	message: stringType().trim().min(1).max(5e3)
@@ -57,6 +57,42 @@ var submitContact = createServerFn({ method: "POST" }).inputValidator((d) => obj
 	const { supabaseAdmin } = await import("./client.server-Bw6iWMJ-.mjs");
 	const { error } = await supabaseAdmin.from("contact_messages").insert(data);
 	if (error) throw new Error("Could not save your message");
+	return { ok: true };
+});
+var getAdminStatus_createServerFn_handler = createServerRpc({
+	id: "6d92e280c68cd3c11aac298fc57f9269dca8d85ae15c9747e0c8a8d46051fccf",
+	name: "getAdminStatus",
+	filename: "src/lib/analytics.functions.ts"
+}, (opts) => getAdminStatus.__executeServer(opts));
+var getAdminStatus = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(getAdminStatus_createServerFn_handler, async ({ context }) => {
+	const { data: roleRow, error } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
+	if (error) throw new Error("Unable to verify admin status");
+	const { supabaseAdmin } = await import("./client.server-Bw6iWMJ-.mjs");
+	const { data: existingAdmin, error: existingAdminError } = await supabaseAdmin.from("user_roles").select("id").eq("role", "admin").limit(1);
+	if (existingAdminError) throw new Error("Unable to verify admin roles");
+	return {
+		isAdmin: Boolean(roleRow),
+		anyAdmin: (existingAdmin?.length ?? 0) > 0
+	};
+});
+var promoteToAdmin_createServerFn_handler = createServerRpc({
+	id: "abd124c618fd11979349d78fa7b5705a4311550c5a02f311710e53685f427a7f",
+	name: "promoteToAdmin",
+	filename: "src/lib/analytics.functions.ts"
+}, (opts) => promoteToAdmin.__executeServer(opts));
+var promoteToAdmin = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).handler(promoteToAdmin_createServerFn_handler, async ({ context }) => {
+	const { supabaseAdmin } = await import("./client.server-Bw6iWMJ-.mjs");
+	const { data: existingAdmin, error: existingAdminError } = await supabaseAdmin.from("user_roles").select("id").eq("role", "admin").limit(1);
+	if (existingAdminError) throw new Error("Unable to verify admin roles");
+	if ((existingAdmin?.length ?? 0) > 0) return {
+		ok: false,
+		alreadyExists: true
+	};
+	const { error } = await supabaseAdmin.from("user_roles").insert({
+		user_id: context.userId,
+		role: "admin"
+	});
+	if (error) throw new Error("Unable to promote this account to admin");
 	return { ok: true };
 });
 var getAdminStats_createServerFn_handler = createServerRpc({
@@ -130,4 +166,4 @@ var getAdminStats = createServerFn({ method: "GET" }).middleware([requireSupabas
 	};
 });
 //#endregion
-export { getAdminStats_createServerFn_handler, submitContact_createServerFn_handler, trackVisit_createServerFn_handler };
+export { getAdminStats_createServerFn_handler, getAdminStatus_createServerFn_handler, promoteToAdmin_createServerFn_handler, submitContact_createServerFn_handler, trackVisit_createServerFn_handler };

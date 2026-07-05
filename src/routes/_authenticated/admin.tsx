@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { getAdminStats } from "@/lib/analytics.functions";
+import { getAdminStats, getAdminStatus, promoteToAdmin } from "@/lib/analytics.functions";
 import { MouseGlow } from "@/components/fx";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -27,6 +27,9 @@ function Admin() {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isPromoting, setIsPromoting] = useState(false);
+  const getStatus = useServerFn(getAdminStatus);
+  const promote = useServerFn(promoteToAdmin);
   const fetchStats = useServerFn(getAdminStats);
 
   useEffect(() => {
@@ -52,10 +55,26 @@ function Admin() {
     }
   }, [navigate, session]);
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const {
+    data: status,
+    isLoading: statusLoading,
+    error: statusError,
+    refetch: refetchStatus,
+  } = useQuery({
+    queryKey: ["admin-status"],
+    queryFn: () => getStatus(),
+    enabled: session !== undefined && session !== null,
+  });
+
+  const {
+    data,
+    isLoading: statsLoading,
+    error: statsError,
+    refetch: refetchStats,
+  } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: () => fetchStats(),
-    enabled: session !== undefined && session !== null,
+    enabled: Boolean(status?.isAdmin),
     refetchInterval: 15_000,
   });
 
@@ -65,27 +84,93 @@ function Admin() {
     navigate({ to: "/auth", replace: true });
   };
 
+  const promoteSelf = async () => {
+    setIsPromoting(true);
+    try {
+      const result = await promote();
+      if (result?.ok) {
+        refetchStatus();
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsPromoting(false);
+    }
+  };
+
   if (session === undefined) {
     return <div className="grid min-h-dvh place-items-center text-white/60">Loading dashboard…</div>;
   }
   if (!session) return null;
-  if (isLoading) {
+  if (statusLoading || statsLoading) {
     return <div className="grid min-h-dvh place-items-center text-white/60">Loading dashboard…</div>;
   }
-  if (error) {
+
+  if (statusError) {
     return (
       <div className="grid min-h-dvh place-items-center p-6 text-center">
         <div>
-          <h1 className="display text-2xl text-white">Forbidden</h1>
-          <p className="mt-2 text-white/60">You are signed in but not an admin. Grant your user the <code>admin</code> role in the database.</p>
+          <h1 className="display text-2xl text-white">Unable to verify access</h1>
+          <p className="mt-2 text-white/60">We could not verify your admin access. Please sign out and try again.</p>
           <div className="mt-6 flex justify-center gap-3">
-            <button onClick={() => refetch()} className="rounded-full glass px-4 py-2 text-sm text-white">Retry</button>
             <button onClick={signOut} className="rounded-full bg-white px-4 py-2 text-sm text-black">Sign out</button>
           </div>
         </div>
       </div>
     );
   }
+
+  if (!status?.isAdmin) {
+    if (!status?.anyAdmin) {
+      return (
+        <div className="grid min-h-dvh place-items-center p-6 text-center">
+          <div>
+            <h1 className="display text-2xl text-white">First admin required</h1>
+            <p className="mt-2 text-white/60">No admin account exists yet. You can promote your current account to the first admin.</p>
+            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <button
+                onClick={promoteSelf}
+                disabled={isPromoting}
+                className="rounded-full glass px-4 py-2 text-sm text-white disabled:opacity-60"
+              >
+                {isPromoting ? "Promoting…" : "Make this account admin"}
+              </button>
+              <button onClick={signOut} className="rounded-full bg-white px-4 py-2 text-sm text-black">Sign out</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid min-h-dvh place-items-center p-6 text-center">
+        <div>
+          <h1 className="display text-2xl text-white">Forbidden</h1>
+          <p className="mt-2 text-white/60">You are signed in but not an admin. Grant your user the <code>admin</code> role in the database.</p>
+          <div className="mt-6 flex justify-center gap-3">
+            <button onClick={() => refetchStatus()} className="rounded-full glass px-4 py-2 text-sm text-white">Retry</button>
+            <button onClick={signOut} className="rounded-full bg-white px-4 py-2 text-sm text-black">Sign out</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (statsError) {
+    return (
+      <div className="grid min-h-dvh place-items-center p-6 text-center">
+        <div>
+          <h1 className="display text-2xl text-white">Dashboard unavailable</h1>
+          <p className="mt-2 text-white/60">We could not load admin data right now.</p>
+          <div className="mt-6 flex justify-center gap-3">
+            <button onClick={() => refetchStats()} className="rounded-full glass px-4 py-2 text-sm text-white">Retry</button>
+            <button onClick={signOut} className="rounded-full bg-white px-4 py-2 text-sm text-black">Sign out</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!data) return null;
 
   const { totals, recentVisits, recentDownloads, byCountry, byBrowser, byOs, hourly, messages } = data;

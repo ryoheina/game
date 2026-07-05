@@ -1,9 +1,9 @@
 import { a as __toESM } from "../_runtime.mjs";
-import { t as supabase } from "./client-gykmVtt_.mjs";
-import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { i as require_react, r as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
+import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
+import { t as supabase } from "./client-gykmVtt_.mjs";
 import { n as MouseGlow, r as Particles } from "./fx-DmVqfUhc.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/auth-DDE7qTT4.js
+//#region node_modules/.nitro/vite/services/ssr/assets/auth-CcGLtPXW.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function Auth() {
@@ -13,6 +13,7 @@ function Auth() {
 	const [password, setPassword] = (0, import_react.useState)("");
 	const [busy, setBusy] = (0, import_react.useState)(false);
 	const [err, setErr] = (0, import_react.useState)(null);
+	const [info, setInfo] = (0, import_react.useState)(null);
 	(0, import_react.useEffect)(() => {
 		supabase.auth.getSession().then(({ data }) => {
 			if (data.session) navigate({
@@ -25,21 +26,27 @@ function Auth() {
 		e.preventDefault();
 		setBusy(true);
 		setErr(null);
+		setInfo(null);
 		try {
 			if (!email || !password) throw new Error("Email and password are required.");
 			if (mode === "signin") {
-				const { error } = await supabase.auth.signInWithPassword({
+				const { data, error } = await supabase.auth.signInWithPassword({
 					email,
 					password
 				});
 				if (error) throw error;
+				if (!data.session) throw new Error("Unable to sign in. Check your credentials and try again.");
 			} else {
-				const { error } = await supabase.auth.signUp({
+				const { data, error } = await supabase.auth.signUp({
 					email,
 					password,
 					options: { emailRedirectTo: window.location.origin + "/admin" }
 				});
 				if (error) throw error;
+				if (!data.session) {
+					setInfo("Check your email to confirm your account before signing in.");
+					return;
+				}
 			}
 			navigate({
 				to: "/admin",
@@ -102,6 +109,10 @@ function Auth() {
 							err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "text-sm text-[color:var(--ember)]",
 								children: err
+							}),
+							info && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "text-sm text-[color:var(--lime)]",
+								children: info
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								disabled: busy,

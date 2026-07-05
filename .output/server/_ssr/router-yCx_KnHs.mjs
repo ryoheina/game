@@ -1,13 +1,13 @@
 import { a as __toESM } from "../_runtime.mjs";
-import { t as supabase } from "./client-gykmVtt_.mjs";
-import { A as redirect, _ as useRouter, c as HeadContent, d as Outlet, f as lazyRouteComponent, h as Link, m as createRootRouteWithContext, p as createFileRoute, s as Scripts, u as createRouter } from "../_libs/@tanstack/react-router+[...].mjs";
 import { i as require_react, n as QueryClientProvider, r as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
+import { A as redirect, _ as useRouter, c as HeadContent, d as Outlet, f as lazyRouteComponent, h as Link, m as createRootRouteWithContext, p as createFileRoute, s as Scripts, u as createRouter } from "../_libs/@tanstack/react-router+[...].mjs";
+import { t as supabase } from "./client-gykmVtt_.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import { t as getClientMeta } from "./ua-VZAcffKf.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-b5kbukNd.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-yCx_KnHs.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-D20RGTEw.css";
+var styles_default = "/assets/styles-jki8sZh9.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -209,7 +209,7 @@ function RootComponent() {
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,_#200a3b,_#05070d_40%,_#05070d_100%)]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Outlet, {})]
 	});
 }
-var $$splitComponentImporter$3 = () => import("./auth-DDE7qTT4.mjs");
+var $$splitComponentImporter$3 = () => import("./auth-CcGLtPXW.mjs");
 var Route$4 = createFileRoute("/auth")({
 	head: () => ({ meta: [{ title: "Admin Access — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
@@ -224,7 +224,7 @@ var Route$3 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-Bu7g6HIg.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-BCBydO5A.mjs");
 var Route$2 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -248,7 +248,7 @@ var Route$2 = createFileRoute("/")({
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
 var $$splitErrorComponentImporter = () => import("./admin-BqW0Kxgr.mjs");
-var $$splitComponentImporter = () => import("./admin-BLKFRTfv.mjs");
+var $$splitComponentImporter = () => import("./admin-CnunIDR_.mjs");
 var Route$1 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Admin Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component"),

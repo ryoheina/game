@@ -1,10 +1,10 @@
 import { a as __toESM } from "../_runtime.mjs";
-import { t as supabase } from "./client-gykmVtt_.mjs";
-import { D as isRedirect, _ as useRouter, g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-import { t as getAdminStats } from "./analytics.functions-DkhMu45D.mjs";
 import { i as require_react, r as require_jsx_runtime, t as useQuery } from "../_libs/react+tanstack__react-query.mjs";
+import { D as isRedirect, _ as useRouter, g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
+import { t as supabase } from "./client-gykmVtt_.mjs";
+import { n as getAdminStatus, r as promoteToAdmin, t as getAdminStats } from "./analytics.functions-Dr04tFJr.mjs";
 import { n as MouseGlow } from "./fx-DmVqfUhc.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-BLKFRTfv.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-CnunIDR_.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function useServerFn(serverFn) {
@@ -27,6 +27,9 @@ function Admin() {
 	const navigate = useNavigate();
 	const [session, setSession] = (0, import_react.useState)(void 0);
 	const [isSigningOut, setIsSigningOut] = (0, import_react.useState)(false);
+	const [isPromoting, setIsPromoting] = (0, import_react.useState)(false);
+	const getStatus = useServerFn(getAdminStatus);
+	const promote = useServerFn(promoteToAdmin);
 	const fetchStats = useServerFn(getAdminStats);
 	(0, import_react.useEffect)(() => {
 		let active = true;
@@ -45,10 +48,15 @@ function Admin() {
 			replace: true
 		});
 	}, [navigate, session]);
-	const { data, isLoading, error, refetch } = useQuery({
+	const { data: status, isLoading: statusLoading, error: statusError, refetch: refetchStatus } = useQuery({
+		queryKey: ["admin-status"],
+		queryFn: () => getStatus(),
+		enabled: session !== void 0 && session !== null
+	});
+	const { data, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useQuery({
 		queryKey: ["admin-stats"],
 		queryFn: () => fetchStats(),
-		enabled: session !== void 0 && session !== null,
+		enabled: Boolean(status?.isAdmin),
 		refetchInterval: 15e3
 	});
 	const signOut = async () => {
@@ -59,34 +67,118 @@ function Admin() {
 			replace: true
 		});
 	};
+	const promoteSelf = async () => {
+		setIsPromoting(true);
+		try {
+			if ((await promote())?.ok) refetchStatus();
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setIsPromoting(false);
+		}
+	};
 	if (session === void 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "grid min-h-dvh place-items-center text-white/60",
 		children: "Loading dashboard…"
 	});
 	if (!session) return null;
-	if (isLoading) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	if (statusLoading || statsLoading) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "grid min-h-dvh place-items-center text-white/60",
 		children: "Loading dashboard…"
 	});
-	if (error) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	if (statusError) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "grid min-h-dvh place-items-center p-6 text-center",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 				className: "display text-2xl text-white",
-				children: "Forbidden"
+				children: "Unable to verify access"
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-2 text-white/60",
-				children: [
-					"You are signed in but not an admin. Grant your user the ",
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "admin" }),
-					" role in the database."
-				]
+				children: "We could not verify your admin access. Please sign out and try again."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "mt-6 flex justify-center gap-3",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					onClick: signOut,
+					className: "rounded-full bg-white px-4 py-2 text-sm text-black",
+					children: "Sign out"
+				})
+			})
+		] })
+	});
+	if (!status?.isAdmin) {
+		if (!status?.anyAdmin) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "grid min-h-dvh place-items-center p-6 text-center",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+					className: "display text-2xl text-white",
+					children: "First admin required"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "mt-2 text-white/60",
+					children: "No admin account exists yet. You can promote your current account to the first admin."
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: promoteSelf,
+						disabled: isPromoting,
+						className: "rounded-full glass px-4 py-2 text-sm text-white disabled:opacity-60",
+						children: isPromoting ? "Promoting…" : "Make this account admin"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: signOut,
+						className: "rounded-full bg-white px-4 py-2 text-sm text-black",
+						children: "Sign out"
+					})]
+				})
+			] })
+		});
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "grid min-h-dvh place-items-center p-6 text-center",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+					className: "display text-2xl text-white",
+					children: "Forbidden"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+					className: "mt-2 text-white/60",
+					children: [
+						"You are signed in but not an admin. Grant your user the ",
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "admin" }),
+						" role in the database."
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "mt-6 flex justify-center gap-3",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => refetchStatus(),
+						className: "rounded-full glass px-4 py-2 text-sm text-white",
+						children: "Retry"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: signOut,
+						className: "rounded-full bg-white px-4 py-2 text-sm text-black",
+						children: "Sign out"
+					})]
+				})
+			] })
+		});
+	}
+	if (statsError) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "grid min-h-dvh place-items-center p-6 text-center",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+				className: "display text-2xl text-white",
+				children: "Dashboard unavailable"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-2 text-white/60",
+				children: "We could not load admin data right now."
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "mt-6 flex justify-center gap-3",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					onClick: () => refetch(),
+					onClick: () => refetchStats(),
 					className: "rounded-full glass px-4 py-2 text-sm text-white",
 					children: "Retry"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {

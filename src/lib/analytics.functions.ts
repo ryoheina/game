@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getClientMeta } from "./ua";
 
 export const trackVisit = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({ sessionId: z.string().min(8).max(64), path: z.string().max(500) }).parse(d))
+  .validator((d) => z.object({ sessionId: z.string().min(8).max(64), path: z.string().max(500) }).parse(d))
   .handler(async ({ data }) => {
     const req = getRequest();
     const meta = req ? getClientMeta(req) : { ip: null, country: null, ua: "", referrer: null, browser: "Unknown", os: "Unknown", device: "Desktop" };
@@ -25,7 +25,7 @@ export const trackVisit = createServerFn({ method: "POST" })
   });
 
 export const submitContact = createServerFn({ method: "POST" })
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         name: z.string().trim().min(1).max(120),
@@ -38,6 +38,68 @@ export const submitContact = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("contact_messages").insert(data);
     if (error) throw new Error("Could not save your message");
+    return { ok: true };
+  });
+
+export const getAdminStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: roleRow, error } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (error) {
+      throw new Error("Unable to verify admin status");
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: existingAdmin, error: existingAdminError } = await supabaseAdmin
+      .from("user_roles")
+      .select("id")
+      .eq("role", "admin")
+      .limit(1);
+
+    if (existingAdminError) {
+      throw new Error("Unable to verify admin roles");
+    }
+
+    return {
+      isAdmin: Boolean(roleRow),
+      anyAdmin: (existingAdmin?.length ?? 0) > 0,
+    };
+  });
+
+export const promoteToAdmin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: existingAdmin, error: existingAdminError } = await supabaseAdmin
+      .from("user_roles")
+      .select("id")
+      .eq("role", "admin")
+      .limit(1);
+
+    if (existingAdminError) {
+      throw new Error("Unable to verify admin roles");
+    }
+
+    if ((existingAdmin?.length ?? 0) > 0) {
+      return { ok: false, alreadyExists: true };
+    }
+
+    const { error } = await supabaseAdmin.from("user_roles").insert({
+      user_id: context.userId,
+      role: "admin",
+    });
+
+    if (error) {
+      throw new Error("Unable to promote this account to admin");
+    }
+
     return { ok: true };
   });
 
