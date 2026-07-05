@@ -123,31 +123,37 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
-    // Smooth scrolling with Lenis
-    try {
-      const Lenis = require("lenis").default;
-      const lenis = new Lenis({
-        duration: 1.2,
-        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        direction: "vertical",
-        gestureDirection: "vertical",
-        smooth: true,
-        smoothTouch: false,
-      });
+    // Smooth scrolling with Lenis - only on client side
+    if (typeof window === "undefined") return;
+    
+    import("lenis").then((module) => {
+      try {
+        const Lenis = module.default;
+        const lenis = new Lenis({
+          duration: 1.2,
+          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          direction: "vertical",
+          gestureDirection: "vertical",
+          smooth: true,
+          smoothTouch: false,
+        });
 
-      function raf(time: number) {
-        lenis.raf(time);
+        function raf(time: number) {
+          lenis.raf(time);
+          requestAnimationFrame(raf);
+        }
+
         requestAnimationFrame(raf);
+        
+        return () => {
+          lenis.destroy?.();
+        };
+      } catch (e) {
+        console.warn("Lenis initialization failed", e);
       }
-
-      requestAnimationFrame(raf);
-
-      return () => {
-        lenis.destroy?.();
-      };
-    } catch (e) {
-      console.warn("Lenis not available");
-    }
+    }).catch(() => {
+      console.warn("Lenis package not available");
+    });
   }, []);
 
   return (
