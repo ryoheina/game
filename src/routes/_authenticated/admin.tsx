@@ -46,8 +46,10 @@ function Admin() {
   const signOut = () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("loe_admin_secret");
+      window.location.assign("/");
+    } else {
+      navigate({ to: "/", replace: true });
     }
-    navigate({ to: "/auth", replace: true });
   };
 
   if (authorized === null) {
