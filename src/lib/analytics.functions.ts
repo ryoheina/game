@@ -1,8 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getClientMeta } from "./ua";
-import { ADMIN_SECRET } from "./admin";
 
 export const trackVisit = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ sessionId: z.string().min(8).max(64), path: z.string().max(500) }).parse(d))
@@ -42,10 +42,16 @@ export const submitContact = createServerFn({ method: "POST" })
   });
 
 export const getAdminStats = createServerFn({ method: "GET" })
-  .inputValidator((d) => z.object({ secret: z.string().min(1) }).parse(d))
-  .handler(async ({ data }) => {
-    const secret = data.secret;
-    if (secret !== ADMIN_SECRET) {
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: roleRow, error } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (error || !roleRow) {
       throw new Error("Forbidden");
     }
 

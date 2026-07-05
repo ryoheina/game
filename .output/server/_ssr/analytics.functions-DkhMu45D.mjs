@@ -1,7 +1,8 @@
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-C_FMKfN7.mjs";
-import { i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-Dova13aH.mjs";
+import { i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-9EjmF9OT.mjs";
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-RHdfKViK.mjs";
+import { t as requireSupabaseAuth } from "./auth-middleware-DZO41X7i.mjs";
 import { n as stringType, t as objectType } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-Bq1tf5Ye.js
+//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-DkhMu45D.js
 var createSsrRpc = (functionId) => {
 	const url = "/_serverFn/" + functionId;
 	const serverFnMeta = { id: functionId };
@@ -23,6 +24,6 @@ var submitContact = createServerFn({ method: "POST" }).inputValidator((d) => obj
 	email: stringType().trim().email().max(200),
 	message: stringType().trim().min(1).max(5e3)
 }).parse(d)).handler(createSsrRpc("8043f9f461a2e106a6aa3ba0474234bd1598036ef6e2dc8a67dea4ff61dab955"));
-var getAdminStats = createServerFn({ method: "GET" }).inputValidator((d) => objectType({ secret: stringType().min(1) }).parse(d)).handler(createSsrRpc("5058339e4274bf852ada72847e61fa713d72a2a54e6e0f6d25efda66bc028b9f"));
+var getAdminStats = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(createSsrRpc("5058339e4274bf852ada72847e61fa713d72a2a54e6e0f6d25efda66bc028b9f"));
 //#endregion
 export { submitContact as n, trackVisit as r, getAdminStats as t };

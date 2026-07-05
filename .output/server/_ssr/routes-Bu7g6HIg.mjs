@@ -1,12 +1,11 @@
 import { a as __toESM } from "../_runtime.mjs";
 import { i as AnimatePresence, n as useScroll, r as motion, t as useTransform } from "../_libs/framer-motion.mjs";
-import { i as require_react, r as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
 import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-import { t as ADMIN_SECRET } from "./admin-CZ92_GKT.mjs";
-import { n as submitContact, r as trackVisit } from "./analytics.functions-Bq1tf5Ye.mjs";
+import { n as submitContact, r as trackVisit } from "./analytics.functions-DkhMu45D.mjs";
+import { i as require_react, r as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow, r as Particles, t as Fog } from "./fx-DmVqfUhc.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-CTR5yjk-.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-Bu7g6HIg.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -1059,8 +1058,7 @@ function ensureSession() {
 	return sid;
 }
 function Home() {
-	const navigate = useNavigate();
-	const typedSecret = (0, import_react.useRef)("");
+	useNavigate();
 	const [openChar, setOpenChar] = (0, import_react.useState)(null);
 	const [downloadStatus, setDownloadStatus] = (0, import_react.useState)("idle");
 	(0, import_react.useEffect)(() => {
@@ -1078,35 +1076,6 @@ function Home() {
 		}, 6e4);
 		return () => clearInterval(heartbeat);
 	}, []);
-	(0, import_react.useEffect)(() => {
-		const secret = ADMIN_SECRET;
-		const onKeyDown = (e) => {
-			const target = e.target;
-			if (!target) return;
-			if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable) return;
-			if (/^[0-9]$/.test(e.key)) {
-				typedSecret.current = (typedSecret.current + e.key).slice(-secret.length);
-				if (typedSecret.current === secret) {
-					localStorage.setItem("loe_admin_secret", secret);
-					typedSecret.current = "";
-					navigate({ to: "/admin" });
-				}
-			} else if (![
-				"Shift",
-				"Control",
-				"Alt",
-				"Meta",
-				"Tab",
-				"ArrowLeft",
-				"ArrowRight",
-				"ArrowUp",
-				"ArrowDown",
-				"Escape"
-			].includes(e.key)) typedSecret.current = "";
-		};
-		window.addEventListener("keydown", onKeyDown);
-		return () => window.removeEventListener("keydown", onKeyDown);
-	}, [navigate]);
 	const handleDownload = (0, import_react.useCallback)(async () => {
 		setDownloadStatus("loading");
 		const iframe = document.createElement("iframe");

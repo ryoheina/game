@@ -1,8 +1,8 @@
-import { i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-Dova13aH.mjs";
+import { f as getRequest, i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-9EjmF9OT.mjs";
+import { t as requireSupabaseAuth } from "./auth-middleware-DZO41X7i.mjs";
 import { n as stringType, t as objectType } from "../_libs/zod.mjs";
-import { t as getRequest } from "./request-response-BEPp1C2k.mjs";
 import { t as getClientMeta } from "./ua-VZAcffKf.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-DnNmXdkk.js
+//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-B5he0NS3.js
 var createServerRpc = (serverFnMeta, splitImportFn) => {
 	const url = "/_serverFn/" + serverFnMeta.id;
 	return Object.assign(splitImportFn, {
@@ -64,8 +64,9 @@ var getAdminStats_createServerFn_handler = createServerRpc({
 	name: "getAdminStats",
 	filename: "src/lib/analytics.functions.ts"
 }, (opts) => getAdminStats.__executeServer(opts));
-var getAdminStats = createServerFn({ method: "GET" }).inputValidator((d) => objectType({ secret: stringType().min(1) }).parse(d)).handler(getAdminStats_createServerFn_handler, async ({ data }) => {
-	if (data.secret !== "20070925") throw new Error("Forbidden");
+var getAdminStats = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(getAdminStats_createServerFn_handler, async ({ context }) => {
+	const { data: roleRow, error } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
+	if (error || !roleRow) throw new Error("Forbidden");
 	const { supabaseAdmin } = await import("./client.server-Bw6iWMJ-.mjs");
 	const since24h = (/* @__PURE__ */ new Date(Date.now() - 24 * 36e5)).toISOString();
 	const since5m = (/* @__PURE__ */ new Date(Date.now() - 5 * 6e4)).toISOString();

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { MouseGlow, Particles } from "@/components/fx";
-import { ADMIN_SECRET } from "@/lib/admin";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Admin Access — Legends of Eternity" }] }),
@@ -10,14 +10,16 @@ export const Route = createFileRoute("/auth")({
 
 function Auth() {
   const navigate = useNavigate();
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("loe_admin_secret") === ADMIN_SECRET) {
-      navigate({ to: "/admin", replace: true });
-    }
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) navigate({ to: "/admin", replace: true });
+    });
   }, [navigate]);
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -25,10 +27,22 @@ function Auth() {
     setBusy(true);
     setErr(null);
     try {
-      if (password !== ADMIN_SECRET) {
-        throw new Error("Incorrect access code.");
+      if (!email || !password) {
+        throw new Error("Email and password are required.");
       }
-      localStorage.setItem("loe_admin_secret", ADMIN_SECRET);
+
+      if (mode === "signin") {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: window.location.origin + "/admin" },
+        });
+        if (error) throw error;
+      }
+
       navigate({ to: "/admin", replace: true });
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Unable to authenticate.");
@@ -46,15 +60,27 @@ function Auth() {
         <Link to="/" className="mb-6 inline-block text-xs uppercase tracking-[0.35em] text-white/50 hover:text-white">
           ← Back to site
         </Link>
-        <h1 className="display text-3xl text-white">Admin Gate</h1>
-        <p className="mt-2 text-sm text-white/60">Enter the hidden studio access code to continue.</p>
+        <h1 className="display text-3xl text-white">Admin Login</h1>
+        <p className="mt-2 text-sm text-white/60">Sign in with your studio account to access the admin dashboard.</p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-3">
           <input
-            type="password" required autoComplete="one-time-code"
-            value={password} onChange={(e) => setPassword(e.target.value)}
-            placeholder="Access code"
-            minLength={1}
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none ring-1 ring-white/10 focus:ring-[color:var(--arcane)]"
+          />
+          <input
+            type="password"
+            required
+            autoComplete={mode === "signin" ? "current-password" : "new-password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            minLength={8}
             className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none ring-1 ring-white/10 focus:ring-[color:var(--arcane)]"
           />
           {err && <div className="text-sm text-[color:var(--ember)]">{err}</div>}
@@ -62,12 +88,17 @@ function Auth() {
             disabled={busy}
             className="w-full rounded-full bg-gradient-to-r from-[color:var(--arcane)] to-[color:var(--gold)] px-6 py-3 text-sm uppercase tracking-[0.25em] text-black transition hover:scale-[1.01] disabled:opacity-60"
           >
-            {busy ? "…" : "Enter"}
+            {busy ? "…" : mode === "signin" ? "Sign in" : "Create account"}
           </button>
         </form>
-        <p className="mt-6 text-center text-[10px] uppercase tracking-[0.3em] text-white/30">
-          Hidden access code required. Keep this page private.
-        </p>
+
+        <div className="mt-6 text-center text-xs text-white/50">
+          {mode === "signin" ? (
+            <>No account? <button onClick={() => setMode("signup")} className="text-white hover:underline">Create one</button></>
+          ) : (
+            <>Have an account? <button onClick={() => setMode("signin")} className="text-white hover:underline">Sign in</button></>
+          )}
+        </div>
       </div>
     </div>
   );
