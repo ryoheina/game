@@ -1,12 +1,12 @@
 {
-  "version": 3,
+  "version": 2,
   "builds": [
     { "src": "package.json", "use": "@vercel/static-build" },
     { "src": "api/index.ts", "use": "@vercel/node" }
   ],
-  "routes": [
-    { "src": "/__l5e/(.*)", "dest": "https://c--19c86a1a-2fae-4b01-ac75-d707fb406ddc-prod.lovable.cloud/__l5e/$1" },
-    { "src": "/api/(.*)", "dest": "/api/index.ts" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/__l5e/:path*", "destination": "https://c--19c86a1a-2fae-4b01-ac75-d707fb406ddc-prod.lovable.cloud/__l5e/:path*" },
+    { "source": "/api/:path*", "destination": "/api/index.ts" },
+    { "source": "/:path*", "destination": "/index.html" }
   ]
 }
