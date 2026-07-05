@@ -41,30 +41,27 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
           src={IMG.azrael}
           alt="Azrael, the Chosen"
           className="h-full w-full object-cover"
-          style={{ objectPosition: "18% center", animation: "slowZoom 30s ease-in-out infinite alternate", transform: "scale(1.18)", transformOrigin: "20% center" }}
+          style={{ objectPosition: "18% center", animation: "slowZoom 30s ease-in-out infinite alternate", transform: "scale(1.12)", transformOrigin: "20% center" }}
         />
-        {/* Cinematic lighting overlay */}
         <div
           className="absolute inset-0"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 18% 18%, rgba(175, 210, 255, 0.18), transparent 28%), radial-gradient(circle at 82% 15%, rgba(255, 205, 120, 0.14), transparent 24%), linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.20))",
+              "radial-gradient(circle at 18% 18%, rgba(175, 210, 255, 0.16), transparent 28%), radial-gradient(circle at 84% 18%, rgba(255, 220, 145, 0.12), transparent 26%)",
           }}
         />
-        <div className="absolute inset-0 rounded-[50%]" style={{ boxShadow: "inset 0 0 180px rgba(0,0,0,0.24)" }} />
+        <div className="absolute inset-0 rounded-[50%]" style={{ boxShadow: "inset 0 0 120px rgba(0,0,0,0.18)" }} />
       </motion.div>
 
-      <Fog className="z-[1]" opacity={0.18} />
+      <Fog className="z-[1]" opacity={0.16} />
       <div
         className="pointer-events-none absolute inset-0 z-[3]"
         style={{
           backgroundImage:
-            "radial-gradient(circle at 25% 30%, rgba(111, 164, 255, 0.14), transparent 32%), radial-gradient(circle at 75% 20%, rgba(255, 220, 140, 0.10), transparent 28%)",
-          opacity: 1,
-          mixBlendMode: "screen",
+            "radial-gradient(circle at 24% 28%, rgba(144, 189, 255, 0.12), transparent 34%), radial-gradient(circle at 76% 20%, rgba(255, 225, 180, 0.08), transparent 30%)",
         }}
       />
-      <Particles count={30} color="arcane" className="z-[4]" />
+      <Particles count={25} color="arcane" className="z-[4]" />
 
       <motion.div
         style={{ opacity }}
@@ -88,25 +85,18 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
           <p className="mt-8 max-w-xl text-lg text-[rgba(255,255,255,0.85)] md:text-xl leading-relaxed font-light drop-shadow-[0_0_20px_rgba(0,0,0,0.24)]">
             A next-generation 3D multiplayer fantasy RPG. Forge alliances, wield forbidden magic, and stand against the tide of eternal darkness.
           </p>
-          <div className="mt-10 flex flex-wrap gap-4">
+          <div className="mt-12 flex flex-wrap gap-4">
             <button
               onClick={onDownload}
-              className="group relative rounded-full bg-gradient-to-r from-[#ffd98f] via-[#fff7e3] to-[#d3e7ff] px-8 py-4 text-sm uppercase tracking-[0.25em] text-black font-bold transition-all duration-500 shadow-[0_0_30px_rgba(255,210,140,0.45)] border border-[#7f9cff]/30 hover:scale-105 hover:shadow-[0_0_50px_rgba(255,210,140,0.55)] overflow-hidden"
+              className="relative overflow-hidden rounded-full bg-gradient-to-r from-[#ffd96c] via-[#f9f3de] to-[#b9d2ff] px-10 py-4 text-sm uppercase tracking-[0.25em] text-black font-black transition-all duration-500 border border-[#d8c07c]/40 shadow-[0_0_30px_rgba(255,211,133,0.28)] hover:scale-[1.02] hover:shadow-[0_0_45px_rgba(255,211,133,0.45)]"
             >
-              <span className="relative z-10 flex items-center gap-2">Download Project</span>
-              <div className="absolute inset-0 opacity-0 bg-white/20 group-hover:opacity-90 transition-opacity duration-500" />
+              <span className="relative z-10">Download Project</span>
             </button>
             <a
               href="#characters"
-              className="relative inline-flex items-center justify-center rounded-full bg-[#0f1c41]/80 px-8 py-4 text-sm uppercase tracking-[0.25em] text-white shadow-[0_0_30px_rgba(75,124,255,0.28)] border border-[#75b5ff]/40 transition-all duration-500 hover:bg-[#18295e]/95 hover:shadow-[0_0_45px_rgba(75,124,255,0.45)]"
+              className="relative inline-flex items-center justify-center rounded-full bg-[#0c1d48]/90 px-10 py-4 text-sm uppercase tracking-[0.25em] text-white shadow-[0_0_30px_rgba(106,151,255,0.25)] border border-[#6e9cff]/50 transition-all duration-500 hover:bg-[#10255e]/95 hover:shadow-[0_0_45px_rgba(106,151,255,0.42)]"
             >
               Explore Characters
-            </a>
-            <a
-              href="#story"
-              className="rounded-full bg-white/12 px-8 py-4 text-sm uppercase tracking-[0.25em] text-white/95 transition-all duration-500 hover:text-white hover:bg-white/20 shadow-[0_0_22px_rgba(255,255,255,0.14)] border border-white/15"
-            >
-              ▶ Watch Trailer
             </a>
           </div>
         </motion.div>

@@ -2,10 +2,10 @@ import { a as __toESM } from "../_runtime.mjs";
 import { o as require_jsx_runtime, s as require_react } from "../_libs/@react-three/fiber+[...].mjs";
 import { h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { n as submitContact, r as trackVisit } from "./analytics.functions-Dhm407dA.mjs";
-import { n as MouseGlow, r as Particles, t as Fog } from "./fx-D18r9mNv.mjs";
+import { n as MouseGlow, r as Particles, t as Fog } from "./fx-DmVqfUhc.mjs";
 import { i as AnimatePresence, n as useScroll, r as motion, t as useTransform } from "../_libs/framer-motion.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-BQWsiLKM.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-DxoMUM2_.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -129,27 +129,36 @@ function Hero({ onDownload }) {
 						style: {
 							objectPosition: "18% center",
 							animation: "slowZoom 30s ease-in-out infinite alternate",
-							transform: "scale(1.35)",
+							transform: "scale(1.12)",
 							transformOrigin: "20% center"
 						}
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-black/10 via-black/35 to-transparent" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-background/5 via-transparent to-background/20" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 rounded-[50%] shadow-[inset_0_0_120px_rgba(0,0,0,0.35)]" })
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "absolute inset-0",
+						style: { backgroundImage: "radial-gradient(circle at 18% 18%, rgba(175, 210, 255, 0.16), transparent 28%), radial-gradient(circle at 84% 18%, rgba(255, 220, 145, 0.12), transparent 26%)" }
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "absolute inset-0 rounded-[50%]",
+						style: { boxShadow: "inset 0 0 120px rgba(0,0,0,0.18)" }
+					})
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Fog, {
 				className: "z-[1]",
-				opacity: .35
+				opacity: .16
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "pointer-events-none absolute inset-0 z-[3]",
+				style: { backgroundImage: "radial-gradient(circle at 24% 28%, rgba(144, 189, 255, 0.12), transparent 34%), radial-gradient(circle at 76% 20%, rgba(255, 225, 180, 0.08), transparent 30%)" }
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Particles, {
-				count: 50,
+				count: 25,
 				color: "arcane",
-				className: "z-[2]"
+				className: "z-[4]"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				style: { opacity },
-				className: "relative z-[10] mx-auto flex h-full max-w-7xl flex-col justify-center px-6 pt-24",
+				className: "relative z-[20] mx-auto flex h-full max-w-7xl flex-col justify-center px-6 pt-24",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 					initial: {
 						opacity: 0,
@@ -163,18 +172,18 @@ function Hero({ onDownload }) {
 					className: "max-w-2xl",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "mb-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500 shadow-[0_0_24px_rgba(255,255,255,0.12)]",
+							className: "mb-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500 shadow-[0_0_28px_rgba(255,255,255,0.14)]",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "h-2 w-2 rounded-full bg-[color:var(--gold)] shadow-lg shadow-[color:var(--gold)]",
 								style: { animation: "shimmer 2s ease-in-out infinite" }
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-xs uppercase tracking-[0.35em] text-[rgba(255,255,255,0.8)]",
+								className: "text-xs uppercase tracking-[0.35em] text-[rgba(255,255,255,0.85)]",
 								children: "Chapter I · The Awakening"
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
 							ref: titleRef,
-							className: "display text-6xl leading-[0.95] text-white md:text-8xl font-black drop-shadow-[0_0_35px_rgba(255,255,255,0.16)]",
+							className: "display text-6xl leading-[0.92] text-white md:text-8xl font-black drop-shadow-[0_0_45px_rgba(255,255,255,0.2)]",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "block text-white",
@@ -191,31 +200,23 @@ function Hero({ onDownload }) {
 							]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "mt-8 max-w-xl text-lg text-[rgba(255,255,255,0.8)] md:text-xl leading-relaxed font-light drop-shadow-[0_0_18px_rgba(0,0,0,0.35)]",
+							className: "mt-8 max-w-xl text-lg text-[rgba(255,255,255,0.85)] md:text-xl leading-relaxed font-light drop-shadow-[0_0_20px_rgba(0,0,0,0.24)]",
 							children: "A next-generation 3D multiplayer fantasy RPG. Forge alliances, wield forbidden magic, and stand against the tide of eternal darkness."
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "mt-10 flex flex-wrap gap-4",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-									onClick: onDownload,
-									className: "group relative rounded-full bg-white/95 px-8 py-4 text-sm uppercase tracking-[0.25em] text-black font-bold transition-all duration-500 shadow-[0_0_35px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_50px_rgba(255,255,255,0.45)] overflow-hidden border border-white/20",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "relative z-10 flex items-center gap-2",
-										children: "Download Project"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" })]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-									href: "#characters",
-									className: "rounded-full bg-white/10 px-8 py-4 text-sm uppercase tracking-[0.25em] text-white transition-all duration-500 hover:text-white hover:bg-white/20 shadow-[0_0_25px_rgba(255,255,255,0.14)] border border-white/15 backdrop-blur-xl",
-									children: "Explore Characters"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-									href: "#story",
-									className: "rounded-full bg-white/5 px-8 py-4 text-sm uppercase tracking-[0.25em] text-white/80 transition-all duration-500 hover:text-white hover:bg-white/15 shadow-[0_0_22px_rgba(255,255,255,0.12)] border border-white/10",
-									children: "▶ Watch Trailer"
+							className: "mt-12 flex flex-wrap gap-4",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: onDownload,
+								className: "relative overflow-hidden rounded-full bg-gradient-to-r from-[#ffd96c] via-[#f9f3de] to-[#b9d2ff] px-10 py-4 text-sm uppercase tracking-[0.25em] text-black font-black transition-all duration-500 border border-[#d8c07c]/40 shadow-[0_0_30px_rgba(255,211,133,0.28)] hover:scale-[1.02] hover:shadow-[0_0_45px_rgba(255,211,133,0.45)]",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "relative z-10",
+									children: "Download Project"
 								})
-							]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+								href: "#characters",
+								className: "relative inline-flex items-center justify-center rounded-full bg-[#0c1d48]/90 px-10 py-4 text-sm uppercase tracking-[0.25em] text-white shadow-[0_0_30px_rgba(106,151,255,0.25)] border border-[#6e9cff]/50 transition-all duration-500 hover:bg-[#10255e]/95 hover:shadow-[0_0_45px_rgba(106,151,255,0.42)]",
+								children: "Explore Characters"
+							})]
 						})
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {

@@ -1,23 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 
-export function Particles({ count = 40, color = "arcane", className = "" }: { count?: number; color?: "arcane" | "ember" | "gold"; className?: string }) {
+export function Particles({ count = 20, color = "arcane", className = "" }: { count?: number; color?: "arcane" | "ember" | "gold"; className?: string }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
   const items = Array.from({ length: count });
   const colors = {
-    arcane: "oklch(0.72 0.19 245)",
-    ember: "oklch(0.66 0.22 40)",
-    gold: "oklch(0.82 0.14 88)",
+    arcane: "rgba(170, 195, 255, 0.35)",
+    ember: "rgba(255, 148, 100, 0.32)",
+    gold: "rgba(255, 215, 130, 0.34)",
   };
   return (
     <div aria-hidden className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
       {items.map((_, i) => {
-        const size = 1 + Math.random() * 3;
+        const size = 2 + Math.random() * 4;
         const left = Math.random() * 100;
         const delay = Math.random() * 12;
-        const dur = 10 + Math.random() * 18;
-        const blur = Math.random() > 0.6 ? "blur(1px)" : "none";
+        const dur = 14 + Math.random() * 20;
+        const blur = Math.random() > 0.8 ? "blur(1px)" : "none";
         return (
           <span
             key={i}
@@ -29,10 +29,10 @@ export function Particles({ count = 40, color = "arcane", className = "" }: { co
               height: size,
               borderRadius: 999,
               background: colors[color],
-              boxShadow: `0 0 ${8 + size * 4}px ${colors[color]}`,
+              boxShadow: `0 0 ${10 + size * 4}px ${colors[color]}`,
               filter: blur,
               animation: `drift ${dur}s linear ${delay}s infinite`,
-              opacity: 0.7,
+              opacity: 0.35,
             }}
           />
         );
@@ -41,17 +41,16 @@ export function Particles({ count = 40, color = "arcane", className = "" }: { co
   );
 }
 
-export function Fog({ opacity = 0.35, className = "" }: { opacity?: number; className?: string }) {
+export function Fog({ opacity = 0.18, className = "" }: { opacity?: number; className?: string }) {
   return (
     <div
       aria-hidden
       className={`pointer-events-none absolute inset-0 ${className}`}
       style={{
         background:
-          "radial-gradient(60% 40% at 30% 80%, oklch(0.72 0.19 245 / 0.20), transparent 70%), radial-gradient(50% 30% at 80% 20%, oklch(0.82 0.14 88 / 0.12), transparent 70%)",
-        mixBlendMode: "screen",
+          "radial-gradient(circle at 25% 80%, rgba(190, 210, 255, 0.16), transparent 28%), radial-gradient(circle at 80% 15%, rgba(255, 235, 175, 0.08), transparent 24%)",
         opacity,
-        animation: "floatSlow 14s ease-in-out infinite",
+        animation: "floatSlow 18s ease-in-out infinite",
       }}
     />
   );
