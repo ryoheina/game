@@ -11,7 +11,7 @@ export default async function handler(req: any, res: any) {
 
     const proto = req.headers['x-forwarded-proto'] || 'http';
     const host = req.headers.host || req.headers['x-forwarded-host'] || 'localhost';
-    const url = `${proto}://${host}${req.url || '/'}"`.replace(/\"$/,'');
+    const url = `${proto}://${host}${req.url || '/'}`;
 
     const init: any = { method: req.method, headers: req.headers };
     if (req.method !== 'GET' && req.method !== 'HEAD') init.body = req.body ?? req;
