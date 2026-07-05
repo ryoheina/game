@@ -1,5 +1,5 @@
 import { a as __toESM } from "../_runtime.mjs";
-import { i as require_react, r as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
+import { o as require_jsx_runtime, s as require_react } from "../_libs/@react-three/fiber+[...].mjs";
 import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as supabase } from "./client-gykmVtt_.mjs";
 import { n as MouseGlow, r as Particles } from "./fx-B3gB7W2L.mjs";

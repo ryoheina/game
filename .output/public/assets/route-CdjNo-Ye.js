@@ -1,1 +1,0 @@
-import{C as e,y as t}from"./index-D5-dX5ev.js";var n=e(),r=()=>(0,n.jsx)(t,{});export{r as component};

@@ -1,10 +1,11 @@
 import { a as __toESM } from "../_runtime.mjs";
-import { i as AnimatePresence, n as useScroll, r as motion, t as useTransform } from "../_libs/framer-motion.mjs";
-import { i as require_react, r as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
+import { o as require_jsx_runtime, s as require_react } from "../_libs/@react-three/fiber+[...].mjs";
 import { h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { n as submitContact, r as trackVisit } from "./analytics.functions-Dhm407dA.mjs";
 import { n as MouseGlow, r as Particles, t as Fog } from "./fx-B3gB7W2L.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-BShigYl8.js
+import { i as AnimatePresence, n as useScroll, r as motion, t as useTransform } from "../_libs/framer-motion.mjs";
+import { t as gsapWithCSS } from "../_libs/gsap.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-CKFvLhi8.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -78,64 +79,15 @@ function Nav() {
 	});
 }
 var IMG = {
-	azrael: {
-		version: 1,
-		asset_id: "d25da4f4-c48e-4aa6-aafc-aae001964652",
-		project_id: "19c86a1a-2fae-4b01-ac75-d707fb406ddc",
-		url: "/__l5e/assets-v1/d25da4f4-c48e-4aa6-aafc-aae001964652/azrael.png",
-		r2_key: "a/v1/19c86a1a-2fae-4b01-ac75-d707fb406ddc/d25da4f4-c48e-4aa6-aafc-aae001964652/azrael.png",
-		original_filename: "azrael.png",
-		size: 2682758,
-		content_type: "image/png",
-		created_at: "2026-07-05T20:44:30Z"
-	}.url,
-	background: {
-		version: 1,
-		asset_id: "5ab0fb45-87a3-4874-afde-22203a9dd8c3",
-		project_id: "19c86a1a-2fae-4b01-ac75-d707fb406ddc",
-		url: "/__l5e/assets-v1/5ab0fb45-87a3-4874-afde-22203a9dd8c3/background.png",
-		r2_key: "a/v1/19c86a1a-2fae-4b01-ac75-d707fb406ddc/5ab0fb45-87a3-4874-afde-22203a9dd8c3/background.png",
-		original_filename: "background.png",
-		size: 2827878,
-		content_type: "image/png",
-		created_at: "2026-07-05T20:44:44Z"
-	}.url,
-	elysia: {
-		version: 1,
-		asset_id: "5f320de6-7a8d-46f9-aca3-150116e95d68",
-		project_id: "19c86a1a-2fae-4b01-ac75-d707fb406ddc",
-		url: "/__l5e/assets-v1/5f320de6-7a8d-46f9-aca3-150116e95d68/elysia.png",
-		r2_key: "a/v1/19c86a1a-2fae-4b01-ac75-d707fb406ddc/5f320de6-7a8d-46f9-aca3-150116e95d68/elysia.png",
-		original_filename: "elysia.png",
-		size: 3135347,
-		content_type: "image/png",
-		created_at: "2026-07-05T20:44:48Z"
-	}.url,
-	lucas: {
-		version: 1,
-		asset_id: "430dab87-0f2e-442b-99a3-08e6a804bdc1",
-		project_id: "19c86a1a-2fae-4b01-ac75-d707fb406ddc",
-		url: "/__l5e/assets-v1/430dab87-0f2e-442b-99a3-08e6a804bdc1/lucas.png",
-		r2_key: "a/v1/19c86a1a-2fae-4b01-ac75-d707fb406ddc/430dab87-0f2e-442b-99a3-08e6a804bdc1/lucas.png",
-		original_filename: "lucas.png",
-		size: 2667846,
-		content_type: "image/png",
-		created_at: "2026-07-05T20:44:52Z"
-	}.url,
-	zerevok: {
-		version: 1,
-		asset_id: "6bf527d3-19d5-4046-92f9-59cc8dde1648",
-		project_id: "19c86a1a-2fae-4b01-ac75-d707fb406ddc",
-		url: "/__l5e/assets-v1/6bf527d3-19d5-4046-92f9-59cc8dde1648/zerevok.png",
-		r2_key: "a/v1/19c86a1a-2fae-4b01-ac75-d707fb406ddc/6bf527d3-19d5-4046-92f9-59cc8dde1648/zerevok.png",
-		original_filename: "zerevok.png",
-		size: 2346791,
-		content_type: "image/png",
-		created_at: "2026-07-05T20:44:55Z"
-	}.url
+	azrael: "/AZRAEL.png",
+	background: "/Background.png",
+	elysia: "/ELYSIA.png",
+	lucas: "/LUCAS.png",
+	zerevok: "/ZEREVOK.png"
 };
 function Hero({ onDownload }) {
 	const ref = (0, import_react.useRef)(null);
+	const titleRef = (0, import_react.useRef)(null);
 	const { scrollYProgress } = useScroll({
 		target: ref,
 		offset: ["start start", "end start"]
@@ -143,6 +95,22 @@ function Hero({ onDownload }) {
 	const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
 	const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
 	const opacity = useTransform(scrollYProgress, [0, .8], [1, 0]);
+	(0, import_react.useEffect)(() => {
+		if (!titleRef.current) return;
+		gsapWithCSS.fromTo(titleRef.current.querySelectorAll("span"), {
+			opacity: 0,
+			y: 50,
+			filter: "blur(20px)"
+		}, {
+			opacity: 1,
+			y: 0,
+			filter: "blur(0px)",
+			duration: 1.5,
+			stagger: .2,
+			ease: "power4.out",
+			delay: .3
+		});
+	}, []);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		ref,
 		className: "relative isolate h-[100vh] min-h-[720px] w-full overflow-hidden",
@@ -166,7 +134,11 @@ function Hero({ onDownload }) {
 						}
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" })
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "absolute inset-0 rounded-[50%] shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]",
+						style: { boxShadow: "inset 0 0 120px rgba(0,0,0,0.9)" }
+					})
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Fog, {}),
@@ -190,9 +162,9 @@ function Hero({ onDownload }) {
 					className: "max-w-2xl",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "mb-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2",
+							className: "mb-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "h-2 w-2 rounded-full bg-[color:var(--gold)]",
+								className: "h-2 w-2 rounded-full bg-[color:var(--gold)] shadow-lg shadow-[color:var(--gold)]",
 								style: { animation: "shimmer 2s ease-in-out infinite" }
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "text-xs uppercase tracking-[0.35em] text-white/70",
@@ -200,49 +172,53 @@ function Hero({ onDownload }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
-							className: "display text-6xl leading-[0.95] text-white md:text-8xl",
+							ref: titleRef,
+							className: "display text-6xl leading-[0.95] text-white md:text-8xl font-black",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "block text-gradient-arcane",
+									className: "block text-gradient-arcane drop-shadow-[0_0_30px_rgba(74,20,140,0.8)]",
 									children: "Legends"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "block text-white/90",
+									className: "block text-white/90 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]",
 									children: "of"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "block text-gradient-gold",
+									className: "block text-gradient-gold drop-shadow-[0_0_30px_rgba(255,179,0,0.8)]",
 									children: "Eternity"
 								})
 							]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "mt-8 max-w-xl text-lg text-white/70 md:text-xl",
+							className: "mt-8 max-w-xl text-lg text-white/70 md:text-xl leading-relaxed font-light",
 							children: "A next-generation 3D multiplayer fantasy RPG. Forge alliances, wield forbidden magic, and stand against the tide of eternal darkness."
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "mt-10 flex flex-wrap gap-4",
 							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 									onClick: onDownload,
-									className: "group relative rounded-full bg-white px-7 py-4 text-sm uppercase tracking-[0.25em] text-black transition hover:scale-[1.02] glow-gold",
-									children: "Download Project"
+									className: "group relative rounded-full bg-gradient-to-r from-white to-gray-100 px-8 py-4 text-sm uppercase tracking-[0.25em] text-black font-bold transition-all duration-500 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.6)] overflow-hidden",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "relative z-10 flex items-center gap-2",
+										children: "Download Project"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-50 group-hover:animate-pulse" })]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
 									href: "#characters",
-									className: "rounded-full glass px-7 py-4 text-sm uppercase tracking-[0.25em] text-white/90 transition hover:text-white glow-blue",
+									className: "rounded-full glass px-8 py-4 text-sm uppercase tracking-[0.25em] text-white/90 transition-all duration-500 hover:text-white hover:bg-white/10 hover:shadow-[0_0_30px_rgba(74,20,140,0.4)] border border-white/20 hover:border-white/40 backdrop-blur-xl",
 									children: "Explore Characters"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
 									href: "#story",
-									className: "rounded-full px-7 py-4 text-sm uppercase tracking-[0.25em] text-white/70 transition hover:text-white",
+									className: "rounded-full px-8 py-4 text-sm uppercase tracking-[0.25em] text-white/70 transition-all duration-500 hover:text-white hover:bg-white/5",
 									children: "▶ Watch Trailer"
 								})
 							]
 						})
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-[10px] uppercase tracking-[0.5em] text-white/40",
+					className: "absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-[10px] uppercase tracking-[0.5em] text-white/40 animate-pulse",
 					children: ["scroll", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mx-auto mt-2 h-10 w-px bg-gradient-to-b from-white/50 to-transparent" })]
 				})]
 			})
@@ -426,15 +402,15 @@ function Characters({ onOpen }) {
 				className: "mb-16 flex flex-col items-center text-center",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]",
+						className: "text-xs uppercase tracking-[0.5em] text-[color:var(--gold)] drop-shadow-[0_0_10px_rgba(255,179,0,0.6)]",
 						children: "Cast"
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						className: "display mt-4 text-5xl text-white md:text-6xl",
+						className: "display mt-4 text-5xl text-white md:text-6xl drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]",
 						children: "Champions & Fallen"
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "mt-4 max-w-xl text-white/60",
+						className: "mt-4 max-w-xl text-white/60 leading-relaxed",
 						children: "Four souls at the heart of the eternal war. Click any card to see the full dossier."
 					})
 				]
@@ -444,44 +420,49 @@ function Characters({ onOpen }) {
 					delay: i * .08,
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: () => onOpen(c),
-						className: "group relative block h-[520px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)]",
+						className: "group relative block h-[520px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_0_50px_rgba(74,20,140,0.6)] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)] backdrop-blur-xl border border-white/10 hover:border-white/30",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
 								src: c.img,
 								alt: c.name,
 								loading: "lazy",
-								className: "absolute inset-0 h-full w-full object-cover transition-transform duration-[1800ms] group-hover:scale-110",
+								className: "absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110",
 								style: { objectPosition: c.name === "Elysia" ? "50% 20%" : "50% 15%" }
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent group-hover:from-black via-black/40 transition-all duration-500" }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100",
-								style: { background: c.color === "ember" ? "radial-gradient(60% 40% at 50% 100%, oklch(0.66 0.22 40 / 0.4), transparent 70%)" : c.color === "gold" ? "radial-gradient(60% 40% at 50% 100%, oklch(0.82 0.14 88 / 0.4), transparent 70%)" : "radial-gradient(60% 40% at 50% 100%, oklch(0.72 0.19 245 / 0.5), transparent 70%)" }
+								style: { background: c.color === "ember" ? "radial-gradient(60% 40% at 50% 100%, oklch(0.66 0.22 40 / 0.6), transparent 70%)" : c.color === "gold" ? "radial-gradient(60% 40% at 50% 100%, oklch(0.82 0.14 88 / 0.6), transparent 70%)" : "radial-gradient(60% 40% at 50% 100%, oklch(0.72 0.19 245 / 0.7), transparent 70%)" }
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none",
+								style: { boxShadow: `inset 0 0 40px ${c.color === "ember" ? "rgba(220, 20, 60, 0.3)" : c.color === "gold" ? "rgba(255, 179, 0, 0.3)" : "rgba(74, 20, 140, 0.3)"}` }
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "absolute inset-x-0 bottom-0 p-6",
+								className: "absolute inset-x-0 bottom-0 p-6 z-10",
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "text-[10px] uppercase tracking-[0.35em] text-white/60",
+										className: "text-[10px] uppercase tracking-[0.35em] text-white/60 group-hover:text-white/80 transition-colors",
 										children: c.title.split(" · ")[0]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-										className: "display mt-2 text-3xl text-white",
+										className: "display mt-2 text-3xl text-white group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all",
 										children: c.name
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "mt-4 flex items-center gap-2",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "h-1 flex-1 overflow-hidden rounded-full bg-white/10",
+											className: "h-1 flex-1 overflow-hidden rounded-full bg-white/10 group-hover:bg-white/20",
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: "h-full",
+												className: "h-full transition-all duration-1000 rounded-full shadow-lg",
 												style: {
 													width: `${c.power}%`,
-													background: c.color === "ember" ? "linear-gradient(90deg, oklch(0.66 0.22 40), oklch(0.8 0.2 30))" : c.color === "gold" ? "linear-gradient(90deg, oklch(0.82 0.14 88), oklch(0.95 0.12 95))" : "linear-gradient(90deg, oklch(0.5 0.2 245), oklch(0.85 0.15 220))"
+													background: c.color === "ember" ? "linear-gradient(90deg, oklch(0.66 0.22 40), oklch(0.8 0.2 30))" : c.color === "gold" ? "linear-gradient(90deg, oklch(0.82 0.14 88), oklch(0.95 0.12 95))" : "linear-gradient(90deg, oklch(0.5 0.2 245), oklch(0.85 0.15 220))",
+													boxShadow: c.color === "ember" ? "0 0 20px rgba(220, 20, 60, 0.8)" : c.color === "gold" ? "0 0 20px rgba(255, 179, 0, 0.8)" : "0 0 20px rgba(74, 20, 140, 0.8)"
 												}
 											})
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-xs text-white/70",
+											className: "text-xs text-white/70 group-hover:text-white transition-colors",
 											children: c.power
 										})]
 									})

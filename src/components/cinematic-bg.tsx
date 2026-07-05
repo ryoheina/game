@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Fog } from "@react-three/drei";
 import * as THREE from "three";
 
 function CinematicScene() {
@@ -24,7 +23,7 @@ function CinematicScene() {
 
   return (
     <>
-      <Fog attach="fog" args={["#0a0a1a", 5, 40]} />
+      <fog attach="fog" args={["#0a0a1a", 5, 40]} />
       <color attach="background" args={["#000000"]} />
       
       {/* Animated volumetric fog planes */}

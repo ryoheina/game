@@ -15,13 +15,6 @@ globalThis.__nitro_vite_envs__ = services;
 //#endregion
 //#region #nitro/virtual/public-assets-data
 var public_assets_data_default = {
-	"/assets/admin-DiDpIEeC.js": {
-		"type": "text/javascript; charset=utf-8",
-		"etag": "\"1d3-UmBDMmZEVi6D/R/iMHmV/tLuAk4\"",
-		"mtime": "2026-07-05T17:42:58.749Z",
-		"size": 467,
-		"path": "../public/assets/admin-DiDpIEeC.js"
-	},
 	"/favicon.ico": {
 		"type": "image/vnd.microsoft.icon",
 		"etag": "\"19a0a-MKXLxbA4hvZ2k37/YIralha8PDI\"",
@@ -29,61 +22,131 @@ var public_assets_data_default = {
 		"size": 104970,
 		"path": "../public/favicon.ico"
 	},
-	"/assets/admin-DOGXNJQJ.js": {
+	"/assets/admin-CqJVvj-n.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"3ecb-rjAL8iB9NIv6C+NBpC2b8cBQdOU\"",
-		"mtime": "2026-07-05T17:42:58.748Z",
-		"size": 16075,
-		"path": "../public/assets/admin-DOGXNJQJ.js"
+		"etag": "\"1d3-/j21ZQKCOfYf3cuy4qePZ9X7ip8\"",
+		"mtime": "2026-07-05T19:33:26.770Z",
+		"size": 467,
+		"path": "../public/assets/admin-CqJVvj-n.js"
 	},
-	"/assets/analytics.functions-Daw3OI07.js": {
+	"/assets/analytics.functions-37VdB_KA.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"1295-W5mYTfgmKfoRaSZdZPkVFz6pTM0\"",
-		"mtime": "2026-07-05T17:42:58.751Z",
+		"etag": "\"1295-8/4SYeJb6mOOPtLzJtFo0k8sUEw\"",
+		"mtime": "2026-07-05T19:33:26.774Z",
 		"size": 4757,
-		"path": "../public/assets/analytics.functions-Daw3OI07.js"
+		"path": "../public/assets/analytics.functions-37VdB_KA.js"
 	},
-	"/assets/fx-cl3HGpXd.js": {
+	"/assets/auth-C-KacB3F.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"743-lGK9hG4w+nWSM1X1fvUYJ+C0XUw\"",
-		"mtime": "2026-07-05T17:42:58.758Z",
-		"size": 1859,
-		"path": "../public/assets/fx-cl3HGpXd.js"
-	},
-	"/assets/auth-CeEy3C-Z.js": {
-		"type": "text/javascript; charset=utf-8",
-		"etag": "\"c86-P8fZ0DWyacK1yuNWpPnm2MSA9Z4\"",
-		"mtime": "2026-07-05T17:42:58.754Z",
+		"etag": "\"c86-8Xp0PvOVvSPE0EmthajbmYmwyJ8\"",
+		"mtime": "2026-07-05T19:33:26.775Z",
 		"size": 3206,
-		"path": "../public/assets/auth-CeEy3C-Z.js"
+		"path": "../public/assets/auth-C-KacB3F.js"
 	},
-	"/assets/route-CdjNo-Ye.js": {
+	"/assets/admin-DwH8Rjux.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"66-UUdW6PEzMkNcFDkr3nR+cOstFo4\"",
-		"mtime": "2026-07-05T17:42:58.760Z",
+		"etag": "\"3ecb-2/H9EAwprGddrxamC7j0bbh7odE\"",
+		"mtime": "2026-07-05T19:33:26.772Z",
+		"size": 16075,
+		"path": "../public/assets/admin-DwH8Rjux.js"
+	},
+	"/assets/fx-CpddcejY.js": {
+		"type": "text/javascript; charset=utf-8",
+		"etag": "\"743-EsxtArIB/smONUuTra+Nggmhj0k\"",
+		"mtime": "2026-07-05T19:33:26.777Z",
+		"size": 1859,
+		"path": "../public/assets/fx-CpddcejY.js"
+	},
+	"/assets/route-D6SIPyF1.js": {
+		"type": "text/javascript; charset=utf-8",
+		"etag": "\"66-r4tGX5inWK2GDw7XVKu9iSYn31k\"",
+		"mtime": "2026-07-05T19:33:26.780Z",
 		"size": 102,
-		"path": "../public/assets/route-CdjNo-Ye.js"
+		"path": "../public/assets/route-D6SIPyF1.js"
 	},
-	"/assets/routes-CSMvA6SB.js": {
+	"/assets/lenis-DdrGTsEx.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"27240-VgIfvKsvcpUa+GhN2zYBlbk9Hi4\"",
-		"mtime": "2026-07-05T17:42:58.763Z",
-		"size": 160320,
-		"path": "../public/assets/routes-CSMvA6SB.js"
+		"etag": "\"478d-mZHPO7Pf1OkK6MydXdG+JjPcikM\"",
+		"mtime": "2026-07-05T19:33:26.778Z",
+		"size": 18317,
+		"path": "../public/assets/lenis-DdrGTsEx.js"
 	},
-	"/assets/styles-CQgO43gA.css": {
+	"/assets/styles-j7O7tvYI.css": {
 		"type": "text/css; charset=utf-8",
-		"etag": "\"15219-KIDVIeM77Y1dQCId5k/xo3j6z68\"",
-		"mtime": "2026-07-05T17:42:58.764Z",
-		"size": 86553,
-		"path": "../public/assets/styles-CQgO43gA.css"
+		"etag": "\"170f6-Li4WqRWWs4UtoO/3sSIgzLEp7wA\"",
+		"mtime": "2026-07-05T19:33:26.783Z",
+		"size": 94454,
+		"path": "../public/assets/styles-j7O7tvYI.css"
 	},
-	"/assets/index-D5-dX5ev.js": {
+	"/assets/routes-BDDOMhJP.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"86a77-1drWkdpIeVIhlncUk1OT65CH/aY\"",
-		"mtime": "2026-07-05T17:42:58.747Z",
-		"size": 551543,
-		"path": "../public/assets/index-D5-dX5ev.js"
+		"etag": "\"3853c-hK7S5/JWgwyZzXtyFcgDikm9P8k\"",
+		"mtime": "2026-07-05T19:33:26.781Z",
+		"size": 230716,
+		"path": "../public/assets/routes-BDDOMhJP.js"
+	},
+	"/assets/index-BS2c0wya.js": {
+		"type": "text/javascript; charset=utf-8",
+		"etag": "\"15ea41-Dgmp7qJjJrQm5UwKKWVzNpfGEOc\"",
+		"mtime": "2026-07-05T19:33:26.769Z",
+		"size": 1436225,
+		"path": "../public/assets/index-BS2c0wya.js"
+	},
+	"/game1.png": {
+		"type": "image/png",
+		"etag": "\"239916-m1u12UM76spJwvYwyyDuXoOGXs4\"",
+		"mtime": "2026-07-05T14:24:48.139Z",
+		"size": 2332950,
+		"path": "../public/game1.png"
+	},
+	"/game2.png": {
+		"type": "image/png",
+		"etag": "\"24c166-wnJi3rPG5xUgSA0A3JZVWaNuuH8\"",
+		"mtime": "2026-07-05T14:24:44.190Z",
+		"size": 2408806,
+		"path": "../public/game2.png"
+	},
+	"/Background.png": {
+		"type": "image/png",
+		"etag": "\"2b2666-5981RG2D3WJ/wK7GeX+MNRfBSCw\"",
+		"mtime": "2026-07-05T14:28:18.165Z",
+		"size": 2827878,
+		"path": "../public/Background.png"
+	},
+	"/ZEREVOK.png": {
+		"type": "image/png",
+		"etag": "\"23cf27-dd4lHKipIKmwumTzFWIB7LtoWTc\"",
+		"mtime": "2026-07-05T14:32:53.302Z",
+		"size": 2346791,
+		"path": "../public/ZEREVOK.png"
+	},
+	"/game3.png": {
+		"type": "image/png",
+		"etag": "\"26612d-e1fd+PEpVzvuzXAZZrs36ZT4bEc\"",
+		"mtime": "2026-07-05T14:24:36.983Z",
+		"size": 2515245,
+		"path": "../public/game3.png"
+	},
+	"/AZRAEL.png": {
+		"type": "image/png",
+		"etag": "\"28ef86-IC8QMM4enbaZRfvGlQOkyQeFbGk\"",
+		"mtime": "2026-07-05T14:30:16.597Z",
+		"size": 2682758,
+		"path": "../public/AZRAEL.png"
+	},
+	"/ELYSIA.png": {
+		"type": "image/png",
+		"etag": "\"2fd773-QXnVNrFbDb8I7lh9hb4l43Jq8vs\"",
+		"mtime": "2026-07-05T14:37:52.663Z",
+		"size": 3135347,
+		"path": "../public/ELYSIA.png"
+	},
+	"/LUCAS.png": {
+		"type": "image/png",
+		"etag": "\"28b546-CvmltOxAfSPSdWTSDeOg5tOXOBE\"",
+		"mtime": "2026-07-05T14:35:07.122Z",
+		"size": 2667846,
+		"path": "../public/LUCAS.png"
 	}
 };
 //#endregion
