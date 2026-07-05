@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-export function Particles({ count = 40, color = "arcane" }: { count?: number; color?: "arcane" | "ember" | "gold" }) {
+export function Particles({ count = 40, color = "arcane", className = "" }: { count?: number; color?: "arcane" | "ember" | "gold"; className?: string }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
@@ -11,7 +11,7 @@ export function Particles({ count = 40, color = "arcane" }: { count?: number; co
     gold: "oklch(0.82 0.14 88)",
   };
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div aria-hidden className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
       {items.map((_, i) => {
         const size = 1 + Math.random() * 3;
         const left = Math.random() * 100;
@@ -41,14 +41,14 @@ export function Particles({ count = 40, color = "arcane" }: { count?: number; co
   );
 }
 
-export function Fog({ opacity = 0.35 }: { opacity?: number }) {
+export function Fog({ opacity = 0.35, className = "" }: { opacity?: number; className?: string }) {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute inset-0"
+      className={`pointer-events-none absolute inset-0 ${className}`}
       style={{
         background:
-          "radial-gradient(60% 40% at 30% 80%, oklch(0.72 0.19 245 / 0.25), transparent 70%), radial-gradient(50% 30% at 80% 20%, oklch(0.82 0.14 88 / 0.15), transparent 70%)",
+          "radial-gradient(60% 40% at 30% 80%, oklch(0.72 0.19 245 / 0.20), transparent 70%), radial-gradient(50% 30% at 80% 20%, oklch(0.82 0.14 88 / 0.12), transparent 70%)",
         mixBlendMode: "screen",
         opacity,
         animation: "floatSlow 14s ease-in-out infinite",

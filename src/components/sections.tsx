@@ -35,7 +35,7 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
     <section ref={ref} className="relative isolate h-[100vh] min-h-[720px] w-full overflow-hidden">
       <motion.div
         style={{ y, scale }}
-        className="absolute inset-0"
+        className="absolute inset-0 z-0"
       >
         <img
           src={IMG.azrael}
@@ -44,18 +44,18 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
           style={{ objectPosition: "18% center", animation: "slowZoom 30s ease-in-out infinite alternate", transform: "scale(1.35)", transformOrigin: "20% center" }}
         />
         {/* Cinematic color grading overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-black/35 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/5 via-transparent to-background/20" />
         {/* Cinematic vignette */}
-        <div className="absolute inset-0 rounded-[50%] shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]" style={{ boxShadow: "inset 0 0 120px rgba(0,0,0,0.9)" }} />
+        <div className="absolute inset-0 rounded-[50%] shadow-[inset_0_0_120px_rgba(0,0,0,0.35)]" />
       </motion.div>
 
-      <Fog />
-      <Particles count={50} color="arcane" />
+      <Fog className="z-[1]" opacity={0.35} />
+      <Particles count={50} color="arcane" className="z-[2]" />
 
       <motion.div
         style={{ opacity }}
-        className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center px-6 pt-24"
+        className="relative z-[10] mx-auto flex h-full max-w-7xl flex-col justify-center px-6 pt-24"
       >
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -63,35 +63,35 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
           transition={{ duration: 1.2 }}
           className="max-w-2xl"
         >
-          <div className="mb-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500">
+          <div className="mb-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500 shadow-[0_0_24px_rgba(255,255,255,0.12)]">
             <span className="h-2 w-2 rounded-full bg-[color:var(--gold)] shadow-lg shadow-[color:var(--gold)]" style={{ animation: "shimmer 2s ease-in-out infinite" }} />
-            <span className="text-xs uppercase tracking-[0.35em] text-white/70">Chapter I · The Awakening</span>
+            <span className="text-xs uppercase tracking-[0.35em] text-[rgba(255,255,255,0.8)]">Chapter I · The Awakening</span>
           </div>
-          <h1 ref={titleRef} className="display text-6xl leading-[0.95] text-white md:text-8xl font-black">
-            <span className="block text-gradient-arcane drop-shadow-[0_0_30px_rgba(74,20,140,0.8)]">Legends</span>
-            <span className="block text-white/90 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">of</span>
-            <span className="block text-gradient-gold drop-shadow-[0_0_30px_rgba(255,179,0,0.8)]">Eternity</span>
+          <h1 ref={titleRef} className="display text-6xl leading-[0.95] text-white md:text-8xl font-black drop-shadow-[0_0_35px_rgba(255,255,255,0.16)]">
+            <span className="block text-white">Legends</span>
+            <span className="block text-white">of</span>
+            <span className="block text-white">Eternity</span>
           </h1>
-          <p className="mt-8 max-w-xl text-lg text-white/70 md:text-xl leading-relaxed font-light">
+          <p className="mt-8 max-w-xl text-lg text-[rgba(255,255,255,0.8)] md:text-xl leading-relaxed font-light drop-shadow-[0_0_18px_rgba(0,0,0,0.35)]">
             A next-generation 3D multiplayer fantasy RPG. Forge alliances, wield forbidden magic, and stand against the tide of eternal darkness.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <button
               onClick={onDownload}
-              className="group relative rounded-full bg-gradient-to-r from-white to-gray-100 px-8 py-4 text-sm uppercase tracking-[0.25em] text-black font-bold transition-all duration-500 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.6)] overflow-hidden"
+              className="group relative rounded-full bg-white/95 px-8 py-4 text-sm uppercase tracking-[0.25em] text-black font-bold transition-all duration-500 shadow-[0_0_35px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_50px_rgba(255,255,255,0.45)] overflow-hidden border border-white/20"
             >
               <span className="relative z-10 flex items-center gap-2">Download Project</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-50 group-hover:animate-pulse" />
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </button>
             <a
               href="#characters"
-              className="rounded-full glass px-8 py-4 text-sm uppercase tracking-[0.25em] text-white/90 transition-all duration-500 hover:text-white hover:bg-white/10 hover:shadow-[0_0_30px_rgba(74,20,140,0.4)] border border-white/20 hover:border-white/40 backdrop-blur-xl"
+              className="rounded-full bg-white/10 px-8 py-4 text-sm uppercase tracking-[0.25em] text-white transition-all duration-500 hover:text-white hover:bg-white/20 shadow-[0_0_25px_rgba(255,255,255,0.14)] border border-white/15 backdrop-blur-xl"
             >
               Explore Characters
             </a>
             <a
               href="#story"
-              className="rounded-full px-8 py-4 text-sm uppercase tracking-[0.25em] text-white/70 transition-all duration-500 hover:text-white hover:bg-white/5"
+              className="rounded-full bg-white/5 px-8 py-4 text-sm uppercase tracking-[0.25em] text-white/80 transition-all duration-500 hover:text-white hover:bg-white/15 shadow-[0_0_22px_rgba(255,255,255,0.12)] border border-white/10"
             >
               ▶ Watch Trailer
             </a>
@@ -437,14 +437,14 @@ export function Battle() {
     <section ref={ref} className="relative isolate h-[100vh] min-h-[600px] w-full overflow-hidden">
       <motion.div style={{ scale, rotate: rot }} className="absolute inset-0">
         <img src={IMG.background} alt="Battle of Aldreth" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-black/30 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/10 to-background/20" />
       </motion.div>
       <div
         className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-100"
         style={{
-          opacity: flash ? 1 : 0,
+          opacity: flash ? 0.35 : 0,
           background:
-            "radial-gradient(60% 40% at 60% 30%, oklch(0.95 0.15 245 / 0.6), transparent 70%)",
+            "radial-gradient(60% 40% at 60% 30%, rgba(255,255,255,0.18), transparent 70%)",
           mixBlendMode: "screen",
         }}
       />
