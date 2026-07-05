@@ -4,10 +4,12 @@ import elysia from "@/assets/elysia.png.asset.json";
 import lucas from "@/assets/lucas.png.asset.json";
 import zerevok from "@/assets/zerevok.png.asset.json";
 
+// Prefer local `public/` images when present (these are included in the build).
+// Fallback to the Lovable-hosted asset URLs embedded in the .asset.json files.
 export const IMG = {
-  azrael: azrael.url,
-  background: background.url,
-  elysia: elysia.url,
-  lucas: lucas.url,
-  zerevok: zerevok.url,
+  azrael: "/AZRAEL.png" || azrael.url,
+  background: "/Background.png" || background.url,
+  elysia: "/ELYSIA.png" || elysia.url,
+  lucas: "/lucas.png" || lucas.url,
+  zerevok: "/ZEREVOK.png" || zerevok.url,
 };
