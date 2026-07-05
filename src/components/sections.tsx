@@ -41,21 +41,34 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
           src={IMG.azrael}
           alt="Azrael, the Chosen"
           className="h-full w-full object-cover"
-          style={{ objectPosition: "18% center", animation: "slowZoom 30s ease-in-out infinite alternate", transform: "scale(1.35)", transformOrigin: "20% center" }}
+          style={{ objectPosition: "18% center", animation: "slowZoom 30s ease-in-out infinite alternate", transform: "scale(1.18)", transformOrigin: "20% center" }}
         />
-        {/* Cinematic color grading overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-black/35 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/5 via-transparent to-background/20" />
-        {/* Cinematic vignette */}
-        <div className="absolute inset-0 rounded-[50%] shadow-[inset_0_0_120px_rgba(0,0,0,0.35)]" />
+        {/* Cinematic lighting overlay */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 18% 18%, rgba(175, 210, 255, 0.18), transparent 28%), radial-gradient(circle at 82% 15%, rgba(255, 205, 120, 0.14), transparent 24%), linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.20))",
+          }}
+        />
+        <div className="absolute inset-0 rounded-[50%]" style={{ boxShadow: "inset 0 0 180px rgba(0,0,0,0.24)" }} />
       </motion.div>
 
-      <Fog className="z-[1]" opacity={0.35} />
-      <Particles count={50} color="arcane" className="z-[2]" />
+      <Fog className="z-[1]" opacity={0.18} />
+      <div
+        className="pointer-events-none absolute inset-0 z-[3]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 25% 30%, rgba(111, 164, 255, 0.14), transparent 32%), radial-gradient(circle at 75% 20%, rgba(255, 220, 140, 0.10), transparent 28%)",
+          opacity: 1,
+          mixBlendMode: "screen",
+        }}
+      />
+      <Particles count={30} color="arcane" className="z-[4]" />
 
       <motion.div
         style={{ opacity }}
-        className="relative z-[10] mx-auto flex h-full max-w-7xl flex-col justify-center px-6 pt-24"
+        className="relative z-[20] mx-auto flex h-full max-w-7xl flex-col justify-center px-6 pt-24"
       >
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -63,35 +76,35 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
           transition={{ duration: 1.2 }}
           className="max-w-2xl"
         >
-          <div className="mb-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500 shadow-[0_0_24px_rgba(255,255,255,0.12)]">
+          <div className="mb-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500 shadow-[0_0_28px_rgba(255,255,255,0.14)]">
             <span className="h-2 w-2 rounded-full bg-[color:var(--gold)] shadow-lg shadow-[color:var(--gold)]" style={{ animation: "shimmer 2s ease-in-out infinite" }} />
-            <span className="text-xs uppercase tracking-[0.35em] text-[rgba(255,255,255,0.8)]">Chapter I · The Awakening</span>
+            <span className="text-xs uppercase tracking-[0.35em] text-[rgba(255,255,255,0.85)]">Chapter I · The Awakening</span>
           </div>
-          <h1 ref={titleRef} className="display text-6xl leading-[0.95] text-white md:text-8xl font-black drop-shadow-[0_0_35px_rgba(255,255,255,0.16)]">
+          <h1 ref={titleRef} className="display text-6xl leading-[0.92] text-white md:text-8xl font-black drop-shadow-[0_0_45px_rgba(255,255,255,0.2)]">
             <span className="block text-white">Legends</span>
             <span className="block text-white">of</span>
             <span className="block text-white">Eternity</span>
           </h1>
-          <p className="mt-8 max-w-xl text-lg text-[rgba(255,255,255,0.8)] md:text-xl leading-relaxed font-light drop-shadow-[0_0_18px_rgba(0,0,0,0.35)]">
+          <p className="mt-8 max-w-xl text-lg text-[rgba(255,255,255,0.85)] md:text-xl leading-relaxed font-light drop-shadow-[0_0_20px_rgba(0,0,0,0.24)]">
             A next-generation 3D multiplayer fantasy RPG. Forge alliances, wield forbidden magic, and stand against the tide of eternal darkness.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <button
               onClick={onDownload}
-              className="group relative rounded-full bg-white/95 px-8 py-4 text-sm uppercase tracking-[0.25em] text-black font-bold transition-all duration-500 shadow-[0_0_35px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_50px_rgba(255,255,255,0.45)] overflow-hidden border border-white/20"
+              className="group relative rounded-full bg-gradient-to-r from-[#ffd98f] via-[#fff7e3] to-[#d3e7ff] px-8 py-4 text-sm uppercase tracking-[0.25em] text-black font-bold transition-all duration-500 shadow-[0_0_30px_rgba(255,210,140,0.45)] border border-[#7f9cff]/30 hover:scale-105 hover:shadow-[0_0_50px_rgba(255,210,140,0.55)] overflow-hidden"
             >
               <span className="relative z-10 flex items-center gap-2">Download Project</span>
-              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 opacity-0 bg-white/20 group-hover:opacity-90 transition-opacity duration-500" />
             </button>
             <a
               href="#characters"
-              className="rounded-full bg-white/10 px-8 py-4 text-sm uppercase tracking-[0.25em] text-white transition-all duration-500 hover:text-white hover:bg-white/20 shadow-[0_0_25px_rgba(255,255,255,0.14)] border border-white/15 backdrop-blur-xl"
+              className="relative inline-flex items-center justify-center rounded-full bg-[#0f1c41]/80 px-8 py-4 text-sm uppercase tracking-[0.25em] text-white shadow-[0_0_30px_rgba(75,124,255,0.28)] border border-[#75b5ff]/40 transition-all duration-500 hover:bg-[#18295e]/95 hover:shadow-[0_0_45px_rgba(75,124,255,0.45)]"
             >
               Explore Characters
             </a>
             <a
               href="#story"
-              className="rounded-full bg-white/5 px-8 py-4 text-sm uppercase tracking-[0.25em] text-white/80 transition-all duration-500 hover:text-white hover:bg-white/15 shadow-[0_0_22px_rgba(255,255,255,0.12)] border border-white/10"
+              className="rounded-full bg-white/12 px-8 py-4 text-sm uppercase tracking-[0.25em] text-white/95 transition-all duration-500 hover:text-white hover:bg-white/20 shadow-[0_0_22px_rgba(255,255,255,0.14)] border border-white/15"
             >
               ▶ Watch Trailer
             </a>
