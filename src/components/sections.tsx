@@ -1,14 +1,35 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import gsap from "gsap";
 import { IMG } from "@/lib/assets";
 import { Particles, Fog } from "./fx";
 
 export function Hero({ onDownload }: { onDownload: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  useEffect(() => {
+    if (!titleRef.current) return;
+
+    // Cinematic title entrance
+    gsap.fromTo(
+      titleRef.current.querySelectorAll("span"),
+      { opacity: 0, y: 50, filter: "blur(20px)" },
+      {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        duration: 1.5,
+        stagger: 0.2,
+        ease: "power4.out",
+        delay: 0.3,
+      }
+    );
+  }, []);
 
   return (
     <section ref={ref} className="relative isolate h-[100vh] min-h-[720px] w-full overflow-hidden">
@@ -22,8 +43,11 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
           className="h-full w-full object-cover"
           style={{ objectPosition: "18% center", animation: "slowZoom 30s ease-in-out infinite alternate", transform: "scale(1.35)", transformOrigin: "20% center" }}
         />
+        {/* Cinematic color grading overlays */}
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" />
+        {/* Cinematic vignette */}
+        <div className="absolute inset-0 rounded-[50%] shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]" style={{ boxShadow: "inset 0 0 120px rgba(0,0,0,0.9)" }} />
       </motion.div>
 
       <Fog />
@@ -39,15 +63,49 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
           transition={{ duration: 1.2 }}
           className="max-w-2xl"
         >
-          <div className="mb-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2">
-            <span className="h-2 w-2 rounded-full bg-[color:var(--gold)]" style={{ animation: "shimmer 2s ease-in-out infinite" }} />
+          <div className="mb-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500">
+            <span className="h-2 w-2 rounded-full bg-[color:var(--gold)] shadow-lg shadow-[color:var(--gold)]" style={{ animation: "shimmer 2s ease-in-out infinite" }} />
             <span className="text-xs uppercase tracking-[0.35em] text-white/70">Chapter I · The Awakening</span>
           </div>
-          <h1 className="display text-6xl leading-[0.95] text-white md:text-8xl">
-            <span className="block text-gradient-arcane">Legends</span>
-            <span className="block text-white/90">of</span>
-            <span className="block text-gradient-gold">Eternity</span>
+          <h1 ref={titleRef} className="display text-6xl leading-[0.95] text-white md:text-8xl font-black">
+            <span className="block text-gradient-arcane drop-shadow-[0_0_30px_rgba(74,20,140,0.8)]">Legends</span>
+            <span className="block text-white/90 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">of</span>
+            <span className="block text-gradient-gold drop-shadow-[0_0_30px_rgba(255,179,0,0.8)]">Eternity</span>
           </h1>
+          <p className="mt-8 max-w-xl text-lg text-white/70 md:text-xl leading-relaxed font-light">
+            A next-generation 3D multiplayer fantasy RPG. Forge alliances, wield forbidden magic, and stand against the tide of eternal darkness.
+          </p>
+          <div className="mt-10 flex flex-wrap gap-4">
+            <button
+              onClick={onDownload}
+              className="group relative rounded-full bg-gradient-to-r from-white to-gray-100 px-8 py-4 text-sm uppercase tracking-[0.25em] text-black font-bold transition-all duration-500 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.6)] overflow-hidden"
+            >
+              <span className="relative z-10 flex items-center gap-2">Download Project</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-50 group-hover:animate-pulse" />
+            </button>
+            <a
+              href="#characters"
+              className="rounded-full glass px-8 py-4 text-sm uppercase tracking-[0.25em] text-white/90 transition-all duration-500 hover:text-white hover:bg-white/10 hover:shadow-[0_0_30px_rgba(74,20,140,0.4)] border border-white/20 hover:border-white/40 backdrop-blur-xl"
+            >
+              Explore Characters
+            </a>
+            <a
+              href="#story"
+              className="rounded-full px-8 py-4 text-sm uppercase tracking-[0.25em] text-white/70 transition-all duration-500 hover:text-white hover:bg-white/5"
+            >
+              ▶ Watch Trailer
+            </a>
+          </div>
+        </motion.div>
+
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-[10px] uppercase tracking-[0.5em] text-white/40 animate-pulse">
+          scroll
+          <div className="mx-auto mt-2 h-10 w-px bg-gradient-to-b from-white/50 to-transparent" />
+        </div>
+      </motion.div>
+    </section>
+  );
+}
           <p className="mt-8 max-w-xl text-lg text-white/70 md:text-xl">
             A next-generation 3D multiplayer fantasy RPG. Forge alliances, wield forbidden magic, and stand against the tide of eternal darkness.
           </p>
@@ -199,9 +257,9 @@ export function Characters({ onOpen }: { onOpen: (c: Character) => void }) {
       <div className="mx-auto max-w-7xl px-6">
         <Reveal>
           <div className="mb-16 flex flex-col items-center text-center">
-            <span className="text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]">Cast</span>
-            <h2 className="display mt-4 text-5xl text-white md:text-6xl">Champions & Fallen</h2>
-            <p className="mt-4 max-w-xl text-white/60">
+            <span className="text-xs uppercase tracking-[0.5em] text-[color:var(--gold)] drop-shadow-[0_0_10px_rgba(255,179,0,0.6)]">Cast</span>
+            <h2 className="display mt-4 text-5xl text-white md:text-6xl drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">Champions & Fallen</h2>
+            <p className="mt-4 max-w-xl text-white/60 leading-relaxed">
               Four souls at the heart of the eternal war. Click any card to see the full dossier.
             </p>
           </div>
@@ -212,34 +270,49 @@ export function Characters({ onOpen }: { onOpen: (c: Character) => void }) {
             <Reveal key={c.name} delay={i * 0.08}>
               <button
                 onClick={() => onOpen(c)}
-                className="group relative block h-[520px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)]"
+                className="group relative block h-[520px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_0_50px_rgba(74,20,140,0.6)] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)] backdrop-blur-xl border border-white/10 hover:border-white/30"
               >
                 <img
                   src={c.img}
                   alt={c.name}
                   loading="lazy"
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1800ms] group-hover:scale-110"
+                  className="absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110"
                   style={{ objectPosition: c.name === "Elysia" ? "50% 20%" : "50% 15%" }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                {/* Cinematic lighting overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent group-hover:from-black via-black/40 transition-all duration-500" />
+                
+                {/* Character-specific glow effect */}
                 <div
                   className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                   style={{
                     background:
                       c.color === "ember"
-                        ? "radial-gradient(60% 40% at 50% 100%, oklch(0.66 0.22 40 / 0.4), transparent 70%)"
+                        ? "radial-gradient(60% 40% at 50% 100%, oklch(0.66 0.22 40 / 0.6), transparent 70%)"
                         : c.color === "gold"
-                          ? "radial-gradient(60% 40% at 50% 100%, oklch(0.82 0.14 88 / 0.4), transparent 70%)"
-                          : "radial-gradient(60% 40% at 50% 100%, oklch(0.72 0.19 245 / 0.5), transparent 70%)",
+                          ? "radial-gradient(60% 40% at 50% 100%, oklch(0.82 0.14 88 / 0.6), transparent 70%)"
+                          : "radial-gradient(60% 40% at 50% 100%, oklch(0.72 0.19 245 / 0.7), transparent 70%)",
                   }}
                 />
-                <div className="absolute inset-x-0 bottom-0 p-6">
-                  <div className="text-[10px] uppercase tracking-[0.35em] text-white/60">{c.title.split(" · ")[0]}</div>
-                  <h3 className="display mt-2 text-3xl text-white">{c.name}</h3>
+
+                {/* Cinematic edge glow */}
+                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" 
+                  style={{
+                    boxShadow: `inset 0 0 40px ${
+                      c.color === "ember" ? "rgba(220, 20, 60, 0.3)" :
+                      c.color === "gold" ? "rgba(255, 179, 0, 0.3)" :
+                      "rgba(74, 20, 140, 0.3)"
+                    }`
+                  }}
+                />
+                
+                <div className="absolute inset-x-0 bottom-0 p-6 z-10">
+                  <div className="text-[10px] uppercase tracking-[0.35em] text-white/60 group-hover:text-white/80 transition-colors">{c.title.split(" · ")[0]}</div>
+                  <h3 className="display mt-2 text-3xl text-white group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all">{c.name}</h3>
                   <div className="mt-4 flex items-center gap-2">
-                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
+                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10 group-hover:bg-white/20">
                       <div
-                        className="h-full"
+                        className="h-full transition-all duration-1000 rounded-full shadow-lg"
                         style={{
                           width: `${c.power}%`,
                           background:
@@ -248,10 +321,16 @@ export function Characters({ onOpen }: { onOpen: (c: Character) => void }) {
                               : c.color === "gold"
                                 ? "linear-gradient(90deg, oklch(0.82 0.14 88), oklch(0.95 0.12 95))"
                                 : "linear-gradient(90deg, oklch(0.5 0.2 245), oklch(0.85 0.15 220))",
+                          boxShadow:
+                            c.color === "ember"
+                              ? "0 0 20px rgba(220, 20, 60, 0.8)"
+                              : c.color === "gold"
+                                ? "0 0 20px rgba(255, 179, 0, 0.8)"
+                                : "0 0 20px rgba(74, 20, 140, 0.8)",
                         }}
                       />
                     </div>
-                    <span className="text-xs text-white/70">{c.power}</span>
+                    <span className="text-xs text-white/70 group-hover:text-white transition-colors">{c.power}</span>
                   </div>
                 </div>
               </button>

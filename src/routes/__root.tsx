@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { CinematicBackground } from "../components/cinematic-bg";
+import { CinematicParticles } from "../components/cinematic-particles";
 
 function NotFoundComponent() {
   return (
@@ -120,8 +122,38 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    // Smooth scrolling with Lenis
+    try {
+      const Lenis = require("lenis").default;
+      const lenis = new Lenis({
+        duration: 1.2,
+        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        direction: "vertical",
+        gestureDirection: "vertical",
+        smooth: true,
+        smoothTouch: false,
+      });
+
+      function raf(time: number) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+
+      requestAnimationFrame(raf);
+
+      return () => {
+        lenis.destroy?.();
+      };
+    } catch (e) {
+      console.warn("Lenis not available");
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
+      <CinematicBackground />
+      <CinematicParticles count={80} color="arcane" />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
