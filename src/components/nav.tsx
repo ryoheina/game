@@ -42,12 +42,6 @@ export function Nav() {
             </a>
           ))}
         </nav>
-        <Link
-          to="/auth"
-          className="rounded-full glass px-4 py-2 text-xs uppercase tracking-widest text-white/80 hover:text-white"
-        >
-          Admin
-        </Link>
       </div>
     </header>
   );

@@ -1,11 +1,10 @@
 import { a as __toESM } from "../_runtime.mjs";
 import { i as Color, n as useFrame, o as require_jsx_runtime, r as useThree, s as require_react, t as Canvas } from "../_libs/@react-three/fiber+[...].mjs";
-import { A as redirect, _ as useRouter, c as HeadContent, d as Outlet, f as lazyRouteComponent, h as Link, m as createRootRouteWithContext, p as createFileRoute, s as Scripts, u as createRouter } from "../_libs/@tanstack/react-router+[...].mjs";
-import { t as supabase } from "./client-gykmVtt_.mjs";
+import { _ as useRouter, c as HeadContent, d as Outlet, f as lazyRouteComponent, h as Link, m as createRootRouteWithContext, p as createFileRoute, s as Scripts, u as createRouter } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import { n as QueryClientProvider } from "../_libs/tanstack__react-query.mjs";
 import { t as getClientMeta } from "./ua-VZAcffKf.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-Vp_hCSjy.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-DStwDDLp.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-B9lnc-cS.css";
@@ -449,7 +448,7 @@ function RootComponent() {
 		]
 	});
 }
-var $$splitComponentImporter$3 = () => import("./auth-ClYGJ0tj.mjs");
+var $$splitComponentImporter$3 = () => import("./auth-DlCd23P9.mjs");
 var Route$4 = createFileRoute("/auth")({
 	head: () => ({ meta: [{ title: "Admin Access — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
@@ -457,14 +456,9 @@ var Route$4 = createFileRoute("/auth")({
 var $$splitComponentImporter$2 = () => import("./route-Di7iQBCH.mjs");
 var Route$3 = createFileRoute("/_authenticated")({
 	ssr: false,
-	beforeLoad: async () => {
-		const { data, error } = await supabase.auth.getUser();
-		if (error || !data.user) throw redirect({ to: "/auth" });
-		return { user: data.user };
-	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-DxoMUM2_.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-CxYxAhim.mjs");
 var Route$2 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -488,7 +482,7 @@ var Route$2 = createFileRoute("/")({
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
 var $$splitErrorComponentImporter = () => import("./admin-BqW0Kxgr.mjs");
-var $$splitComponentImporter = () => import("./admin-CYjvmhrW.mjs");
+var $$splitComponentImporter = () => import("./admin-D--l8NME.mjs");
 var Route$1 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Admin Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component"),

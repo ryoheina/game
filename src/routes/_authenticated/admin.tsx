@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useState } from "react";
 import { getAdminStats } from "@/lib/analytics.functions";
-import { supabase } from "@/integrations/supabase/client";
 import { MouseGlow } from "@/components/fx";
+import { ADMIN_SECRET } from "@/lib/admin";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin Dashboard — Legends of Eternity" }] }),
@@ -23,18 +24,35 @@ function ErrorView({ error }: { error: Error }) {
 
 function Admin() {
   const navigate = useNavigate();
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
   const fetchStats = useServerFn(getAdminStats);
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["admin-stats"],
-    queryFn: () => fetchStats(),
+    queryFn: () => fetchStats({ data: { secret: ADMIN_SECRET } }),
+    enabled: authorized === true,
     refetchInterval: 15_000,
   });
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const secret = localStorage.getItem("loe_admin_secret");
+    if (secret !== "20070925") {
+      navigate({ to: "/auth", replace: true });
+      return;
+    }
+    setAuthorized(true);
+  }, [navigate]);
+
+  const signOut = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("loe_admin_secret");
+    }
     navigate({ to: "/auth", replace: true });
   };
 
+  if (authorized === null) {
+    return <div className="grid min-h-dvh place-items-center text-white/60">Verifying access…</div>;
+  }
   if (isLoading) {
     return <div className="grid min-h-dvh place-items-center text-white/60">Loading dashboard…</div>;
   }

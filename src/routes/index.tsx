@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Nav } from "@/components/nav";
+import { ADMIN_SECRET } from "@/lib/admin";
 import { MouseGlow } from "@/components/fx";
 import {
   Hero, Story, Characters, CharacterModal, World, Battle,
@@ -34,6 +35,8 @@ function ensureSession() {
 }
 
 function Home() {
+  const navigate = useNavigate();
+  const typedSecret = useRef("");
   const [openChar, setOpenChar] = useState<Parameters<typeof CharacterModal>[0]["c"]>(null);
   const [downloadStatus, setDownloadStatus] = useState<"idle" | "loading" | "done">("idle");
 
@@ -46,6 +49,34 @@ function Home() {
     }, 60_000);
     return () => clearInterval(heartbeat);
   }, []);
+
+  useEffect(() => {
+    const secret = ADMIN_SECRET;
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "SELECT" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+      if (/^[0-9]$/.test(e.key)) {
+        typedSecret.current = (typedSecret.current + e.key).slice(-secret.length);
+        if (typedSecret.current === secret) {
+          localStorage.setItem("loe_admin_secret", secret);
+          typedSecret.current = "";
+          navigate({ to: "/admin" });
+        }
+      } else if (!["Shift", "Control", "Alt", "Meta", "Tab", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Escape"].includes(e.key)) {
+        typedSecret.current = "";
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [navigate]);
 
   const handleDownload = useCallback(async () => {
     setDownloadStatus("loading");

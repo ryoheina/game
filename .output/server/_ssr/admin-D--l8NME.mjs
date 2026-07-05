@@ -1,11 +1,10 @@
 import { a as __toESM } from "../_runtime.mjs";
 import { o as require_jsx_runtime, s as require_react } from "../_libs/@react-three/fiber+[...].mjs";
 import { D as isRedirect, _ as useRouter, g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-import { t as supabase } from "./client-gykmVtt_.mjs";
 import { t as getAdminStats } from "./analytics.functions-Dhm407dA.mjs";
 import { n as MouseGlow } from "./fx-DmVqfUhc.mjs";
 import { t as useQuery } from "../_libs/tanstack__react-query.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-CYjvmhrW.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-D--l8NME.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function useServerFn(serverFn) {
@@ -26,19 +25,36 @@ function useServerFn(serverFn) {
 }
 function Admin() {
 	const navigate = useNavigate();
+	const [authorized, setAuthorized] = (0, import_react.useState)(null);
 	const fetchStats = useServerFn(getAdminStats);
 	const { data, isLoading, error, refetch } = useQuery({
 		queryKey: ["admin-stats"],
 		queryFn: () => fetchStats(),
+		enabled: authorized === true,
 		refetchInterval: 15e3
 	});
-	const signOut = async () => {
-		await supabase.auth.signOut();
+	(0, import_react.useEffect)(() => {
+		if (typeof window === "undefined") return;
+		if (localStorage.getItem("loe_admin_secret") !== "20070925") {
+			navigate({
+				to: "/auth",
+				replace: true
+			});
+			return;
+		}
+		setAuthorized(true);
+	}, [navigate]);
+	const signOut = () => {
+		if (typeof window !== "undefined") localStorage.removeItem("loe_admin_secret");
 		navigate({
 			to: "/auth",
 			replace: true
 		});
 	};
+	if (authorized === null) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "grid min-h-dvh place-items-center text-white/60",
+		children: "Verifying access…"
+	});
 	if (isLoading) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "grid min-h-dvh place-items-center text-white/60",
 		children: "Loading dashboard…"

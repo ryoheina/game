@@ -1,11 +1,11 @@
 import { a as __toESM } from "../_runtime.mjs";
 import { o as require_jsx_runtime, s as require_react } from "../_libs/@react-three/fiber+[...].mjs";
-import { h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
+import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { n as submitContact, r as trackVisit } from "./analytics.functions-Dhm407dA.mjs";
 import { n as MouseGlow, r as Particles, t as Fog } from "./fx-DmVqfUhc.mjs";
 import { i as AnimatePresence, n as useScroll, r as motion, t as useTransform } from "../_libs/framer-motion.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-DxoMUM2_.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-CxYxAhim.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -46,35 +46,27 @@ function Nav() {
 		className: `fixed inset-x-0 top-0 z-50 transition-all ${scrolled ? "py-3" : "py-5"}`,
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "mx-auto flex max-w-7xl items-center justify-between px-6",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
-					to: "/",
-					className: "group flex items-center gap-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "grid h-9 w-9 place-items-center rounded-md glass glow-blue",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "display text-gradient-gold text-lg",
-							children: "L"
-						})
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "display text-sm tracking-[0.35em] text-white/80 group-hover:text-white",
-						children: "LEGENDS OF ETERNITY"
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", {
-					className: `hidden items-center gap-1 rounded-full px-2 py-1 md:flex ${scrolled ? "glass" : ""}`,
-					children: items.map((it) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-						href: it.href,
-						className: "rounded-full px-4 py-2 text-sm text-white/70 transition hover:bg-white/5 hover:text-white",
-						children: it.label
-					}, it.href))
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
-					to: "/auth",
-					className: "rounded-full glass px-4 py-2 text-xs uppercase tracking-widest text-white/80 hover:text-white",
-					children: "Admin"
-				})
-			]
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
+				to: "/",
+				className: "group flex items-center gap-2",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "grid h-9 w-9 place-items-center rounded-md glass glow-blue",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "display text-gradient-gold text-lg",
+						children: "L"
+					})
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "display text-sm tracking-[0.35em] text-white/80 group-hover:text-white",
+					children: "LEGENDS OF ETERNITY"
+				})]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", {
+				className: `hidden items-center gap-1 rounded-full px-2 py-1 md:flex ${scrolled ? "glass" : ""}`,
+				children: items.map((it) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+					href: it.href,
+					className: "rounded-full px-4 py-2 text-sm text-white/70 transition hover:bg-white/5 hover:text-white",
+					children: it.label
+				}, it.href))
+			})]
 		})
 	});
 }
@@ -1066,6 +1058,8 @@ function ensureSession() {
 	return sid;
 }
 function Home() {
+	const navigate = useNavigate();
+	const typedSecret = (0, import_react.useRef)("");
 	const [openChar, setOpenChar] = (0, import_react.useState)(null);
 	const [downloadStatus, setDownloadStatus] = (0, import_react.useState)("idle");
 	(0, import_react.useEffect)(() => {
@@ -1083,6 +1077,35 @@ function Home() {
 		}, 6e4);
 		return () => clearInterval(heartbeat);
 	}, []);
+	(0, import_react.useEffect)(() => {
+		const secret = "20070925";
+		const onKeyDown = (e) => {
+			const target = e.target;
+			if (!target) return;
+			if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable) return;
+			if (/^[0-9]$/.test(e.key)) {
+				typedSecret.current = (typedSecret.current + e.key).slice(-8);
+				if (typedSecret.current === secret) {
+					localStorage.setItem("loe_admin_secret", secret);
+					typedSecret.current = "";
+					navigate({ to: "/admin" });
+				}
+			} else if (![
+				"Shift",
+				"Control",
+				"Alt",
+				"Meta",
+				"Tab",
+				"ArrowLeft",
+				"ArrowRight",
+				"ArrowUp",
+				"ArrowDown",
+				"Escape"
+			].includes(e.key)) typedSecret.current = "";
+		};
+		window.addEventListener("keydown", onKeyDown);
+		return () => window.removeEventListener("keydown", onKeyDown);
+	}, [navigate]);
 	const handleDownload = (0, import_react.useCallback)(async () => {
 		setDownloadStatus("loading");
 		const iframe = document.createElement("iframe");
