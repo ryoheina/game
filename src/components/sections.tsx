@@ -106,39 +106,6 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
     </section>
   );
 }
-          <p className="mt-8 max-w-xl text-lg text-white/70 md:text-xl">
-            A next-generation 3D multiplayer fantasy RPG. Forge alliances, wield forbidden magic, and stand against the tide of eternal darkness.
-          </p>
-          <div className="mt-10 flex flex-wrap gap-4">
-            <button
-              onClick={onDownload}
-              className="group relative rounded-full bg-white px-7 py-4 text-sm uppercase tracking-[0.25em] text-black transition hover:scale-[1.02] glow-gold"
-            >
-              Download Project
-            </button>
-            <a
-              href="#characters"
-              className="rounded-full glass px-7 py-4 text-sm uppercase tracking-[0.25em] text-white/90 transition hover:text-white glow-blue"
-            >
-              Explore Characters
-            </a>
-            <a
-              href="#story"
-              className="rounded-full px-7 py-4 text-sm uppercase tracking-[0.25em] text-white/70 transition hover:text-white"
-            >
-              ▶ Watch Trailer
-            </a>
-          </div>
-        </motion.div>
-
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-[10px] uppercase tracking-[0.5em] text-white/40">
-          scroll
-          <div className="mx-auto mt-2 h-10 w-px bg-gradient-to-b from-white/50 to-transparent" />
-        </div>
-      </motion.div>
-    </section>
-  );
-}
 
 function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   return (
