@@ -10,6 +10,6 @@ export const IMG = {
   azrael: "/AZRAEL.png" || azrael.url,
   background: "/Background.png" || background.url,
   elysia: "/ELYSIA.png" || elysia.url,
-  lucas: "/lucas.png" || lucas.url,
+  lucas: "/game1.png" || lucas.url,  // lucas.png not found; using game1.png as placeholder
   zerevok: "/ZEREVOK.png" || zerevok.url,
 };
