@@ -8,7 +8,7 @@ import { MouseGlow } from "@/components/fx";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "Admin Dashboard — Legends of Eternity" }] }),
+  head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
   component: Admin,
   errorComponent: ErrorView,
 });

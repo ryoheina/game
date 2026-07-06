@@ -22,75 +22,75 @@ var public_assets_data_default = {
 		"size": 104970,
 		"path": "../public/favicon.ico"
 	},
-	"/assets/admin-BO-HIZLJ.js": {
+	"/assets/admin-BdXV_CqN.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"4900-80Q4fA6sYGQu4YjBhMMZuC4EZFM\"",
-		"mtime": "2026-07-05T22:52:20.922Z",
-		"size": 18688,
-		"path": "../public/assets/admin-BO-HIZLJ.js"
-	},
-	"/assets/analytics.functions-3Cuvl8oT.js": {
-		"type": "text/javascript; charset=utf-8",
-		"etag": "\"138a-lWH+MIchgjihflDoz3USateA2/U\"",
-		"mtime": "2026-07-05T22:52:20.925Z",
-		"size": 5002,
-		"path": "../public/assets/analytics.functions-3Cuvl8oT.js"
-	},
-	"/assets/admin-CgXanHCs.js": {
-		"type": "text/javascript; charset=utf-8",
-		"etag": "\"1d3-O9qeWZj4sJZhAXhDBmEb651P+uk\"",
-		"mtime": "2026-07-05T22:52:20.923Z",
+		"etag": "\"1d3-zTgnXjmoClqgMFE8DUwMAyd38Fo\"",
+		"mtime": "2026-07-06T07:16:47.366Z",
 		"size": 467,
-		"path": "../public/assets/admin-CgXanHCs.js"
+		"path": "../public/assets/admin-BdXV_CqN.js"
 	},
-	"/assets/auth-D4x0S4ry.js": {
+	"/assets/admin-BQtxvNTK.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"d57-pfwbh7LLnNT4fIhPrmjaw7EVR6U\"",
-		"mtime": "2026-07-05T22:52:20.927Z",
-		"size": 3415,
-		"path": "../public/assets/auth-D4x0S4ry.js"
+		"etag": "\"4900-My8qKtLVTzVYH5+M7+e8Iu3y1AQ\"",
+		"mtime": "2026-07-06T07:16:47.363Z",
+		"size": 18688,
+		"path": "../public/assets/admin-BQtxvNTK.js"
 	},
-	"/assets/fx-BQHwGxwi.js": {
+	"/assets/analytics.functions-Cz4IaZWN.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"763-smgWueqXXScWxC3qZ+pLisFG484\"",
-		"mtime": "2026-07-05T22:52:20.929Z",
+		"etag": "\"138a-bfd1AULh4OJveLdGwZu0WSE/ZJ4\"",
+		"mtime": "2026-07-06T07:16:47.369Z",
+		"size": 5002,
+		"path": "../public/assets/analytics.functions-Cz4IaZWN.js"
+	},
+	"/assets/auth-DoJIc6aQ.js": {
+		"type": "text/javascript; charset=utf-8",
+		"etag": "\"d32-QIwcnztxyLp36ELb85kLkdfzsNw\"",
+		"mtime": "2026-07-06T07:16:47.370Z",
+		"size": 3378,
+		"path": "../public/assets/auth-DoJIc6aQ.js"
+	},
+	"/assets/fx--nROQjJO.js": {
+		"type": "text/javascript; charset=utf-8",
+		"etag": "\"763-aO2iQKe2EqcgJ8LjP/vEeO+DSuU\"",
+		"mtime": "2026-07-06T07:16:47.372Z",
 		"size": 1891,
-		"path": "../public/assets/fx-BQHwGxwi.js"
+		"path": "../public/assets/fx--nROQjJO.js"
 	},
 	"/assets/lenis-DdrGTsEx.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"478d-mZHPO7Pf1OkK6MydXdG+JjPcikM\"",
-		"mtime": "2026-07-05T22:52:20.930Z",
+		"mtime": "2026-07-06T07:16:47.374Z",
 		"size": 18317,
 		"path": "../public/assets/lenis-DdrGTsEx.js"
 	},
-	"/assets/route-DVCW4ZQB.js": {
+	"/assets/route-Fxw8WQCS.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"66-X8tj+rM1i86RGy8g0EzBY9P6s7o\"",
-		"mtime": "2026-07-05T22:52:20.932Z",
+		"etag": "\"66-wfWzI2cIe33FE6SfFVv+kTRCGBk\"",
+		"mtime": "2026-07-06T07:16:47.376Z",
 		"size": 102,
-		"path": "../public/assets/route-DVCW4ZQB.js"
+		"path": "../public/assets/route-Fxw8WQCS.js"
 	},
 	"/assets/styles-jki8sZh9.css": {
 		"type": "text/css; charset=utf-8",
 		"etag": "\"16ce1-eoiSWogFyD0kZNcLyht00rpd4ek\"",
-		"mtime": "2026-07-05T22:52:20.936Z",
+		"mtime": "2026-07-06T07:16:47.383Z",
 		"size": 93409,
 		"path": "../public/assets/styles-jki8sZh9.css"
 	},
-	"/assets/routes-BRSI_WfG.js": {
+	"/assets/routes-KKTfDWsH.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"384dd-e+V/r+uDzugMFnHq1azxoeltSNw\"",
-		"mtime": "2026-07-05T22:52:20.934Z",
+		"etag": "\"384dd-J+YQYdq/8Sl4ySWO/19SE1FfskQ\"",
+		"mtime": "2026-07-06T07:16:47.378Z",
 		"size": 230621,
-		"path": "../public/assets/routes-BRSI_WfG.js"
+		"path": "../public/assets/routes-KKTfDWsH.js"
 	},
-	"/assets/index-MPKTpSO9.js": {
+	"/assets/index-GONreuuZ.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"86cdc-LgsXpxMVkn+tuE7xNKrZFk6VHqw\"",
-		"mtime": "2026-07-05T22:52:20.920Z",
-		"size": 552156,
-		"path": "../public/assets/index-MPKTpSO9.js"
+		"etag": "\"86cdd-xnZ3dIp5yHhlg+5ewAU3g4WCS2U\"",
+		"mtime": "2026-07-06T07:16:47.361Z",
+		"size": 552157,
+		"path": "../public/assets/index-GONreuuZ.js"
 	},
 	"/game1.png": {
 		"type": "image/png",

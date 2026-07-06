@@ -19,7 +19,7 @@ function Auth() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/admin", replace: true });
+      if (data.session) navigate({ to: "/me", replace: true });
     });
   }, [navigate]);
 
@@ -27,7 +27,6 @@ function Auth() {
     e.preventDefault();
     setBusy(true);
     setErr(null);
-    setInfo(null);
     try {
       if (!email || !password) {
         throw new Error("Email and password are required.");
@@ -39,20 +38,22 @@ function Auth() {
         if (!data.session) {
           throw new Error("Unable to sign in. Check your credentials and try again.");
         }
-      } else {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin + "/admin" },
-        });
-        if (error) throw error;
-        if (!data.session) {
-          setInfo("Check your email to confirm your account before signing in.");
-          return;
-        }
+
+        navigate({ to: "/me", replace: true });
+        return;
       }
 
-      navigate({ to: "/admin", replace: true });
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (error) throw error;
+      if (!data.session) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
+      }
+
+      navigate({ to: "/", replace: true });
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Unable to authenticate.");
     } finally {
@@ -69,8 +70,8 @@ function Auth() {
         <Link to="/" className="mb-6 inline-block text-xs uppercase tracking-[0.35em] text-white/50 hover:text-white">
           ← Back to site
         </Link>
-        <h1 className="display text-3xl text-white">Admin Login</h1>
-        <p className="mt-2 text-sm text-white/60">Sign in with your studio account to access the admin dashboard.</p>
+        <h1 className="display text-3xl text-white">Studio Login</h1>
+        <p className="mt-2 text-sm text-white/60">Sign in with your studio account to access your studio dashboard.</p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-3">
           <input

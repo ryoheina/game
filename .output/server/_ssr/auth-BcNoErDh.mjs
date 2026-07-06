@@ -3,7 +3,7 @@ import { i as require_react, r as require_jsx_runtime } from "../_libs/react+tan
 import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as supabase } from "./client-gykmVtt_.mjs";
 import { n as MouseGlow, r as Particles } from "./fx-DmVqfUhc.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/auth-CcGLtPXW.js
+//#region node_modules/.nitro/vite/services/ssr/assets/auth-BcNoErDh.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function Auth() {
@@ -17,7 +17,7 @@ function Auth() {
 	(0, import_react.useEffect)(() => {
 		supabase.auth.getSession().then(({ data }) => {
 			if (data.session) navigate({
-				to: "/admin",
+				to: "/me",
 				replace: true
 			});
 		});
@@ -26,7 +26,6 @@ function Auth() {
 		e.preventDefault();
 		setBusy(true);
 		setErr(null);
-		setInfo(null);
 		try {
 			if (!email || !password) throw new Error("Email and password are required.");
 			if (mode === "signin") {
@@ -36,20 +35,26 @@ function Auth() {
 				});
 				if (error) throw error;
 				if (!data.session) throw new Error("Unable to sign in. Check your credentials and try again.");
-			} else {
-				const { data, error } = await supabase.auth.signUp({
-					email,
-					password,
-					options: { emailRedirectTo: window.location.origin + "/admin" }
+				navigate({
+					to: "/me",
+					replace: true
 				});
-				if (error) throw error;
-				if (!data.session) {
-					setInfo("Check your email to confirm your account before signing in.");
-					return;
-				}
+				return;
+			}
+			const { data, error } = await supabase.auth.signUp({
+				email,
+				password
+			});
+			if (error) throw error;
+			if (!data.session) {
+				const { error: signInError } = await supabase.auth.signInWithPassword({
+					email,
+					password
+				});
+				if (signInError) throw signInError;
 			}
 			navigate({
-				to: "/admin",
+				to: "/",
 				replace: true
 			});
 		} catch (e) {
@@ -77,11 +82,11 @@ function Auth() {
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 						className: "display text-3xl text-white",
-						children: "Admin Login"
+						children: "Studio Login"
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 						className: "mt-2 text-sm text-white/60",
-						children: "Sign in with your studio account to access the admin dashboard."
+						children: "Sign in with your studio account to access your studio dashboard."
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 						onSubmit,
