@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_authenticated")({
     }
 
     const token = window.localStorage.getItem("studio-admin-token");
-    if (token !== import.meta.env.VITE_ADMIN_PASSWORD && token !== "20070925") {
+    if (!token) {
       throw redirect({ to: "/auth" });
     }
 

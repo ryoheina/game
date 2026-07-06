@@ -10,6 +10,10 @@ export const trackVisit = createServerFn({ method: "POST" })
     const req = getRequest();
     const meta = req ? getClientMeta(req) : { ip: null, country: null, ua: "", referrer: null, browser: "Unknown", os: "Unknown", device: "Desktop" };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const now = new Date().toISOString();
+
+    // Insert visit record
     await supabaseAdmin.from("visits").insert({
       session_id: data.sessionId,
       path: data.path,
@@ -21,6 +25,22 @@ export const trackVisit = createServerFn({ method: "POST" })
       user_agent: meta.ua,
       referrer: meta.referrer,
     });
+
+    // Upsert session: if exists update last_active, else insert with first_visit
+    const { data: existing } = await supabaseAdmin.from("sessions").select("session_id").eq("session_id", data.sessionId).maybeSingle();
+    if (existing) {
+      await supabaseAdmin.from("sessions").update({ last_active: now, ip: meta.ip, country: meta.country, browser: meta.browser, os: meta.os, device: meta.device, user_agent: meta.ua }).eq("session_id", data.sessionId);
+      // create a small heartbeat notification? we skip notifications for heartbeats
+    } else {
+      await supabaseAdmin.from("sessions").insert({ session_id: data.sessionId, ip: meta.ip, country: meta.country, browser: meta.browser, os: meta.os, device: meta.device, user_agent: meta.ua, first_visit: now, last_active: now });
+      // notify admin of arrival
+      try {
+        await supabaseAdmin.from("notifications").insert({ type: "visitor_arrival", title: "Visitor Arrived", body: `${meta.ip ?? 'unknown'} — ${meta.device} — ${meta.browser}`, payload: { session_id: data.sessionId } });
+      } catch (e) {
+        console.error('notify failed', e);
+      }
+    }
+
     return { ok: true };
   });
 

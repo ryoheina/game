@@ -41,33 +41,51 @@ export type Database = {
       downloads: {
         Row: {
           browser: string | null
+          completed: boolean
+          completed_at: string | null
           country: string | null
           created_at: string
+          device: string | null
           file_name: string
           id: string
           ip: string | null
           os: string | null
+          session_id: string | null
+          started_at: string | null
           user_agent: string | null
+          extracted: boolean
         }
         Insert: {
           browser?: string | null
+          completed?: boolean
+          completed_at?: string | null
           country?: string | null
           created_at?: string
+          device?: string | null
           file_name: string
           id?: string
           ip?: string | null
           os?: string | null
+          session_id?: string | null
+          started_at?: string | null
           user_agent?: string | null
+          extracted?: boolean
         }
         Update: {
           browser?: string | null
+          completed?: boolean
+          completed_at?: string | null
           country?: string | null
           created_at?: string
+          device?: string | null
           file_name?: string
           id?: string
           ip?: string | null
           os?: string | null
+          session_id?: string | null
+          started_at?: string | null
           user_agent?: string | null
+          extracted?: boolean
         }
         Relationships: []
       }
@@ -131,6 +149,75 @@ export type Database = {
           referrer?: string | null
           session_id?: string
           user_agent?: string | null
+        }
+        Relationships: []
+      }
+      sessions: {
+        Row: {
+          browser: string | null
+          country: string | null
+          created_at: string
+          device: string | null
+          first_visit: string
+          ip: string | null
+          last_active: string
+          notified_left: boolean
+          session_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          first_visit: string
+          ip?: string | null
+          last_active: string
+          notified_left?: boolean
+          session_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          first_visit?: string
+          ip?: string | null
+          last_active?: string
+          notified_left?: boolean
+          session_id?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          delivered: boolean
+          id: string
+          payload: Json | null
+          title: string
+          type: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          delivered?: boolean
+          id?: string
+          payload?: Json | null
+          title: string
+          type: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          delivered?: boolean
+          id?: string
+          payload?: Json | null
+          title?: string
+          type?: string
         }
         Relationships: []
       }

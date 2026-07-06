@@ -52,7 +52,9 @@ function Home() {
     setDownloadStatus("loading");
     const iframe = document.createElement("iframe");
     iframe.style.display = "none";
-    iframe.src = "/api/public/download";
+    const sid = ensureSession();
+    const fileName = encodeURIComponent("3D Game.rar");
+    iframe.src = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${fileName}`;
     document.body.appendChild(iframe);
     setTimeout(() => {
       setDownloadStatus("done");

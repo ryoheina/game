@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { MouseGlow, Particles } from "@/components/fx";
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? "20070925";
@@ -23,21 +23,30 @@ function Auth() {
     }
   }, [navigate]);
 
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setErr(null);
-    setInfo(null);
-    try {
-      if (!password) {
-        throw new Error("Password is required.");
-      }
+const onSubmit = async (e: FormEvent) => {
+     e.preventDefault();
+     setBusy(true);
+     setErr(null);
+     setInfo(null);
+     try {
+       if (!password) {
+         throw new Error("Password is required.");
+       }
 
-      if (password !== ADMIN_PASSWORD) {
-        throw new Error("Invalid password.");
-      }
-
-      window.localStorage.setItem("studio-admin-token", ADMIN_PASSWORD);
+-      if (password !== ADMIN_PASSWORD) {
+-        throw new Error("Invalid password.");
+-      }
+-
+-      window.localStorage.setItem("studio-admin-token", ADMIN_PASSWORD);
++      const res = await fetch("/api/admin/login", {
++        method: "POST",        credentials: "include",+        headers: { "content-type": "application/json" },
++        body: JSON.stringify({ password }),
++      });
++      if (!res.ok) {
++        const body = await res.json().catch(() => null);
++        throw new Error(body?.error || "Invalid password.");
++      }
++      window.localStorage.setItem("studio-admin-token", password);
       navigate({ to: "/admin", replace: true });
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Unable to authenticate.");
