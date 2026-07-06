@@ -51,6 +51,16 @@ function Admin() {
           return;
         }
 
+        if (!res.ok) {
+          console.error("Dashboard API error:", res.status, res.statusText);
+          if (!mounted) return;
+          // Still update UI but with empty data
+          setSessions([]);
+          setDownloads([]);
+          setNotifications([]);
+          return;
+        }
+
         const data = await res.json();
         const list = data.sessions || [];
         if (!mounted) return;
@@ -74,7 +84,11 @@ function Admin() {
         }
         lastSnapshotRef.current = snap;
       } catch (e) {
-        console.error(e);
+        console.error("Dashboard poll error:", e);
+        if (!mounted) return;
+        setSessions([]);
+        setDownloads([]);
+        setNotifications([]);
       }
     }
 
