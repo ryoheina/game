@@ -2,7 +2,7 @@ import { f as getRequest, i as TSS_SERVER_FUNCTION, l as createServerFn } from "
 import { t as requireSupabaseAuth } from "./auth-middleware-DZO41X7i.mjs";
 import { t as getClientMeta } from "./ua-VZAcffKf.mjs";
 import { n as stringType, t as objectType } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-BEGDnzM_.js
+//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-eLOiLdoR.js
 var createServerRpc = (serverFnMeta, splitImportFn) => {
 	const url = "/_serverFn/" + serverFnMeta.id;
 	return Object.assign(splitImportFn, {
@@ -30,7 +30,7 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 		os: "Unknown",
 		device: "Desktop"
 	};
-	const { supabaseAdmin } = await import("./client.server-Bw6iWMJ-.mjs");
+	const { supabaseAdmin } = await import("./client.server-By2HwjZj.mjs");
 	const now = (/* @__PURE__ */ new Date()).toISOString();
 	await supabaseAdmin.from("visits").insert({
 		session_id: data.sessionId,
@@ -88,7 +88,7 @@ var submitContact = createServerFn({ method: "POST" }).validator((d) => objectTy
 	email: stringType().trim().email().max(200),
 	message: stringType().trim().min(1).max(5e3)
 }).parse(d)).handler(submitContact_createServerFn_handler, async ({ data }) => {
-	const { supabaseAdmin } = await import("./client.server-Bw6iWMJ-.mjs");
+	const { supabaseAdmin } = await import("./client.server-By2HwjZj.mjs");
 	const { error } = await supabaseAdmin.from("contact_messages").insert(data);
 	if (error) throw new Error("Could not save your message");
 	return { ok: true };
@@ -101,7 +101,7 @@ var getAdminStatus_createServerFn_handler = createServerRpc({
 var getAdminStatus = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(getAdminStatus_createServerFn_handler, async ({ context }) => {
 	const { data: roleRow, error } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
 	if (error) throw new Error("Unable to verify admin status");
-	const { supabaseAdmin } = await import("./client.server-Bw6iWMJ-.mjs");
+	const { supabaseAdmin } = await import("./client.server-By2HwjZj.mjs");
 	const { data: existingAdmin, error: existingAdminError } = await supabaseAdmin.from("user_roles").select("id").eq("role", "admin").limit(1);
 	if (existingAdminError) throw new Error("Unable to verify admin roles");
 	return {
@@ -115,7 +115,7 @@ var promoteToAdmin_createServerFn_handler = createServerRpc({
 	filename: "src/lib/analytics.functions.ts"
 }, (opts) => promoteToAdmin.__executeServer(opts));
 var promoteToAdmin = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).handler(promoteToAdmin_createServerFn_handler, async ({ context }) => {
-	const { supabaseAdmin } = await import("./client.server-Bw6iWMJ-.mjs");
+	const { supabaseAdmin } = await import("./client.server-By2HwjZj.mjs");
 	const { data: existingAdmin, error: existingAdminError } = await supabaseAdmin.from("user_roles").select("id").eq("role", "admin").limit(1);
 	if (existingAdminError) throw new Error("Unable to verify admin roles");
 	if ((existingAdmin?.length ?? 0) > 0) return {
@@ -137,7 +137,7 @@ var getAdminStats_createServerFn_handler = createServerRpc({
 var getAdminStats = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(getAdminStats_createServerFn_handler, async ({ context }) => {
 	const { data: roleRow, error } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
 	if (error || !roleRow) throw new Error("Forbidden");
-	const { supabaseAdmin } = await import("./client.server-Bw6iWMJ-.mjs");
+	const { supabaseAdmin } = await import("./client.server-By2HwjZj.mjs");
 	const since24h = (/* @__PURE__ */ new Date(Date.now() - 24 * 36e5)).toISOString();
 	const since5m = (/* @__PURE__ */ new Date(Date.now() - 5 * 6e4)).toISOString();
 	const sinceToday = new Date((/* @__PURE__ */ new Date()).setHours(0, 0, 0, 0)).toISOString();
