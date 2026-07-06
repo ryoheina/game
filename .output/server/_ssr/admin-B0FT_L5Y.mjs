@@ -2,7 +2,7 @@ import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow } from "./fx-DmVqfUhc.mjs";
 import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-C5ucsgEF.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-B0FT_L5Y.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var ADMIN_PASSWORD = "20070925";
@@ -43,6 +43,14 @@ function Admin() {
 					});
 					return;
 				}
+				if (!res.ok) {
+					console.error("Dashboard API error:", res.status, res.statusText);
+					if (!mounted) return;
+					setSessions([]);
+					setDownloads([]);
+					setNotifications([]);
+					return;
+				}
 				const data = await res.json();
 				const list = data.sessions || [];
 				if (!mounted) return;
@@ -63,7 +71,11 @@ function Admin() {
 				}
 				lastSnapshotRef.current = snap;
 			} catch (e) {
-				console.error(e);
+				console.error("Dashboard poll error:", e);
+				if (!mounted) return;
+				setSessions([]);
+				setDownloads([]);
+				setNotifications([]);
 			}
 		}
 		poll();

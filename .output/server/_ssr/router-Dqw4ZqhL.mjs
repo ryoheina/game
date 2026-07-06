@@ -5,7 +5,7 @@ import { t as getClientMeta } from "./ua-VZAcffKf.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { createHmac } from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-CbpCV0oE.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-Dqw4ZqhL.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-Bls1oCnA.css";
@@ -248,7 +248,7 @@ var Route$6 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-C5ucsgEF.mjs");
+var $$splitComponentImporter = () => import("./admin-B0FT_L5Y.mjs");
 var Route$5 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
@@ -441,47 +441,100 @@ function computeStatus(lastActive) {
 	return Date.now() - last <= 12e4 ? "online" : "offline";
 }
 var Route = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET: async ({ request }) => {
-	if (!isAdminAuthorized(request)) return new Response(JSON.stringify({ error: "Unauthorized" }), {
-		status: 401,
-		headers: { "content-type": "application/json" }
-	});
-	const { supabaseAdmin } = await import("./client.server-Bw6iWMJ-.mjs");
-	const onlineThreshold = (/* @__PURE__ */ new Date(Date.now() - 12e4)).toISOString();
-	const [{ data: sessions }, { data: downloads }, { data: notifications }] = await Promise.all([
-		supabaseAdmin.from("sessions").select("*").order("last_active", { ascending: false }),
-		supabaseAdmin.from("downloads").select("*").order("started_at", { ascending: false }).limit(100),
-		supabaseAdmin.from("notifications").select("*").order("created_at", { ascending: false }).limit(50)
-	]);
-	const onlineSessions = (sessions || []).map((session) => ({
-		...session,
-		status: computeStatus(session.last_active),
-		last_active_time: session.last_active,
-		first_visit_time: session.first_visit
-	}));
-	const enhancedDownloads = (downloads || []).map((download) => ({
-		...download,
-		status: download.completed ? "completed" : "in_progress"
-	}));
-	const pendingOffline = (sessions || []).filter((session) => session.last_active < onlineThreshold && !session.notified_left);
-	if (pendingOffline.length) {
-		await supabaseAdmin.from("notifications").insert(pendingOffline.map((session) => ({
-			type: "visitor_left",
-			title: "Visitor Left",
-			body: `${session.ip ?? "unknown"} — ${session.device ?? session.os ?? "Unknown device"}`,
-			payload: { session_id: session.session_id }
-		})));
-		await supabaseAdmin.from("sessions").update({ notified_left: true }).in("session_id", pendingOffline.map((session) => session.session_id));
+	try {
+		if (!isAdminAuthorized(request)) return new Response(JSON.stringify({
+			error: "Unauthorized",
+			sessions: [],
+			downloads: [],
+			notifications: []
+		}), {
+			status: 401,
+			headers: { "content-type": "application/json" }
+		});
+	} catch (authError) {
+		console.error("Auth check error:", authError);
+		return new Response(JSON.stringify({
+			error: "Auth error",
+			sessions: [],
+			downloads: [],
+			notifications: []
+		}), {
+			status: 500,
+			headers: { "content-type": "application/json" }
+		});
 	}
-	const undeliveredNotifications = (notifications || []).filter((notification) => !notification.delivered);
-	if (undeliveredNotifications.length) await supabaseAdmin.from("notifications").update({ delivered: true }).in("id", undeliveredNotifications.map((notification) => notification.id));
-	return new Response(JSON.stringify({
-		sessions: onlineSessions,
-		downloads: enhancedDownloads,
-		notifications: undeliveredNotifications
-	}), {
-		status: 200,
-		headers: { "content-type": "application/json" }
-	});
+	const defaultResponse = {
+		sessions: [],
+		downloads: [],
+		notifications: []
+	};
+	try {
+		const { supabaseAdmin } = await import("./client.server-Bw6iWMJ-.mjs");
+		const onlineThreshold = (/* @__PURE__ */ new Date(Date.now() - 12e4)).toISOString();
+		let sessions = [];
+		let downloads = [];
+		let notifications = [];
+		try {
+			const res = await supabaseAdmin.from("sessions").select("*").order("last_active", { ascending: false });
+			if (res.data) sessions = res.data;
+		} catch (e) {
+			console.warn("Sessions query failed:", e instanceof Error ? e.message : e);
+		}
+		try {
+			const res = await supabaseAdmin.from("downloads").select("*").order("started_at", { ascending: false }).limit(100);
+			if (res.data) downloads = res.data;
+		} catch (e) {
+			console.warn("Downloads query failed:", e instanceof Error ? e.message : e);
+		}
+		try {
+			const res = await supabaseAdmin.from("notifications").select("*").order("created_at", { ascending: false }).limit(50);
+			if (res.data) notifications = res.data;
+		} catch (e) {
+			console.warn("Notifications query failed:", e instanceof Error ? e.message : e);
+		}
+		const onlineSessions = sessions.map((session) => ({
+			...session,
+			status: computeStatus(session.last_active),
+			last_active_time: session.last_active,
+			first_visit_time: session.first_visit
+		}));
+		const enhancedDownloads = downloads.map((download) => ({
+			...download,
+			status: download.completed ? "completed" : "in_progress"
+		}));
+		const pendingOffline = sessions.filter((session) => session.last_active < onlineThreshold && !session.notified_left);
+		if (pendingOffline.length > 0) try {
+			await supabaseAdmin.from("notifications").insert(pendingOffline.map((session) => ({
+				type: "visitor_left",
+				title: "Visitor Left",
+				body: `${session.ip ?? "unknown"} — ${session.device ?? session.os ?? "Unknown device"}`,
+				payload: { session_id: session.session_id }
+			})));
+			await supabaseAdmin.from("sessions").update({ notified_left: true }).in("session_id", pendingOffline.map((session) => session.session_id));
+		} catch (e) {
+			console.warn("Failed to update offline notifications:", e instanceof Error ? e.message : e);
+		}
+		const undeliveredNotifications = notifications.filter((notification) => !notification.delivered);
+		if (undeliveredNotifications.length > 0) try {
+			await supabaseAdmin.from("notifications").update({ delivered: true }).in("id", undeliveredNotifications.map((notification) => notification.id));
+		} catch (e) {
+			console.warn("Failed to mark notifications as delivered:", e instanceof Error ? e.message : e);
+		}
+		return new Response(JSON.stringify({
+			sessions: onlineSessions,
+			downloads: enhancedDownloads,
+			notifications: undeliveredNotifications
+		}), {
+			status: 200,
+			headers: { "content-type": "application/json" }
+		});
+	} catch (error) {
+		console.error("Dashboard error:", error instanceof Error ? error.message : error);
+		return new Response(JSON.stringify(defaultResponse), {
+			status: 200,
+			headers: { "content-type": "application/json" }
+		});
+	}
 } } } });
 var AuthRoute = Route$8.update({
 	id: "/auth",
