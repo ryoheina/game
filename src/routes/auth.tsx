@@ -1,9 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { MouseGlow, Particles } from "@/components/fx";
-import { supabase } from "@/integrations/supabase/client";
 
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL ?? "admin@legends-of-eternity.studio";
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? "20070925";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Studio Admin Access — Legends of Eternity" }] }),
@@ -18,12 +17,13 @@ function Auth() {
   const [info, setInfo] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/admin", replace: true });
-    });
+    const hasToken = window.localStorage.getItem("studio-admin-token") === ADMIN_PASSWORD;
+    if (hasToken) {
+      navigate({ to: "/admin", replace: true });
+    }
   }, [navigate]);
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     setErr(null);
@@ -33,30 +33,11 @@ function Auth() {
         throw new Error("Password is required.");
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: ADMIN_EMAIL,
-        password,
-      });
-
-      if (error) {
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: ADMIN_EMAIL,
-          password,
-        });
-
-        if (signUpError) {
-          throw signUpError;
-        }
-
-        if (!signUpData.session) {
-          const { error: signInError } = await supabase.auth.signInWithPassword({
-            email: ADMIN_EMAIL,
-            password,
-          });
-          if (signInError) throw signInError;
-        }
+      if (password !== ADMIN_PASSWORD) {
+        throw new Error("Invalid password.");
       }
 
+      window.localStorage.setItem("studio-admin-token", ADMIN_PASSWORD);
       navigate({ to: "/admin", replace: true });
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Unable to authenticate.");

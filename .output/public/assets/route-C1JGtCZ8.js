@@ -1,1 +1,0 @@
-import{C as e,y as t}from"./index-C_bZl-en.js";var n=e(),r=()=>(0,n.jsx)(t,{});export{r as component};

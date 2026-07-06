@@ -1,4 +1,4 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-CMEaRDtt.js
+//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-BBNeSrCy.js
 var tsrStartManifest = () => ({ routes: {
 	__root__: {
 		filePath: "E:/eternal-visions-studio-main/src/routes/__root.tsx",
@@ -8,41 +8,32 @@ var tsrStartManifest = () => ({ routes: {
 			"/auth",
 			"/api/public/download"
 		],
-		preloads: ["/assets/index-C_bZl-en.js"],
+		preloads: ["/assets/index-Bha8ja6L.js"],
 		scripts: [{ attrs: {
 			type: "module",
 			async: !0,
-			src: "/assets/index-C_bZl-en.js"
+			src: "/assets/index-Bha8ja6L.js"
 		} }]
 	},
 	"/": {
 		filePath: "E:/eternal-visions-studio-main/src/routes/index.tsx",
 		children: void 0,
-		preloads: [
-			"/assets/routes-CYfOfjyJ.js",
-			"/assets/analytics.functions-B1WZLWNJ.js",
-			"/assets/fx-B5RrAgGj.js"
-		]
+		preloads: ["/assets/routes-ClfZHkBH.js", "/assets/fx-D2_tL6XN.js"]
 	},
 	"/_authenticated": {
 		filePath: "E:/eternal-visions-studio-main/src/routes/_authenticated/route.tsx",
 		children: ["/_authenticated/admin"],
-		preloads: ["/assets/route-C1JGtCZ8.js"]
+		preloads: ["/assets/route-9SMfjxj0.js"]
 	},
 	"/auth": {
 		filePath: "E:/eternal-visions-studio-main/src/routes/auth.tsx",
 		children: void 0,
-		preloads: ["/assets/auth-CUKL_7YS.js", "/assets/fx-B5RrAgGj.js"]
+		preloads: ["/assets/auth-COAfbb8z.js", "/assets/fx-D2_tL6XN.js"]
 	},
 	"/_authenticated/admin": {
 		filePath: "E:/eternal-visions-studio-main/src/routes/_authenticated/admin.tsx",
 		children: void 0,
-		preloads: [
-			"/assets/admin-9YMjRrcL.js",
-			"/assets/analytics.functions-B1WZLWNJ.js",
-			"/assets/fx-B5RrAgGj.js",
-			"/assets/admin-Bb6gDb3m.js"
-		]
+		preloads: ["/assets/admin-CbDV2G5i.js", "/assets/fx-D2_tL6XN.js"]
 	}
 } });
 //#endregion
