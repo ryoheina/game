@@ -3,15 +3,15 @@ import { useState, useEffect } from "react";
 import { MouseGlow, Particles } from "@/components/fx";
 import { supabase } from "@/integrations/supabase/client";
 
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL ?? "admin@legends-of-eternity.studio";
+
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Admin Access — Legends of Eternity" }] }),
+  head: () => ({ meta: [{ title: "Studio Admin Access — Legends of Eternity" }] }),
   component: Auth,
 });
 
 function Auth() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -19,7 +19,7 @@ function Auth() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/me", replace: true });
+      if (data.session) navigate({ to: "/admin", replace: true });
     });
   }, [navigate]);
 
@@ -27,33 +27,37 @@ function Auth() {
     e.preventDefault();
     setBusy(true);
     setErr(null);
+    setInfo(null);
     try {
-      if (!email || !password) {
-        throw new Error("Email and password are required.");
+      if (!password) {
+        throw new Error("Password is required.");
       }
 
-      if (mode === "signin") {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        if (!data.session) {
-          throw new Error("Unable to sign in. Check your credentials and try again.");
-        }
-
-        navigate({ to: "/me", replace: true });
-        return;
-      }
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: ADMIN_EMAIL,
         password,
       });
-      if (error) throw error;
-      if (!data.session) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-        if (signInError) throw signInError;
+
+      if (error) {
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: ADMIN_EMAIL,
+          password,
+        });
+
+        if (signUpError) {
+          throw signUpError;
+        }
+
+        if (!signUpData.session) {
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: ADMIN_EMAIL,
+            password,
+          });
+          if (signInError) throw signInError;
+        }
       }
 
-      navigate({ to: "/", replace: true });
+      navigate({ to: "/admin", replace: true });
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Unable to authenticate.");
     } finally {
@@ -71,26 +75,16 @@ function Auth() {
           ← Back to site
         </Link>
         <h1 className="display text-3xl text-white">Studio Login</h1>
-        <p className="mt-2 text-sm text-white/60">Sign in with your studio account to access your studio dashboard.</p>
+        <p className="mt-2 text-sm text-white/60">Enter the admin password to access your studio dashboard.</p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-3">
           <input
-            type="email"
-            required
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none ring-1 ring-white/10 focus:ring-[color:var(--arcane)]"
-          />
-          <input
             type="password"
             required
-            autoComplete={mode === "signin" ? "current-password" : "new-password"}
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            minLength={8}
+            placeholder="Admin password"
             className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none ring-1 ring-white/10 focus:ring-[color:var(--arcane)]"
           />
           {err && <div className="text-sm text-[color:var(--ember)]">{err}</div>}
@@ -99,16 +93,12 @@ function Auth() {
             disabled={busy}
             className="w-full rounded-full bg-gradient-to-r from-[color:var(--arcane)] to-[color:var(--gold)] px-6 py-3 text-sm uppercase tracking-[0.25em] text-black transition hover:scale-[1.01] disabled:opacity-60"
           >
-            {busy ? "…" : mode === "signin" ? "Sign in" : "Create account"}
+            {busy ? "…" : "Enter"}
           </button>
         </form>
 
         <div className="mt-6 text-center text-xs text-white/50">
-          {mode === "signin" ? (
-            <>No account? <button onClick={() => setMode("signup")} className="text-white hover:underline">Create one</button></>
-          ) : (
-            <>Have an account? <button onClick={() => setMode("signin")} className="text-white hover:underline">Sign in</button></>
-          )}
+          <p>Enter your admin password to access the studio dashboard.</p>
         </div>
       </div>
     </div>

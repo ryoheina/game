@@ -4,7 +4,7 @@ import { A as redirect, _ as useRouter, c as HeadContent, d as Outlet, f as lazy
 import { t as supabase } from "./client-gykmVtt_.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import { t as getClientMeta } from "./ua-VZAcffKf.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-CV8dCA_L.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-D3MKQcb9.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-jki8sZh9.css";
@@ -209,9 +209,9 @@ function RootComponent() {
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,_#200a3b,_#05070d_40%,_#05070d_100%)]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Outlet, {})]
 	});
 }
-var $$splitComponentImporter$3 = () => import("./auth-BcNoErDh.mjs");
+var $$splitComponentImporter$3 = () => import("./auth-Cp6HLXSN.mjs");
 var Route$4 = createFileRoute("/auth")({
-	head: () => ({ meta: [{ title: "Admin Access — Legends of Eternity" }] }),
+	head: () => ({ meta: [{ title: "Studio Admin Access — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
 var $$splitComponentImporter$2 = () => import("./route-Di7iQBCH.mjs");

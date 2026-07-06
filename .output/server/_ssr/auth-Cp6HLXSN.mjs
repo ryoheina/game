@@ -3,13 +3,12 @@ import { i as require_react, r as require_jsx_runtime } from "../_libs/react+tan
 import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as supabase } from "./client-gykmVtt_.mjs";
 import { n as MouseGlow, r as Particles } from "./fx-DmVqfUhc.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/auth-BcNoErDh.js
+//#region node_modules/.nitro/vite/services/ssr/assets/auth-Cp6HLXSN.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
+var ADMIN_EMAIL = "admin@legends-of-eternity.studio";
 function Auth() {
 	const navigate = useNavigate();
-	const [mode, setMode] = (0, import_react.useState)("signin");
-	const [email, setEmail] = (0, import_react.useState)("");
 	const [password, setPassword] = (0, import_react.useState)("");
 	const [busy, setBusy] = (0, import_react.useState)(false);
 	const [err, setErr] = (0, import_react.useState)(null);
@@ -17,7 +16,7 @@ function Auth() {
 	(0, import_react.useEffect)(() => {
 		supabase.auth.getSession().then(({ data }) => {
 			if (data.session) navigate({
-				to: "/me",
+				to: "/admin",
 				replace: true
 			});
 		});
@@ -26,35 +25,29 @@ function Auth() {
 		e.preventDefault();
 		setBusy(true);
 		setErr(null);
+		setInfo(null);
 		try {
-			if (!email || !password) throw new Error("Email and password are required.");
-			if (mode === "signin") {
-				const { data, error } = await supabase.auth.signInWithPassword({
-					email,
-					password
-				});
-				if (error) throw error;
-				if (!data.session) throw new Error("Unable to sign in. Check your credentials and try again.");
-				navigate({
-					to: "/me",
-					replace: true
-				});
-				return;
-			}
-			const { data, error } = await supabase.auth.signUp({
-				email,
+			if (!password) throw new Error("Password is required.");
+			const { data, error } = await supabase.auth.signInWithPassword({
+				email: ADMIN_EMAIL,
 				password
 			});
-			if (error) throw error;
-			if (!data.session) {
-				const { error: signInError } = await supabase.auth.signInWithPassword({
-					email,
+			if (error) {
+				const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+					email: ADMIN_EMAIL,
 					password
 				});
-				if (signInError) throw signInError;
+				if (signUpError) throw signUpError;
+				if (!signUpData.session) {
+					const { error: signInError } = await supabase.auth.signInWithPassword({
+						email: ADMIN_EMAIL,
+						password
+					});
+					if (signInError) throw signInError;
+				}
 			}
 			navigate({
-				to: "/",
+				to: "/admin",
 				replace: true
 			});
 		} catch (e) {
@@ -86,29 +79,19 @@ function Auth() {
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 						className: "mt-2 text-sm text-white/60",
-						children: "Sign in with your studio account to access your studio dashboard."
+						children: "Enter the admin password to access your studio dashboard."
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 						onSubmit,
 						className: "mt-8 space-y-3",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-								type: "email",
-								required: true,
-								autoComplete: "email",
-								value: email,
-								onChange: (e) => setEmail(e.target.value),
-								placeholder: "Email",
-								className: "w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none ring-1 ring-white/10 focus:ring-[color:var(--arcane)]"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 								type: "password",
 								required: true,
-								autoComplete: mode === "signin" ? "current-password" : "new-password",
+								autoComplete: "current-password",
 								value: password,
 								onChange: (e) => setPassword(e.target.value),
-								placeholder: "Password",
-								minLength: 8,
+								placeholder: "Admin password",
 								className: "w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none ring-1 ring-white/10 focus:ring-[color:var(--arcane)]"
 							}),
 							err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -122,21 +105,13 @@ function Auth() {
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								disabled: busy,
 								className: "w-full rounded-full bg-gradient-to-r from-[color:var(--arcane)] to-[color:var(--gold)] px-6 py-3 text-sm uppercase tracking-[0.25em] text-black transition hover:scale-[1.01] disabled:opacity-60",
-								children: busy ? "…" : mode === "signin" ? "Sign in" : "Create account"
+								children: busy ? "…" : "Enter"
 							})
 						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "mt-6 text-center text-xs text-white/50",
-						children: mode === "signin" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["No account? ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: () => setMode("signup"),
-							className: "text-white hover:underline",
-							children: "Create one"
-						})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["Have an account? ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: () => setMode("signin"),
-							className: "text-white hover:underline",
-							children: "Sign in"
-						})] })
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Enter your admin password to access the studio dashboard." })
 					})
 				]
 			})
