@@ -5,7 +5,7 @@ import { t as getClientMeta } from "./ua-VZAcffKf.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { createHmac } from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-uQWyjCXi.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-CF0Xiz9J.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-Bls1oCnA.css";
@@ -225,7 +225,7 @@ var Route$7 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-Oc9Qpi2q.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-DopRQ8NQ.mjs");
 var Route$6 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -258,7 +258,7 @@ var Route$4 = createFileRoute("/api/public/mark-extracted")({ server: { handlers
 		const url = new URL(request.url);
 		const sid = url.searchParams.get("sid");
 		const fileName = url.searchParams.get("file");
-		const { supabaseAdmin } = await import("./client.server-By2HwjZj.mjs");
+		const { supabaseAdmin } = await import("./client.server-DAKDxF4H.mjs");
 		if (sid) {
 			const q = supabaseAdmin.from("downloads").update({ extracted: true }).eq("session_id", sid);
 			if (fileName) q.eq("file_name", fileName);
@@ -308,7 +308,7 @@ var Route$3 = createFileRoute("/api/public/download")({ server: { handlers: { GE
 	const fileName = url.searchParams.get("file") || "3D Game.rar";
 	let downloadId = null;
 	try {
-		const { supabaseAdmin } = await import("./client.server-By2HwjZj.mjs");
+		const { supabaseAdmin } = await import("./client.server-DAKDxF4H.mjs");
 		const now = (/* @__PURE__ */ new Date()).toISOString();
 		const { data: insertData, error: insertError } = await supabaseAdmin.from("downloads").insert({
 			file_name: fileName,
@@ -333,7 +333,7 @@ var Route$3 = createFileRoute("/api/public/download")({ server: { handlers: { GE
 		const data = await fs.readFile(path);
 		try {
 			if (downloadId) {
-				const { supabaseAdmin } = await import("./client.server-By2HwjZj.mjs");
+				const { supabaseAdmin } = await import("./client.server-DAKDxF4H.mjs");
 				await supabaseAdmin.from("downloads").update({
 					completed: true,
 					completed_at: (/* @__PURE__ */ new Date()).toISOString()
@@ -364,7 +364,7 @@ var Route$3 = createFileRoute("/api/public/download")({ server: { handlers: { GE
 		const body = buildPlaceholderRar();
 		try {
 			if (downloadId) {
-				const { supabaseAdmin } = await import("./client.server-By2HwjZj.mjs");
+				const { supabaseAdmin } = await import("./client.server-DAKDxF4H.mjs");
 				await supabaseAdmin.from("downloads").update({
 					completed: true,
 					completed_at: (/* @__PURE__ */ new Date()).toISOString()
@@ -440,138 +440,179 @@ function computeStatus(lastActive) {
 	if (Number.isNaN(last)) return "offline";
 	return Date.now() - last <= 12e4 ? "online" : "offline";
 }
-var errorResponse = (message, details) => ({
-	success: false,
-	error: message,
-	details: details || void 0,
-	sessions: [],
-	downloads: [],
-	notifications: []
-});
+var requiredEnvVars = [
+	"ADMIN_PASSWORD",
+	"SUPABASE_URL",
+	"SUPABASE_SERVICE_ROLE_KEY"
+];
+function logEnvStatus() {
+	const status = requiredEnvVars.map((name) => `${name}=${processModule.env[name] ? "set" : "missing"}`).join(", ");
+	console.log(`[Dashboard] Required env vars: ${status}`);
+}
+function createFailureResponse(message, step, error, details, table, column) {
+	return {
+		success: false,
+		message,
+		stack: error instanceof Error ? error.stack || String(error) : typeof error === "string" ? error : "unknown stack",
+		step,
+		details,
+		table,
+		column
+	};
+}
+function parsePostgresError(errorMessage) {
+	const tableMatch = /relation "([^"]+)" does not exist/.exec(errorMessage) || /table "([^"]+)" does not exist/.exec(errorMessage);
+	const columnMatch = /column "([^"]+)" does not exist/.exec(errorMessage);
+	return {
+		table: tableMatch?.[1],
+		column: columnMatch?.[1]
+	};
+}
+function extractErrorLocation(stack) {
+	if (!stack) return "unknown location";
+	const lines = stack.split("\n").slice(1);
+	const firstFrame = lines.find((line) => line.includes("src/")) || lines[0];
+	return firstFrame ? firstFrame.trim() : "unknown location";
+}
+async function verifyDatabaseConnectivity(supabaseAdmin) {
+	console.log("[Dashboard] Verifying database connectivity using sessions table...");
+	const res = await supabaseAdmin.from("sessions").select("session_id").limit(1);
+	if (res.error) {
+		const parsed = parsePostgresError(res.error.message);
+		console.error("[Dashboard] Database connectivity check failed:", res.error.message);
+		return {
+			ok: false,
+			error: res.error,
+			table: parsed.table,
+			column: parsed.column,
+			details: res.error.message
+		};
+	}
+	console.log("[Dashboard] Database connectivity verified");
+	return { ok: true };
+}
 var Route = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET: async ({ request }) => {
 	const responseHeaders = { "content-type": "application/json" };
+	logEnvStatus();
 	try {
-		if (!isAdminAuthorized(request)) {
-			console.warn("[Dashboard] Unauthorized access attempt");
-			return new Response(JSON.stringify(errorResponse("Unauthorized")), {
-				status: 401,
+		const missingEnv = requiredEnvVars.filter((name) => !processModule.env[name]);
+		if (missingEnv.length > 0) {
+			const message = `Missing required environment variables: ${missingEnv.join(", ")}`;
+			console.error("[Dashboard]", message);
+			return new Response(JSON.stringify(createFailureResponse(message, "validate_env", void 0, void 0, missingEnv.join(", "))), {
+				status: 200,
 				headers: responseHeaders
 			});
 		}
-	} catch (authError) {
-		const message = authError instanceof Error ? authError.message : String(authError);
-		console.error("[Dashboard] Auth check failed:", message);
-		return new Response(JSON.stringify(errorResponse("Authentication failed", message)), {
-			status: 500,
-			headers: responseHeaders
-		});
-	}
-	let supabaseAdmin;
-	try {
-		supabaseAdmin = (await import("./client.server-By2HwjZj.mjs")).supabaseAdmin;
-		if (!supabaseAdmin) throw new Error("Supabase admin client is undefined");
-	} catch (importError) {
-		const message = importError instanceof Error ? importError.message : String(importError);
-		console.error("[Dashboard] Failed to import Supabase client:", message);
-		return new Response(JSON.stringify(errorResponse("Database client unavailable", message)), {
-			status: 500,
-			headers: responseHeaders
-		});
-	}
-	let sessions = [];
-	let downloads = [];
-	let notifications = [];
-	const onlineThreshold = (/* @__PURE__ */ new Date(Date.now() - 12e4)).toISOString();
-	try {
-		console.log("[Dashboard] Fetching sessions...");
-		const res = await supabaseAdmin.from("sessions").select("*").order("last_active", { ascending: false });
-		if (res.error) console.warn("[Dashboard] Sessions query error:", res.error.message);
-		else if (res.data) {
-			sessions = res.data;
-			console.log(`[Dashboard] Fetched ${sessions.length} sessions`);
+		try {
+			if (!isAdminAuthorized(request)) {
+				console.warn("[Dashboard] Unauthorized access attempt");
+				return new Response(JSON.stringify(createFailureResponse("Unauthorized", "authorize", void 0, "Admin auth failed")), {
+					status: 401,
+					headers: responseHeaders
+				});
+			}
+		} catch (authError) {
+			const message = authError instanceof Error ? authError.message : String(authError);
+			const location = extractErrorLocation(authError instanceof Error ? authError.stack : void 0);
+			console.error("[Dashboard] Authorization failed:", message, location);
+			return new Response(JSON.stringify(createFailureResponse("Authentication failed", "authorize", authError, message)), {
+				status: 200,
+				headers: responseHeaders
+			});
 		}
-	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		console.error("[Dashboard] Sessions query exception:", message);
-	}
-	try {
-		console.log("[Dashboard] Fetching downloads...");
-		const res = await supabaseAdmin.from("downloads").select("*").order("started_at", { ascending: false }).limit(100);
-		if (res.error) console.warn("[Dashboard] Downloads query error:", res.error.message);
-		else if (res.data) {
-			downloads = res.data;
-			console.log(`[Dashboard] Fetched ${downloads.length} downloads`);
+		let supabaseAdmin;
+		try {
+			console.log("[Dashboard] Importing Supabase admin client");
+			supabaseAdmin = (await import("./client.server-DAKDxF4H.mjs")).supabaseAdmin;
+			if (!supabaseAdmin) throw new Error("Supabase admin client import returned undefined");
+		} catch (importError) {
+			const message = importError instanceof Error ? importError.message : String(importError);
+			const stack = importError instanceof Error ? importError.stack || message : String(importError);
+			console.error("[Dashboard] Supabase client import failed:", message, stack);
+			return new Response(JSON.stringify(createFailureResponse("Database client unavailable", "load_client", importError, message)), {
+				status: 200,
+				headers: responseHeaders
+			});
 		}
-	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		console.error("[Dashboard] Downloads query exception:", message);
-	}
-	try {
-		console.log("[Dashboard] Fetching notifications...");
-		const res = await supabaseAdmin.from("notifications").select("*").order("created_at", { ascending: false }).limit(50);
-		if (res.error) console.warn("[Dashboard] Notifications query error:", res.error.message);
-		else if (res.data) {
-			notifications = res.data;
-			console.log(`[Dashboard] Fetched ${notifications.length} notifications`);
+		const connectivity = await verifyDatabaseConnectivity(supabaseAdmin);
+		if (!connectivity.ok) {
+			const message = connectivity.details || "Database connectivity check failed";
+			return new Response(JSON.stringify(createFailureResponse(message, "database_connectivity", connectivity.error, connectivity.details, connectivity.table, connectivity.column)), {
+				status: 200,
+				headers: responseHeaders
+			});
 		}
-	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		console.error("[Dashboard] Notifications query exception:", message);
-	}
-	let onlineSessions = [];
-	try {
-		onlineSessions = sessions.map((session) => ({
+		console.log("[Dashboard] Executing sessions query");
+		const sessionsRes = await supabaseAdmin.from("sessions").select("*").order("last_active", { ascending: false });
+		if (sessionsRes.error) {
+			const parsed = parsePostgresError(sessionsRes.error.message);
+			console.error("[Dashboard] Sessions query failed:", sessionsRes.error.message);
+			return new Response(JSON.stringify(createFailureResponse("Sessions query failed", "query_sessions", sessionsRes.error, sessionsRes.error.message, parsed.table, parsed.column)), {
+				status: 200,
+				headers: responseHeaders
+			});
+		}
+		const sessions = sessionsRes.data ?? [];
+		console.log(`[Dashboard] Sessions fetched: ${sessions.length}`);
+		console.log("[Dashboard] Executing downloads query");
+		const downloadsRes = await supabaseAdmin.from("downloads").select("*").order("started_at", { ascending: false }).limit(100);
+		if (downloadsRes.error) {
+			const parsed = parsePostgresError(downloadsRes.error.message);
+			console.error("[Dashboard] Downloads query failed:", downloadsRes.error.message);
+			return new Response(JSON.stringify(createFailureResponse("Downloads query failed", "query_downloads", downloadsRes.error, downloadsRes.error.message, parsed.table, parsed.column)), {
+				status: 200,
+				headers: responseHeaders
+			});
+		}
+		const downloads = downloadsRes.data ?? [];
+		console.log(`[Dashboard] Downloads fetched: ${downloads.length}`);
+		console.log("[Dashboard] Executing notifications query");
+		const notificationsRes = await supabaseAdmin.from("notifications").select("*").order("created_at", { ascending: false }).limit(50);
+		if (notificationsRes.error) {
+			const parsed = parsePostgresError(notificationsRes.error.message);
+			console.error("[Dashboard] Notifications query failed:", notificationsRes.error.message);
+			return new Response(JSON.stringify(createFailureResponse("Notifications query failed", "query_notifications", notificationsRes.error, notificationsRes.error.message, parsed.table, parsed.column)), {
+				status: 200,
+				headers: responseHeaders
+			});
+		}
+		const notifications = notificationsRes.data ?? [];
+		console.log(`[Dashboard] Notifications fetched: ${notifications.length}`);
+		const onlineSessions = sessions.map((session) => ({
 			...session,
 			status: computeStatus(session.last_active),
 			last_active_time: session.last_active,
 			first_visit_time: session.first_visit
 		}));
-		console.log(`[Dashboard] Processed ${onlineSessions.length} sessions with status`);
-	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		console.error("[Dashboard] Session processing error:", message);
-		onlineSessions = sessions;
-	}
-	let enhancedDownloads = [];
-	try {
-		enhancedDownloads = downloads.map((download) => ({
+		const enhancedDownloads = downloads.map((download) => ({
 			...download,
 			status: download.completed ? "completed" : "in_progress"
 		}));
-		console.log(`[Dashboard] Processed ${enhancedDownloads.length} downloads with status`);
-	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		console.error("[Dashboard] Download processing error:", message);
-		enhancedDownloads = downloads;
-	}
-	try {
-		const pendingOffline = sessions.filter((session) => session.last_active < onlineThreshold && !session.notified_left);
-		if (pendingOffline.length > 0) {
-			console.log(`[Dashboard] Creating notifications for ${pendingOffline.length} offline visitors`);
-			await supabaseAdmin.from("notifications").insert(pendingOffline.map((session) => ({
-				type: "visitor_left",
-				title: "Visitor Left",
-				body: `${session.ip ?? "unknown"} — ${session.device ?? session.os ?? "Unknown device"}`,
-				payload: { session_id: session.session_id }
-			})));
-			await supabaseAdmin.from("sessions").update({ notified_left: true }).in("session_id", pendingOffline.map((session) => session.session_id));
+		const undeliveredNotifications = notifications.filter((notification) => !notification.delivered);
+		try {
+			const pendingOffline = sessions.filter((session) => session.last_active < (/* @__PURE__ */ new Date(Date.now() - 12e4)).toISOString() && !session.notified_left);
+			if (pendingOffline.length > 0) {
+				console.log(`[Dashboard] Creating ${pendingOffline.length} offline notification(s)`);
+				await supabaseAdmin.from("notifications").insert(pendingOffline.map((session) => ({
+					type: "visitor_left",
+					title: "Visitor Left",
+					body: `${session.ip ?? "unknown"} — ${session.device ?? session.os ?? "Unknown device"}`,
+					payload: { session_id: session.session_id }
+				})));
+				await supabaseAdmin.from("sessions").update({ notified_left: true }).in("session_id", pendingOffline.map((session) => session.session_id));
+			}
+		} catch (backgroundError) {
+			console.warn("[Dashboard] Background update failed:", backgroundError instanceof Error ? backgroundError.message : String(backgroundError));
 		}
-	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		console.warn("[Dashboard] Failed to update offline notifications:", message);
-	}
-	let undeliveredNotifications = [];
-	try {
-		undeliveredNotifications = notifications.filter((notification) => !notification.delivered);
-		if (undeliveredNotifications.length > 0) {
-			console.log(`[Dashboard] Marking ${undeliveredNotifications.length} notifications as delivered`);
-			await supabaseAdmin.from("notifications").update({ delivered: true }).in("id", undeliveredNotifications.map((notification) => notification.id));
+		try {
+			if (undeliveredNotifications.length > 0) {
+				console.log(`[Dashboard] Marking ${undeliveredNotifications.length} notification(s) as delivered`);
+				await supabaseAdmin.from("notifications").update({ delivered: true }).in("id", undeliveredNotifications.map((notification) => notification.id));
+			}
+		} catch (deliveryError) {
+			console.warn("[Dashboard] Notification delivery update failed:", deliveryError instanceof Error ? deliveryError.message : String(deliveryError));
 		}
-	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		console.warn("[Dashboard] Failed to mark notifications as delivered:", message);
-	}
-	try {
 		const response = {
 			success: true,
 			sessions: onlineSessions,
@@ -584,15 +625,17 @@ var Route = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET:
 				pending_notifications: undeliveredNotifications.length
 			}
 		};
-		console.log("[Dashboard] Response built successfully");
+		console.log("[Dashboard] Dashboard handler completed successfully");
 		return new Response(JSON.stringify(response), {
 			status: 200,
 			headers: responseHeaders
 		});
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
-		console.error("[Dashboard] Response building failed:", message);
-		return new Response(JSON.stringify(errorResponse("Failed to build response", message)), {
+		const stack = error instanceof Error ? error.stack || message : String(error);
+		const location = extractErrorLocation(error instanceof Error ? error.stack : void 0);
+		console.error("[Dashboard] Unhandled exception:", message, location, stack);
+		return new Response(JSON.stringify(createFailureResponse(message, "unhandled_exception", error, `Unhandled exception at ${location}`)), {
 			status: 200,
 			headers: responseHeaders
 		});

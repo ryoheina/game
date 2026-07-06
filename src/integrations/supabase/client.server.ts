@@ -10,7 +10,11 @@ function isNewSupabaseApiKey(value: string): boolean {
 }
 
 function createSupabaseFetch(supabaseKey: string): typeof fetch {
-  return (input, init) => {
+  return async (input, init) => {
+    const url = typeof input === 'string' ? input : input.url;
+    const method = init?.method ?? (typeof input !== 'string' && input.method ? input.method : 'GET');
+    console.log(`[Supabase] External request: ${method} ${url}`);
+
     const headers = new Headers(
       typeof Request !== 'undefined' && input instanceof Request ? input.headers : undefined,
     );
