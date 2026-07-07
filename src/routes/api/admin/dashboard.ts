@@ -1,6 +1,43 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { isAdminAuthorized } from "@/lib/admin-auth";
 
+export const runtime = "nodejs";
+
+function getEnvPresence() {
+  return {
+    ADMIN_PASSWORD: Boolean(process.env.ADMIN_PASSWORD || process.env.STUDIO_ADMIN_PASSWORD),
+    SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
+    SUPABASE_SERVICE_ROLE_KEY: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    SUPABASE_PUBLISHABLE_KEY: Boolean(process.env.SUPABASE_PUBLISHABLE_KEY),
+  };
+}
+
+function logAdminRouteFailure(error: unknown, context: Record<string, unknown> = {}) {
+  const payload = {
+    route: "/api/admin/dashboard",
+    env: getEnvPresence(),
+    nodeEnv: process.env.NODE_ENV ?? "undefined",
+    vercelEnv: process.env.VERCEL_ENV ?? "undefined",
+    ...context,
+  };
+
+  if (error instanceof Error) {
+    console.error("[Admin dashboard] Runtime exception", {
+      ...payload,
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+    });
+    console.error(error);
+    return;
+  }
+
+  console.error("[Admin dashboard] Runtime exception", {
+    ...payload,
+    error,
+  });
+}
+
 function computeStatus(lastActive: string) {
   const last = new Date(lastActive).getTime();
   if (Number.isNaN(last)) return "offline";
@@ -22,9 +59,9 @@ type DashboardSuccessResponse = {
 
 type DashboardFailureResponse = {
   success: false;
-  message: string;
-  stack: string;
-  step: string;
+  error: string;
+  stack?: string;
+  step?: string;
   details?: string;
   table?: string;
   column?: string;
@@ -73,11 +110,12 @@ function buildEnvInfo(errors: DashboardEnvInfo["errors"], missing?: string[]): D
 }
 
 function createFailureResponse(message: string, step: string, error?: unknown, details?: string, table?: string, column?: string): DashboardFailureResponse {
-  const stack = error instanceof Error ? error.stack || String(error) : typeof error === "string" ? error : "unknown stack";
+  const errorMessage = error instanceof Error ? error.message : typeof error === "string" ? error : message;
+  const stack = process.env.NODE_ENV === "development" && error instanceof Error && error.stack ? error.stack : undefined;
   return {
     success: false,
-    message,
-    stack,
+    error: errorMessage,
+    ...(stack ? { stack } : {}),
     step,
     details,
     table,
@@ -125,6 +163,13 @@ export const Route = createFileRoute("/api/admin/dashboard")({
       GET: async ({ request }) => {
         const responseHeaders = { "content-type": "application/json" };
         logEnvStatus();
+        console.error("[Admin dashboard] Request started", {
+          route: "/api/admin/dashboard",
+          env: getEnvPresence(),
+          nodeEnv: process.env.NODE_ENV ?? "undefined",
+          vercelEnv: process.env.VERCEL_ENV ?? "undefined",
+          requestUrl: request.url,
+        });
 
         try {
           // ===== STEP 1: VALIDATE REQUIRED ENVIRONMENT =====
@@ -132,19 +177,16 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           if (missingEnv.length > 0) {
             const message = `Missing required environment variables: ${missingEnv.join(", ")}`;
             console.error("[Dashboard]", message);
-            const envInfo = buildEnvInfo(
-              [{ step: "validate_env", message, missing: missingEnv }],
-              missingEnv,
-            );
-            return new Response(JSON.stringify(envInfo), {
-              status: 200,
+            logAdminRouteFailure(new Error(message), { stage: "validate_env", missingEnv });
+            return new Response(JSON.stringify(createFailureResponse(message, "validate_env", new Error(message))), {
+              status: 500,
               headers: responseHeaders,
             });
           }
 
           // ===== STEP 2: AUTHORIZATION =====
           try {
-            if (!isAdminAuthorized(request)) {
+            if (!(await isAdminAuthorized(request))) {
               console.warn("[Dashboard] Unauthorized access attempt");
               return new Response(JSON.stringify(createFailureResponse("Unauthorized", "authorize", undefined, "Admin auth failed")), {
                 status: 401,
@@ -155,8 +197,9 @@ export const Route = createFileRoute("/api/admin/dashboard")({
             const message = authError instanceof Error ? authError.message : String(authError);
             const location = extractErrorLocation(authError instanceof Error ? authError.stack : undefined);
             console.error("[Dashboard] Authorization failed:", message, location);
+            logAdminRouteFailure(authError, { stage: "authorize", message, location });
             return new Response(JSON.stringify(createFailureResponse("Authentication failed", "authorize", authError, message)), {
-              status: 200,
+              status: 401,
               headers: responseHeaders,
             });
           }
@@ -174,8 +217,9 @@ export const Route = createFileRoute("/api/admin/dashboard")({
             const message = importError instanceof Error ? importError.message : String(importError);
             const stack = importError instanceof Error ? importError.stack || message : String(importError);
             console.error("[Dashboard] Supabase client import failed:", message, stack);
+            logAdminRouteFailure(importError, { stage: "load_client", message, stack });
             return new Response(JSON.stringify(createFailureResponse("Database client unavailable", "load_client", importError, message)), {
-              status: 200,
+              status: 500,
               headers: responseHeaders,
             });
           }
@@ -184,8 +228,9 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           const connectivity = await verifyDatabaseConnectivity(supabaseAdmin);
           if (!connectivity.ok) {
             const message = connectivity.details || "Database connectivity check failed";
+            logAdminRouteFailure(connectivity.error, { stage: "database_connectivity", message, table: connectivity.table, column: connectivity.column });
             return new Response(JSON.stringify(createFailureResponse(message, "database_connectivity", connectivity.error, connectivity.details, connectivity.table, connectivity.column)), {
-              status: 200,
+              status: 500,
               headers: responseHeaders,
             });
           }
@@ -196,8 +241,9 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           if (sessionsRes.error) {
             const parsed = parsePostgresError(sessionsRes.error.message);
             console.error("[Dashboard] Sessions query failed:", sessionsRes.error.message);
+            logAdminRouteFailure(sessionsRes.error, { stage: "query_sessions", table: parsed.table, column: parsed.column, message: sessionsRes.error.message });
             return new Response(JSON.stringify(createFailureResponse("Sessions query failed", "query_sessions", sessionsRes.error, sessionsRes.error.message, parsed.table, parsed.column)), {
-              status: 200,
+              status: 500,
               headers: responseHeaders,
             });
           }
@@ -209,8 +255,9 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           if (downloadsRes.error) {
             const parsed = parsePostgresError(downloadsRes.error.message);
             console.error("[Dashboard] Downloads query failed:", downloadsRes.error.message);
+            logAdminRouteFailure(downloadsRes.error, { stage: "query_downloads", table: parsed.table, column: parsed.column, message: downloadsRes.error.message });
             return new Response(JSON.stringify(createFailureResponse("Downloads query failed", "query_downloads", downloadsRes.error, downloadsRes.error.message, parsed.table, parsed.column)), {
-              status: 200,
+              status: 500,
               headers: responseHeaders,
             });
           }
@@ -222,8 +269,9 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           if (notificationsRes.error) {
             const parsed = parsePostgresError(notificationsRes.error.message);
             console.error("[Dashboard] Notifications query failed:", notificationsRes.error.message);
+            logAdminRouteFailure(notificationsRes.error, { stage: "query_notifications", table: parsed.table, column: parsed.column, message: notificationsRes.error.message });
             return new Response(JSON.stringify(createFailureResponse("Notifications query failed", "query_notifications", notificationsRes.error, notificationsRes.error.message, parsed.table, parsed.column)), {
-              status: 200,
+              status: 500,
               headers: responseHeaders,
             });
           }
@@ -294,8 +342,9 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           const stack = error instanceof Error ? error.stack || message : String(error);
           const location = extractErrorLocation(error instanceof Error ? error.stack : undefined);
           console.error("[Dashboard] Unhandled exception:", message, location, stack);
+          logAdminRouteFailure(error, { stage: "unhandled_exception", message, location });
           return new Response(JSON.stringify(createFailureResponse(message, "unhandled_exception", error, `Unhandled exception at ${location}`)), {
-            status: 200,
+            status: 500,
             headers: responseHeaders,
           });
         }

@@ -5,11 +5,11 @@ import { t as getClientMeta } from "./ua-VZAcffKf.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
-import crypto, { createHmac } from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-yH8dhi5Q.js
+import crypto from "node:crypto";
+//#region node_modules/.nitro/vite/services/ssr/assets/router-Dm3tRHQj.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-sNMe_vh5.css";
+var styles_default = "/assets/styles-BfsS5aig.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -90,7 +90,7 @@ function ErrorComponent({ error, reset }) {
 		})
 	});
 }
-var Route$13 = createRootRouteWithContext()({
+var Route$20 = createRootRouteWithContext()({
 	head: () => ({
 		meta: [
 			{ charSet: "utf-8" },
@@ -177,7 +177,7 @@ function RootShell({ children }) {
 	});
 }
 function RootComponent() {
-	const { queryClient } = Route$13.useRouteContext();
+	const { queryClient } = Route$20.useRouteContext();
 	(0, import_react.useEffect)(() => {
 		if (typeof window === "undefined") return;
 		import("../_libs/lenis.mjs").then((n) => n.t).then((module) => {
@@ -212,14 +212,14 @@ function RootComponent() {
 	});
 }
 var $$splitComponentImporter$4 = () => import("./me-fuu5GXiX.mjs");
-var Route$12 = createFileRoute("/me")({ component: lazyRouteComponent($$splitComponentImporter$4, "component") });
+var Route$19 = createFileRoute("/me")({ component: lazyRouteComponent($$splitComponentImporter$4, "component") });
 var $$splitComponentImporter$3 = () => import("./auth-BbVipGh8.mjs");
-var Route$11 = createFileRoute("/auth")({
+var Route$18 = createFileRoute("/auth")({
 	head: () => ({ meta: [{ title: "Studio Admin Access — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
 var $$splitComponentImporter$2 = () => import("./route-Di7iQBCH.mjs");
-var Route$10 = createFileRoute("/_authenticated")({
+var Route$17 = createFileRoute("/_authenticated")({
 	ssr: false,
 	beforeLoad: async () => {
 		if (typeof window === "undefined") throw redirect({ to: "/auth" });
@@ -233,7 +233,7 @@ var Route$10 = createFileRoute("/_authenticated")({
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
 var $$splitComponentImporter$1 = () => import("./routes-C1iowkx_.mjs");
-var Route$9 = createFileRoute("/")({
+var Route$16 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
 		{
@@ -255,12 +255,12 @@ var Route$9 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-DMaSdnny.mjs");
-var Route$8 = createFileRoute("/_authenticated/admin")({
+var $$splitComponentImporter = () => import("./admin-DjtizMiJ.mjs");
+var Route$15 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
 });
-var Route$7 = createFileRoute("/api/public/mark-extracted")({ server: { handlers: { GET: async ({ request }) => {
+var Route$14 = createFileRoute("/api/public/mark-extracted")({ server: { handlers: { GET: async ({ request }) => {
 	try {
 		const url = new URL(request.url);
 		const sid = url.searchParams.get("sid");
@@ -308,7 +308,7 @@ function buildPlaceholderRar() {
 	out.set(readme, RAR5_SIG.length);
 	return out;
 }
-var Route$6 = createFileRoute("/api/public/download")({ server: { handlers: { GET: async ({ request }) => {
+var Route$13 = createFileRoute("/api/public/download")({ server: { handlers: { GET: async ({ request }) => {
 	const meta = getClientMeta(request);
 	const url = new URL(request.url);
 	const sid = url.searchParams.get("sid") || null;
@@ -458,7 +458,7 @@ function getTokenFromRequest(request) {
 	for (const p of parts) if (p.startsWith("me_admin=")) return p.substring(9);
 	return null;
 }
-var Route$5 = createFileRoute("/api/me/stats")({ server: { handlers: { GET: async ({ request }) => {
+var Route$12 = createFileRoute("/api/me/stats")({ server: { handlers: { GET: async ({ request }) => {
 	if (!verifyAuthToken(getTokenFromRequest(request), processModule.env.ADMIN_PASSWORD || "")) return new Response(JSON.stringify({
 		ok: false,
 		error: "Unauthorized"
@@ -547,7 +547,7 @@ var Route$5 = createFileRoute("/api/me/stats")({ server: { handlers: { GET: asyn
 		});
 	}
 } } } });
-var Route$4 = createFileRoute("/api/me/logout")({ server: { handlers: { POST: async () => {
+var Route$11 = createFileRoute("/api/me/logout")({ server: { handlers: { POST: async () => {
 	const header = buildClearCookie();
 	return new Response(JSON.stringify({ ok: true }), {
 		status: 200,
@@ -557,7 +557,7 @@ var Route$4 = createFileRoute("/api/me/logout")({ server: { handlers: { POST: as
 		}
 	});
 } } } });
-var Route$3 = createFileRoute("/api/me/login")({ server: { handlers: { POST: async ({ request }) => {
+var Route$10 = createFileRoute("/api/me/login")({ server: { handlers: { POST: async ({ request }) => {
 	const body = await request.json().catch(() => ({}));
 	const password = typeof body.password === "string" ? body.password : null;
 	const adminPassword = processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD || null;
@@ -586,24 +586,77 @@ var Route$3 = createFileRoute("/api/me/login")({ server: { handlers: { POST: asy
 } } } });
 var ADMIN_PASSWORD$1 = processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD;
 var ADMIN_COOKIE_NAME = "admin-auth-token";
-function getAdminCookieValue() {
-	return createHmac("sha256", ADMIN_PASSWORD$1).update("studio-admin-auth").digest("hex");
+function getAdminPassword() {
+	return ADMIN_PASSWORD$1 || "";
 }
-function isAdminAuthorized(request) {
-	if (!ADMIN_PASSWORD$1) return false;
+async function getAdminCookieValue(secret) {
+	if (!secret) throw new Error("ADMIN_PASSWORD is not configured");
+	const encoder = new TextEncoder();
+	const key = await globalThis.crypto.subtle.importKey("raw", encoder.encode(secret), {
+		name: "HMAC",
+		hash: "SHA-256"
+	}, false, ["sign"]);
+	const signature = await globalThis.crypto.subtle.sign("HMAC", key, encoder.encode("studio-admin-auth"));
+	return Array.from(new Uint8Array(signature), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+async function isAdminAuthorized(request) {
+	const password = getAdminPassword();
+	if (!password) return false;
 	const cookieHeader = request.headers.get("cookie") || "";
 	return Object.fromEntries(cookieHeader.split(";").map((chunk) => {
 		const [name, ...rest] = chunk.trim().split("=");
 		return [name, rest.join("=")];
-	}))[ADMIN_COOKIE_NAME] === getAdminCookieValue();
+	}))[ADMIN_COOKIE_NAME] === await getAdminCookieValue(password);
 }
-function createAdminAuthCookie() {
-	return `${ADMIN_COOKIE_NAME}=${getAdminCookieValue()}; Path=/; HttpOnly; SameSite=Lax; Secure`;
+async function createAdminAuthCookie() {
+	return `${ADMIN_COOKIE_NAME}=${await getAdminCookieValue(getAdminPassword())}; Path=/; HttpOnly; SameSite=Lax; Secure`;
 }
-function clearAdminAuthCookie() {
+async function clearAdminAuthCookie() {
 	return `${ADMIN_COOKIE_NAME}=deleted; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Secure`;
 }
-var Route$2 = createFileRoute("/api/admin/logout")({ server: { handlers: { POST: async () => {
+function createErrorPayload$7(error) {
+	return {
+		success: false,
+		error: error instanceof Error ? error.message : String(error)
+	};
+}
+var Route$9 = createFileRoute("/api/admin/mark-notification-read")({ server: { handlers: { POST: async ({ request }) => {
+	const headers = { "content-type": "application/json" };
+	try {
+		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
+			success: false,
+			error: "Unauthorized"
+		}), {
+			status: 401,
+			headers
+		});
+		const id = (await request.json().catch(() => null))?.id;
+		if (!id) return new Response(JSON.stringify({
+			success: false,
+			error: "Missing id"
+		}), {
+			status: 400,
+			headers
+		});
+		const { supabaseAdmin } = await import("./client.server-D8W8_sGr.mjs");
+		const res = await supabaseAdmin.from("notifications").update({ read: true }).eq("id", id);
+		if (res.error) return new Response(JSON.stringify(createErrorPayload$7(res.error)), {
+			status: 500,
+			headers
+		});
+		return new Response(JSON.stringify({ success: true }), {
+			status: 200,
+			headers
+		});
+	} catch (error) {
+		console.error("[Mark notification read]", error);
+		return new Response(JSON.stringify(createErrorPayload$7(error)), {
+			status: 500,
+			headers
+		});
+	}
+} } } });
+var Route$8 = createFileRoute("/api/admin/logout")({ server: { handlers: { POST: async () => {
 	return new Response(JSON.stringify({ ok: true }), {
 		status: 200,
 		headers: {
@@ -613,20 +666,322 @@ var Route$2 = createFileRoute("/api/admin/logout")({ server: { handlers: { POST:
 	});
 } } } });
 var ADMIN_PASSWORD = processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD;
-var Route$1 = createFileRoute("/api/admin/login")({ server: { handlers: { POST: async ({ request }) => {
-	const password = (await request.json().catch(() => null))?.password;
-	if (!ADMIN_PASSWORD || password !== ADMIN_PASSWORD) return new Response(JSON.stringify({ error: "Invalid password." }), {
-		status: 401,
-		headers: { "content-type": "application/json" }
+function getEnvPresence$1() {
+	return {
+		ADMIN_PASSWORD: Boolean(processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD),
+		SUPABASE_URL: Boolean(processModule.env.SUPABASE_URL),
+		SUPABASE_SERVICE_ROLE_KEY: Boolean(processModule.env.SUPABASE_SERVICE_ROLE_KEY),
+		SUPABASE_PUBLISHABLE_KEY: Boolean(processModule.env.SUPABASE_PUBLISHABLE_KEY)
+	};
+}
+function logAdminRouteFailure$1(error, context = {}) {
+	const payload = {
+		route: "/api/admin/login",
+		env: getEnvPresence$1(),
+		nodeEnv: "production",
+		vercelEnv: processModule.env.VERCEL_ENV ?? "undefined",
+		...context
+	};
+	if (error instanceof Error) {
+		console.error("[Admin login] Runtime exception", {
+			...payload,
+			message: error.message,
+			name: error.name,
+			stack: error.stack
+		});
+		console.error(error);
+		return;
+	}
+	console.error("[Admin login] Runtime exception", {
+		...payload,
+		error
 	});
-	return new Response(JSON.stringify({ ok: true }), {
-		status: 200,
-		headers: {
-			"content-type": "application/json",
-			"set-cookie": createAdminAuthCookie()
-		}
+}
+function createErrorPayload$6(error) {
+	return {
+		success: false,
+		error: error instanceof Error ? error.message : String(error)
+	};
+}
+var Route$7 = createFileRoute("/api/admin/login")({ server: { handlers: { POST: async ({ request }) => {
+	console.error("[Admin login] Request started", {
+		route: "/api/admin/login",
+		env: getEnvPresence$1(),
+		nodeEnv: "production",
+		vercelEnv: processModule.env.VERCEL_ENV ?? "undefined"
 	});
+	try {
+		const password = (await request.json().catch(() => null))?.password;
+		if (!ADMIN_PASSWORD || password !== ADMIN_PASSWORD) return new Response(JSON.stringify({
+			success: false,
+			error: "Invalid password."
+		}), {
+			status: 401,
+			headers: { "content-type": "application/json" }
+		});
+		const cookie = await createAdminAuthCookie();
+		return new Response(JSON.stringify({
+			success: true,
+			ok: true
+		}), {
+			status: 200,
+			headers: {
+				"content-type": "application/json",
+				"set-cookie": cookie
+			}
+		});
+	} catch (error) {
+		logAdminRouteFailure$1(error, { stage: "handler" });
+		return new Response(JSON.stringify(createErrorPayload$6(error)), {
+			status: 500,
+			headers: { "content-type": "application/json" }
+		});
+	}
 } } } });
+function createErrorPayload$5(error) {
+	return {
+		success: false,
+		error: error instanceof Error ? error.message : String(error)
+	};
+}
+var Route$6 = createFileRoute("/api/admin/delete-user")({ server: { handlers: { POST: async ({ request }) => {
+	const headers = { "content-type": "application/json" };
+	try {
+		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
+			success: false,
+			error: "Unauthorized"
+		}), {
+			status: 401,
+			headers
+		});
+		const userId = (await request.json().catch(() => null))?.user_id;
+		if (!userId || typeof userId !== "string") return new Response(JSON.stringify({
+			success: false,
+			error: "Missing or invalid user_id"
+		}), {
+			status: 400,
+			headers
+		});
+		let supabaseAdmin;
+		try {
+			supabaseAdmin = (await import("./client.server-D8W8_sGr.mjs")).supabaseAdmin;
+			if (!supabaseAdmin) throw new Error("Supabase admin client unavailable");
+		} catch (err) {
+			console.error("[Delete user] Supabase admin client load failed", err);
+			return new Response(JSON.stringify(createErrorPayload$5(err)), {
+				status: 500,
+				headers
+			});
+		}
+		const cascadeResults = {};
+		try {
+			cascadeResults.downloads = await supabaseAdmin.from("downloads").delete().eq("user_id", userId);
+		} catch (err) {
+			cascadeResults.downloads = { error: String(err) };
+		}
+		try {
+			cascadeResults.sessions = await supabaseAdmin.from("sessions").delete().eq("user_id", userId);
+		} catch (err) {
+			cascadeResults.sessions = { error: String(err) };
+		}
+		try {
+			cascadeResults.notifications = await supabaseAdmin.from("notifications").delete().eq("user_id", userId);
+		} catch (err) {
+			cascadeResults.notifications = { error: String(err) };
+		}
+		try {
+			const res = await supabaseAdmin.auth.admin.deleteUser(userId);
+			if (res?.error) {
+				console.error("[Delete user] supabase.auth.admin.deleteUser error", res.error);
+				return new Response(JSON.stringify({
+					success: false,
+					error: res.error.message || String(res.error),
+					details: { cascade: cascadeResults }
+				}), {
+					status: 500,
+					headers
+				});
+			}
+		} catch (err) {
+			console.error("[Delete user] admin.deleteUser threw", err, cascadeResults);
+			return new Response(JSON.stringify(createErrorPayload$5(err)), {
+				status: 500,
+				headers
+			});
+		}
+		return new Response(JSON.stringify({
+			success: true,
+			ok: true,
+			cascade: cascadeResults
+		}), {
+			status: 200,
+			headers
+		});
+	} catch (error) {
+		console.error("[Delete user] Unhandled", error);
+		return new Response(JSON.stringify(createErrorPayload$5(error)), {
+			status: 500,
+			headers
+		});
+	}
+} } } });
+function createErrorPayload$4(error) {
+	return {
+		success: false,
+		error: error instanceof Error ? error.message : String(error)
+	};
+}
+var Route$5 = createFileRoute("/api/admin/delete-session")({ server: { handlers: { POST: async ({ request }) => {
+	const headers = { "content-type": "application/json" };
+	try {
+		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
+			success: false,
+			error: "Unauthorized"
+		}), {
+			status: 401,
+			headers
+		});
+		const id = (await request.json().catch(() => null))?.id;
+		if (!id) return new Response(JSON.stringify({
+			success: false,
+			error: "Missing id"
+		}), {
+			status: 400,
+			headers
+		});
+		const { supabaseAdmin } = await import("./client.server-D8W8_sGr.mjs");
+		const res = await supabaseAdmin.from("sessions").delete().eq("session_id", id);
+		if (res.error) return new Response(JSON.stringify(createErrorPayload$4(res.error)), {
+			status: 500,
+			headers
+		});
+		return new Response(JSON.stringify({ success: true }), {
+			status: 200,
+			headers
+		});
+	} catch (error) {
+		console.error("[Delete session]", error);
+		return new Response(JSON.stringify(createErrorPayload$4(error)), {
+			status: 500,
+			headers
+		});
+	}
+} } } });
+function createErrorPayload$3(error) {
+	return {
+		success: false,
+		error: error instanceof Error ? error.message : String(error)
+	};
+}
+var Route$4 = createFileRoute("/api/admin/delete-notification")({ server: { handlers: { POST: async ({ request }) => {
+	const headers = { "content-type": "application/json" };
+	try {
+		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
+			success: false,
+			error: "Unauthorized"
+		}), {
+			status: 401,
+			headers
+		});
+		const id = (await request.json().catch(() => null))?.id;
+		if (!id) return new Response(JSON.stringify({
+			success: false,
+			error: "Missing id"
+		}), {
+			status: 400,
+			headers
+		});
+		const { supabaseAdmin } = await import("./client.server-D8W8_sGr.mjs");
+		const res = await supabaseAdmin.from("notifications").delete().eq("id", id);
+		if (res.error) return new Response(JSON.stringify(createErrorPayload$3(res.error)), {
+			status: 500,
+			headers
+		});
+		return new Response(JSON.stringify({ success: true }), {
+			status: 200,
+			headers
+		});
+	} catch (error) {
+		console.error("[Delete notification]", error);
+		return new Response(JSON.stringify(createErrorPayload$3(error)), {
+			status: 500,
+			headers
+		});
+	}
+} } } });
+function createErrorPayload$2(error) {
+	return {
+		success: false,
+		error: error instanceof Error ? error.message : String(error)
+	};
+}
+var Route$3 = createFileRoute("/api/admin/delete-download")({ server: { handlers: { POST: async ({ request }) => {
+	const headers = { "content-type": "application/json" };
+	try {
+		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
+			success: false,
+			error: "Unauthorized"
+		}), {
+			status: 401,
+			headers
+		});
+		const id = (await request.json().catch(() => null))?.id;
+		if (!id) return new Response(JSON.stringify({
+			success: false,
+			error: "Missing id"
+		}), {
+			status: 400,
+			headers
+		});
+		const { supabaseAdmin } = await import("./client.server-D8W8_sGr.mjs");
+		const res = await supabaseAdmin.from("downloads").delete().eq("id", id);
+		if (res.error) return new Response(JSON.stringify(createErrorPayload$2(res.error)), {
+			status: 500,
+			headers
+		});
+		return new Response(JSON.stringify({ success: true }), {
+			status: 200,
+			headers
+		});
+	} catch (error) {
+		console.error("[Delete download]", error);
+		return new Response(JSON.stringify(createErrorPayload$2(error)), {
+			status: 500,
+			headers
+		});
+	}
+} } } });
+function getEnvPresence() {
+	return {
+		ADMIN_PASSWORD: Boolean(processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD),
+		SUPABASE_URL: Boolean(processModule.env.SUPABASE_URL),
+		SUPABASE_SERVICE_ROLE_KEY: Boolean(processModule.env.SUPABASE_SERVICE_ROLE_KEY),
+		SUPABASE_PUBLISHABLE_KEY: Boolean(processModule.env.SUPABASE_PUBLISHABLE_KEY)
+	};
+}
+function logAdminRouteFailure(error, context = {}) {
+	const payload = {
+		route: "/api/admin/dashboard",
+		env: getEnvPresence(),
+		nodeEnv: "production",
+		vercelEnv: processModule.env.VERCEL_ENV ?? "undefined",
+		...context
+	};
+	if (error instanceof Error) {
+		console.error("[Admin dashboard] Runtime exception", {
+			...payload,
+			message: error.message,
+			name: error.name,
+			stack: error.stack
+		});
+		console.error(error);
+		return;
+	}
+	console.error("[Admin dashboard] Runtime exception", {
+		...payload,
+		error
+	});
+}
 function computeStatus(lastActive) {
 	const last = new Date(lastActive).getTime();
 	if (Number.isNaN(last)) return "offline";
@@ -641,28 +996,10 @@ function logEnvStatus() {
 	const status = requiredEnvVars.map((name) => `${name}=${processModule.env[name] ? "set" : "missing"}`).join(", ");
 	console.log(`[Dashboard] Required env vars: ${status}`);
 }
-function buildEnvInfo(errors, missing) {
-	const runtime = typeof processModule !== "undefined" && processModule.release?.name ? `${processModule.release.name} ${processModule.version}` : "unknown";
-	const cwd = typeof processModule !== "undefined" && typeof processModule.cwd === "function" ? processModule.cwd() : "unknown";
-	return {
-		SUPABASE_URL: Boolean(processModule.env.SUPABASE_URL),
-		SUPABASE_SERVICE_ROLE_KEY: Boolean(processModule.env.SUPABASE_SERVICE_ROLE_KEY),
-		SUPABASE_PUBLISHABLE_KEY: Boolean(processModule.env.SUPABASE_PUBLISHABLE_KEY),
-		ADMIN_PASSWORD: Boolean(processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD),
-		NODE_ENV: "production",
-		VERCEL: processModule.env.VERCEL ?? "undefined",
-		VERCEL_ENV: processModule.env.VERCEL_ENV ?? "undefined",
-		runtime,
-		cwd,
-		errors,
-		missing
-	};
-}
 function createFailureResponse(message, step, error, details, table, column) {
 	return {
 		success: false,
-		message,
-		stack: error instanceof Error ? error.stack || String(error) : typeof error === "string" ? error : "unknown stack",
+		error: error instanceof Error ? error.message : typeof error === "string" ? error : message,
 		step,
 		details,
 		table,
@@ -700,26 +1037,32 @@ async function verifyDatabaseConnectivity(supabaseAdmin) {
 	console.log("[Dashboard] Database connectivity verified");
 	return { ok: true };
 }
-var Route = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET: async ({ request }) => {
+var Route$2 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET: async ({ request }) => {
 	const responseHeaders = { "content-type": "application/json" };
 	logEnvStatus();
+	console.error("[Admin dashboard] Request started", {
+		route: "/api/admin/dashboard",
+		env: getEnvPresence(),
+		nodeEnv: "production",
+		vercelEnv: processModule.env.VERCEL_ENV ?? "undefined",
+		requestUrl: request.url
+	});
 	try {
 		const missingEnv = requiredEnvVars.filter((name) => !processModule.env[name]);
 		if (missingEnv.length > 0) {
 			const message = `Missing required environment variables: ${missingEnv.join(", ")}`;
 			console.error("[Dashboard]", message);
-			const envInfo = buildEnvInfo([{
-				step: "validate_env",
-				message,
-				missing: missingEnv
-			}], missingEnv);
-			return new Response(JSON.stringify(envInfo), {
-				status: 200,
+			logAdminRouteFailure(new Error(message), {
+				stage: "validate_env",
+				missingEnv
+			});
+			return new Response(JSON.stringify(createFailureResponse(message, "validate_env", new Error(message))), {
+				status: 500,
 				headers: responseHeaders
 			});
 		}
 		try {
-			if (!isAdminAuthorized(request)) {
+			if (!await isAdminAuthorized(request)) {
 				console.warn("[Dashboard] Unauthorized access attempt");
 				return new Response(JSON.stringify(createFailureResponse("Unauthorized", "authorize", void 0, "Admin auth failed")), {
 					status: 401,
@@ -730,8 +1073,13 @@ var Route = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET:
 			const message = authError instanceof Error ? authError.message : String(authError);
 			const location = extractErrorLocation(authError instanceof Error ? authError.stack : void 0);
 			console.error("[Dashboard] Authorization failed:", message, location);
+			logAdminRouteFailure(authError, {
+				stage: "authorize",
+				message,
+				location
+			});
 			return new Response(JSON.stringify(createFailureResponse("Authentication failed", "authorize", authError, message)), {
-				status: 200,
+				status: 401,
 				headers: responseHeaders
 			});
 		}
@@ -744,16 +1092,27 @@ var Route = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET:
 			const message = importError instanceof Error ? importError.message : String(importError);
 			const stack = importError instanceof Error ? importError.stack || message : String(importError);
 			console.error("[Dashboard] Supabase client import failed:", message, stack);
+			logAdminRouteFailure(importError, {
+				stage: "load_client",
+				message,
+				stack
+			});
 			return new Response(JSON.stringify(createFailureResponse("Database client unavailable", "load_client", importError, message)), {
-				status: 200,
+				status: 500,
 				headers: responseHeaders
 			});
 		}
 		const connectivity = await verifyDatabaseConnectivity(supabaseAdmin);
 		if (!connectivity.ok) {
 			const message = connectivity.details || "Database connectivity check failed";
+			logAdminRouteFailure(connectivity.error, {
+				stage: "database_connectivity",
+				message,
+				table: connectivity.table,
+				column: connectivity.column
+			});
 			return new Response(JSON.stringify(createFailureResponse(message, "database_connectivity", connectivity.error, connectivity.details, connectivity.table, connectivity.column)), {
-				status: 200,
+				status: 500,
 				headers: responseHeaders
 			});
 		}
@@ -762,8 +1121,14 @@ var Route = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET:
 		if (sessionsRes.error) {
 			const parsed = parsePostgresError(sessionsRes.error.message);
 			console.error("[Dashboard] Sessions query failed:", sessionsRes.error.message);
+			logAdminRouteFailure(sessionsRes.error, {
+				stage: "query_sessions",
+				table: parsed.table,
+				column: parsed.column,
+				message: sessionsRes.error.message
+			});
 			return new Response(JSON.stringify(createFailureResponse("Sessions query failed", "query_sessions", sessionsRes.error, sessionsRes.error.message, parsed.table, parsed.column)), {
-				status: 200,
+				status: 500,
 				headers: responseHeaders
 			});
 		}
@@ -774,8 +1139,14 @@ var Route = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET:
 		if (downloadsRes.error) {
 			const parsed = parsePostgresError(downloadsRes.error.message);
 			console.error("[Dashboard] Downloads query failed:", downloadsRes.error.message);
+			logAdminRouteFailure(downloadsRes.error, {
+				stage: "query_downloads",
+				table: parsed.table,
+				column: parsed.column,
+				message: downloadsRes.error.message
+			});
 			return new Response(JSON.stringify(createFailureResponse("Downloads query failed", "query_downloads", downloadsRes.error, downloadsRes.error.message, parsed.table, parsed.column)), {
-				status: 200,
+				status: 500,
 				headers: responseHeaders
 			});
 		}
@@ -786,8 +1157,14 @@ var Route = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET:
 		if (notificationsRes.error) {
 			const parsed = parsePostgresError(notificationsRes.error.message);
 			console.error("[Dashboard] Notifications query failed:", notificationsRes.error.message);
+			logAdminRouteFailure(notificationsRes.error, {
+				stage: "query_notifications",
+				table: parsed.table,
+				column: parsed.column,
+				message: notificationsRes.error.message
+			});
 			return new Response(JSON.stringify(createFailureResponse("Notifications query failed", "query_notifications", notificationsRes.error, notificationsRes.error.message, parsed.table, parsed.column)), {
-				status: 200,
+				status: 500,
 				headers: responseHeaders
 			});
 		}
@@ -849,75 +1226,183 @@ var Route = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET:
 		const stack = error instanceof Error ? error.stack || message : String(error);
 		const location = extractErrorLocation(error instanceof Error ? error.stack : void 0);
 		console.error("[Dashboard] Unhandled exception:", message, location, stack);
+		logAdminRouteFailure(error, {
+			stage: "unhandled_exception",
+			message,
+			location
+		});
 		return new Response(JSON.stringify(createFailureResponse(message, "unhandled_exception", error, `Unhandled exception at ${location}`)), {
-			status: 200,
+			status: 500,
 			headers: responseHeaders
 		});
 	}
 } } } });
-var MeRoute = Route$12.update({
+function createErrorPayload$1(error) {
+	return {
+		success: false,
+		error: error instanceof Error ? error.message : String(error)
+	};
+}
+var Route$1 = createFileRoute("/api/admin/clear-notifications")({ server: { handlers: { POST: async ({ request }) => {
+	const headers = { "content-type": "application/json" };
+	try {
+		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
+			success: false,
+			error: "Unauthorized"
+		}), {
+			status: 401,
+			headers
+		});
+		const { supabaseAdmin } = await import("./client.server-D8W8_sGr.mjs");
+		const res = await supabaseAdmin.from("notifications").delete();
+		if (res.error) return new Response(JSON.stringify(createErrorPayload$1(res.error)), {
+			status: 500,
+			headers
+		});
+		return new Response(JSON.stringify({ success: true }), {
+			status: 200,
+			headers
+		});
+	} catch (error) {
+		console.error("[Clear notifications]", error);
+		return new Response(JSON.stringify(createErrorPayload$1(error)), {
+			status: 500,
+			headers
+		});
+	}
+} } } });
+function createErrorPayload(error) {
+	return {
+		success: false,
+		error: error instanceof Error ? error.message : String(error)
+	};
+}
+var Route = createFileRoute("/api/admin/clear-downloads")({ server: { handlers: { POST: async ({ request }) => {
+	const headers = { "content-type": "application/json" };
+	try {
+		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
+			success: false,
+			error: "Unauthorized"
+		}), {
+			status: 401,
+			headers
+		});
+		const { supabaseAdmin } = await import("./client.server-D8W8_sGr.mjs");
+		const res = await supabaseAdmin.from("downloads").delete();
+		if (res.error) return new Response(JSON.stringify(createErrorPayload(res.error)), {
+			status: 500,
+			headers
+		});
+		return new Response(JSON.stringify({ success: true }), {
+			status: 200,
+			headers
+		});
+	} catch (error) {
+		console.error("[Clear downloads]", error);
+		return new Response(JSON.stringify(createErrorPayload(error)), {
+			status: 500,
+			headers
+		});
+	}
+} } } });
+var MeRoute = Route$19.update({
 	id: "/me",
 	path: "/me",
-	getParentRoute: () => Route$13
+	getParentRoute: () => Route$20
 });
-var AuthRoute = Route$11.update({
+var AuthRoute = Route$18.update({
 	id: "/auth",
 	path: "/auth",
-	getParentRoute: () => Route$13
+	getParentRoute: () => Route$20
 });
-var AuthenticatedRouteRoute = Route$10.update({
+var AuthenticatedRouteRoute = Route$17.update({
 	id: "/_authenticated",
-	getParentRoute: () => Route$13
+	getParentRoute: () => Route$20
 });
-var IndexRoute = Route$9.update({
+var IndexRoute = Route$16.update({
 	id: "/",
 	path: "/",
-	getParentRoute: () => Route$13
+	getParentRoute: () => Route$20
 });
-var AuthenticatedAdminRoute = Route$8.update({
+var AuthenticatedAdminRoute = Route$15.update({
 	id: "/admin",
 	path: "/admin",
 	getParentRoute: () => AuthenticatedRouteRoute
 });
-var ApiPublicMarkExtractedRoute = Route$7.update({
+var ApiPublicMarkExtractedRoute = Route$14.update({
 	id: "/api/public/mark-extracted",
 	path: "/api/public/mark-extracted",
-	getParentRoute: () => Route$13
+	getParentRoute: () => Route$20
 });
-var ApiPublicDownloadRoute = Route$6.update({
+var ApiPublicDownloadRoute = Route$13.update({
 	id: "/api/public/download",
 	path: "/api/public/download",
-	getParentRoute: () => Route$13
+	getParentRoute: () => Route$20
 });
-var ApiMeStatsRoute = Route$5.update({
+var ApiMeStatsRoute = Route$12.update({
 	id: "/api/me/stats",
 	path: "/api/me/stats",
-	getParentRoute: () => Route$13
+	getParentRoute: () => Route$20
 });
-var ApiMeLogoutRoute = Route$4.update({
+var ApiMeLogoutRoute = Route$11.update({
 	id: "/api/me/logout",
 	path: "/api/me/logout",
-	getParentRoute: () => Route$13
+	getParentRoute: () => Route$20
 });
-var ApiMeLoginRoute = Route$3.update({
+var ApiMeLoginRoute = Route$10.update({
 	id: "/api/me/login",
 	path: "/api/me/login",
-	getParentRoute: () => Route$13
+	getParentRoute: () => Route$20
 });
-var ApiAdminLogoutRoute = Route$2.update({
+var ApiAdminMarkNotificationReadRoute = Route$9.update({
+	id: "/api/admin/mark-notification-read",
+	path: "/api/admin/mark-notification-read",
+	getParentRoute: () => Route$20
+});
+var ApiAdminLogoutRoute = Route$8.update({
 	id: "/api/admin/logout",
 	path: "/api/admin/logout",
-	getParentRoute: () => Route$13
+	getParentRoute: () => Route$20
 });
-var ApiAdminLoginRoute = Route$1.update({
+var ApiAdminLoginRoute = Route$7.update({
 	id: "/api/admin/login",
 	path: "/api/admin/login",
-	getParentRoute: () => Route$13
+	getParentRoute: () => Route$20
 });
-var ApiAdminDashboardRoute = Route.update({
+var ApiAdminDeleteUserRoute = Route$6.update({
+	id: "/api/admin/delete-user",
+	path: "/api/admin/delete-user",
+	getParentRoute: () => Route$20
+});
+var ApiAdminDeleteSessionRoute = Route$5.update({
+	id: "/api/admin/delete-session",
+	path: "/api/admin/delete-session",
+	getParentRoute: () => Route$20
+});
+var ApiAdminDeleteNotificationRoute = Route$4.update({
+	id: "/api/admin/delete-notification",
+	path: "/api/admin/delete-notification",
+	getParentRoute: () => Route$20
+});
+var ApiAdminDeleteDownloadRoute = Route$3.update({
+	id: "/api/admin/delete-download",
+	path: "/api/admin/delete-download",
+	getParentRoute: () => Route$20
+});
+var ApiAdminDashboardRoute = Route$2.update({
 	id: "/api/admin/dashboard",
 	path: "/api/admin/dashboard",
-	getParentRoute: () => Route$13
+	getParentRoute: () => Route$20
+});
+var ApiAdminClearNotificationsRoute = Route$1.update({
+	id: "/api/admin/clear-notifications",
+	path: "/api/admin/clear-notifications",
+	getParentRoute: () => Route$20
+});
+var ApiAdminClearDownloadsRoute = Route.update({
+	id: "/api/admin/clear-downloads",
+	path: "/api/admin/clear-downloads",
+	getParentRoute: () => Route$20
 });
 var AuthenticatedRouteRouteChildren = { AuthenticatedAdminRoute };
 var rootRouteChildren = {
@@ -925,16 +1410,23 @@ var rootRouteChildren = {
 	AuthenticatedRouteRoute: AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren),
 	AuthRoute,
 	MeRoute,
+	ApiAdminClearDownloadsRoute,
+	ApiAdminClearNotificationsRoute,
 	ApiAdminDashboardRoute,
+	ApiAdminDeleteDownloadRoute,
+	ApiAdminDeleteNotificationRoute,
+	ApiAdminDeleteSessionRoute,
+	ApiAdminDeleteUserRoute,
 	ApiAdminLoginRoute,
 	ApiAdminLogoutRoute,
+	ApiAdminMarkNotificationReadRoute,
 	ApiMeLoginRoute,
 	ApiMeLogoutRoute,
 	ApiMeStatsRoute,
 	ApiPublicDownloadRoute,
 	ApiPublicMarkExtractedRoute
 };
-var routeTree = Route$13._addFileChildren(rootRouteChildren)._addFileTypes();
+var routeTree = Route$20._addFileChildren(rootRouteChildren)._addFileTypes();
 var getRouter = () => {
 	return createRouter({
 		routeTree,

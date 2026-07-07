@@ -19,9 +19,17 @@ import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/downl
 import { Route as ApiMeStatsRouteImport } from './routes/api/me/stats'
 import { Route as ApiMeLogoutRouteImport } from './routes/api/me/logout'
 import { Route as ApiMeLoginRouteImport } from './routes/api/me/login'
+import { Route as ApiAdminMarkNotificationReadRouteImport } from './routes/api/admin/mark-notification-read'
 import { Route as ApiAdminLogoutRouteImport } from './routes/api/admin/logout'
 import { Route as ApiAdminLoginRouteImport } from './routes/api/admin/login'
+import { Route as ApiAdminLogNotificationRouteImport } from './routes/api/admin/log-notification'
+import { Route as ApiAdminDeleteUserRouteImport } from './routes/api/admin/delete-user'
+import { Route as ApiAdminDeleteSessionRouteImport } from './routes/api/admin/delete-session'
+import { Route as ApiAdminDeleteNotificationRouteImport } from './routes/api/admin/delete-notification'
+import { Route as ApiAdminDeleteDownloadRouteImport } from './routes/api/admin/delete-download'
 import { Route as ApiAdminDashboardRouteImport } from './routes/api/admin/dashboard'
+import { Route as ApiAdminClearNotificationsRouteImport } from './routes/api/admin/clear-notifications'
+import { Route as ApiAdminClearDownloadsRouteImport } from './routes/api/admin/clear-downloads'
 
 const MeRoute = MeRouteImport.update({
   id: '/me',
@@ -72,6 +80,12 @@ const ApiMeLoginRoute = ApiMeLoginRouteImport.update({
   path: '/api/me/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminMarkNotificationReadRoute =
+  ApiAdminMarkNotificationReadRouteImport.update({
+    id: '/api/admin/mark-notification-read',
+    path: '/api/admin/mark-notification-read',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAdminLogoutRoute = ApiAdminLogoutRouteImport.update({
   id: '/api/admin/logout',
   path: '/api/admin/logout',
@@ -82,9 +96,46 @@ const ApiAdminLoginRoute = ApiAdminLoginRouteImport.update({
   path: '/api/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminLogNotificationRoute = ApiAdminLogNotificationRouteImport.update({
+  id: '/api/admin/log-notification',
+  path: '/api/admin/log-notification',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminDeleteUserRoute = ApiAdminDeleteUserRouteImport.update({
+  id: '/api/admin/delete-user',
+  path: '/api/admin/delete-user',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminDeleteSessionRoute = ApiAdminDeleteSessionRouteImport.update({
+  id: '/api/admin/delete-session',
+  path: '/api/admin/delete-session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminDeleteNotificationRoute =
+  ApiAdminDeleteNotificationRouteImport.update({
+    id: '/api/admin/delete-notification',
+    path: '/api/admin/delete-notification',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAdminDeleteDownloadRoute = ApiAdminDeleteDownloadRouteImport.update({
+  id: '/api/admin/delete-download',
+  path: '/api/admin/delete-download',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminDashboardRoute = ApiAdminDashboardRouteImport.update({
   id: '/api/admin/dashboard',
   path: '/api/admin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminClearNotificationsRoute =
+  ApiAdminClearNotificationsRouteImport.update({
+    id: '/api/admin/clear-notifications',
+    path: '/api/admin/clear-notifications',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAdminClearDownloadsRoute = ApiAdminClearDownloadsRouteImport.update({
+  id: '/api/admin/clear-downloads',
+  path: '/api/admin/clear-downloads',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -93,9 +144,17 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/me': typeof MeRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/api/admin/clear-downloads': typeof ApiAdminClearDownloadsRoute
+  '/api/admin/clear-notifications': typeof ApiAdminClearNotificationsRoute
   '/api/admin/dashboard': typeof ApiAdminDashboardRoute
+  '/api/admin/delete-download': typeof ApiAdminDeleteDownloadRoute
+  '/api/admin/delete-notification': typeof ApiAdminDeleteNotificationRoute
+  '/api/admin/delete-session': typeof ApiAdminDeleteSessionRoute
+  '/api/admin/delete-user': typeof ApiAdminDeleteUserRoute
+  '/api/admin/log-notification': typeof ApiAdminLogNotificationRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/mark-notification-read': typeof ApiAdminMarkNotificationReadRoute
   '/api/me/login': typeof ApiMeLoginRoute
   '/api/me/logout': typeof ApiMeLogoutRoute
   '/api/me/stats': typeof ApiMeStatsRoute
@@ -107,9 +166,17 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/me': typeof MeRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/api/admin/clear-downloads': typeof ApiAdminClearDownloadsRoute
+  '/api/admin/clear-notifications': typeof ApiAdminClearNotificationsRoute
   '/api/admin/dashboard': typeof ApiAdminDashboardRoute
+  '/api/admin/delete-download': typeof ApiAdminDeleteDownloadRoute
+  '/api/admin/delete-notification': typeof ApiAdminDeleteNotificationRoute
+  '/api/admin/delete-session': typeof ApiAdminDeleteSessionRoute
+  '/api/admin/delete-user': typeof ApiAdminDeleteUserRoute
+  '/api/admin/log-notification': typeof ApiAdminLogNotificationRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/mark-notification-read': typeof ApiAdminMarkNotificationReadRoute
   '/api/me/login': typeof ApiMeLoginRoute
   '/api/me/logout': typeof ApiMeLogoutRoute
   '/api/me/stats': typeof ApiMeStatsRoute
@@ -123,9 +190,17 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/me': typeof MeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/api/admin/clear-downloads': typeof ApiAdminClearDownloadsRoute
+  '/api/admin/clear-notifications': typeof ApiAdminClearNotificationsRoute
   '/api/admin/dashboard': typeof ApiAdminDashboardRoute
+  '/api/admin/delete-download': typeof ApiAdminDeleteDownloadRoute
+  '/api/admin/delete-notification': typeof ApiAdminDeleteNotificationRoute
+  '/api/admin/delete-session': typeof ApiAdminDeleteSessionRoute
+  '/api/admin/delete-user': typeof ApiAdminDeleteUserRoute
+  '/api/admin/log-notification': typeof ApiAdminLogNotificationRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/mark-notification-read': typeof ApiAdminMarkNotificationReadRoute
   '/api/me/login': typeof ApiMeLoginRoute
   '/api/me/logout': typeof ApiMeLogoutRoute
   '/api/me/stats': typeof ApiMeStatsRoute
@@ -139,9 +214,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/me'
     | '/admin'
+    | '/api/admin/clear-downloads'
+    | '/api/admin/clear-notifications'
     | '/api/admin/dashboard'
+    | '/api/admin/delete-download'
+    | '/api/admin/delete-notification'
+    | '/api/admin/delete-session'
+    | '/api/admin/delete-user'
+    | '/api/admin/log-notification'
     | '/api/admin/login'
     | '/api/admin/logout'
+    | '/api/admin/mark-notification-read'
     | '/api/me/login'
     | '/api/me/logout'
     | '/api/me/stats'
@@ -153,9 +236,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/me'
     | '/admin'
+    | '/api/admin/clear-downloads'
+    | '/api/admin/clear-notifications'
     | '/api/admin/dashboard'
+    | '/api/admin/delete-download'
+    | '/api/admin/delete-notification'
+    | '/api/admin/delete-session'
+    | '/api/admin/delete-user'
+    | '/api/admin/log-notification'
     | '/api/admin/login'
     | '/api/admin/logout'
+    | '/api/admin/mark-notification-read'
     | '/api/me/login'
     | '/api/me/logout'
     | '/api/me/stats'
@@ -168,9 +259,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/me'
     | '/_authenticated/admin'
+    | '/api/admin/clear-downloads'
+    | '/api/admin/clear-notifications'
     | '/api/admin/dashboard'
+    | '/api/admin/delete-download'
+    | '/api/admin/delete-notification'
+    | '/api/admin/delete-session'
+    | '/api/admin/delete-user'
+    | '/api/admin/log-notification'
     | '/api/admin/login'
     | '/api/admin/logout'
+    | '/api/admin/mark-notification-read'
     | '/api/me/login'
     | '/api/me/logout'
     | '/api/me/stats'
@@ -183,9 +282,17 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   MeRoute: typeof MeRoute
+  ApiAdminClearDownloadsRoute: typeof ApiAdminClearDownloadsRoute
+  ApiAdminClearNotificationsRoute: typeof ApiAdminClearNotificationsRoute
   ApiAdminDashboardRoute: typeof ApiAdminDashboardRoute
+  ApiAdminDeleteDownloadRoute: typeof ApiAdminDeleteDownloadRoute
+  ApiAdminDeleteNotificationRoute: typeof ApiAdminDeleteNotificationRoute
+  ApiAdminDeleteSessionRoute: typeof ApiAdminDeleteSessionRoute
+  ApiAdminDeleteUserRoute: typeof ApiAdminDeleteUserRoute
+  ApiAdminLogNotificationRoute: typeof ApiAdminLogNotificationRoute
   ApiAdminLoginRoute: typeof ApiAdminLoginRoute
   ApiAdminLogoutRoute: typeof ApiAdminLogoutRoute
+  ApiAdminMarkNotificationReadRoute: typeof ApiAdminMarkNotificationReadRoute
   ApiMeLoginRoute: typeof ApiMeLoginRoute
   ApiMeLogoutRoute: typeof ApiMeLogoutRoute
   ApiMeStatsRoute: typeof ApiMeStatsRoute
@@ -265,6 +372,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMeLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/mark-notification-read': {
+      id: '/api/admin/mark-notification-read'
+      path: '/api/admin/mark-notification-read'
+      fullPath: '/api/admin/mark-notification-read'
+      preLoaderRoute: typeof ApiAdminMarkNotificationReadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/logout': {
       id: '/api/admin/logout'
       path: '/api/admin/logout'
@@ -279,11 +393,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/log-notification': {
+      id: '/api/admin/log-notification'
+      path: '/api/admin/log-notification'
+      fullPath: '/api/admin/log-notification'
+      preLoaderRoute: typeof ApiAdminLogNotificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/delete-user': {
+      id: '/api/admin/delete-user'
+      path: '/api/admin/delete-user'
+      fullPath: '/api/admin/delete-user'
+      preLoaderRoute: typeof ApiAdminDeleteUserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/delete-session': {
+      id: '/api/admin/delete-session'
+      path: '/api/admin/delete-session'
+      fullPath: '/api/admin/delete-session'
+      preLoaderRoute: typeof ApiAdminDeleteSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/delete-notification': {
+      id: '/api/admin/delete-notification'
+      path: '/api/admin/delete-notification'
+      fullPath: '/api/admin/delete-notification'
+      preLoaderRoute: typeof ApiAdminDeleteNotificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/delete-download': {
+      id: '/api/admin/delete-download'
+      path: '/api/admin/delete-download'
+      fullPath: '/api/admin/delete-download'
+      preLoaderRoute: typeof ApiAdminDeleteDownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/dashboard': {
       id: '/api/admin/dashboard'
       path: '/api/admin/dashboard'
       fullPath: '/api/admin/dashboard'
       preLoaderRoute: typeof ApiAdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/clear-notifications': {
+      id: '/api/admin/clear-notifications'
+      path: '/api/admin/clear-notifications'
+      fullPath: '/api/admin/clear-notifications'
+      preLoaderRoute: typeof ApiAdminClearNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/clear-downloads': {
+      id: '/api/admin/clear-downloads'
+      path: '/api/admin/clear-downloads'
+      fullPath: '/api/admin/clear-downloads'
+      preLoaderRoute: typeof ApiAdminClearDownloadsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -305,9 +468,17 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   MeRoute: MeRoute,
+  ApiAdminClearDownloadsRoute: ApiAdminClearDownloadsRoute,
+  ApiAdminClearNotificationsRoute: ApiAdminClearNotificationsRoute,
   ApiAdminDashboardRoute: ApiAdminDashboardRoute,
+  ApiAdminDeleteDownloadRoute: ApiAdminDeleteDownloadRoute,
+  ApiAdminDeleteNotificationRoute: ApiAdminDeleteNotificationRoute,
+  ApiAdminDeleteSessionRoute: ApiAdminDeleteSessionRoute,
+  ApiAdminDeleteUserRoute: ApiAdminDeleteUserRoute,
+  ApiAdminLogNotificationRoute: ApiAdminLogNotificationRoute,
   ApiAdminLoginRoute: ApiAdminLoginRoute,
   ApiAdminLogoutRoute: ApiAdminLogoutRoute,
+  ApiAdminMarkNotificationReadRoute: ApiAdminMarkNotificationReadRoute,
   ApiMeLoginRoute: ApiMeLoginRoute,
   ApiMeLogoutRoute: ApiMeLogoutRoute,
   ApiMeStatsRoute: ApiMeStatsRoute,

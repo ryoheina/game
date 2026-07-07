@@ -1,4 +1,4 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-D3DtXemY.js
+//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-CPneV2CE.js
 var tsrStartManifest = () => ({ routes: {
 	__root__: {
 		filePath: "E:/game/src/routes/__root.tsx",
@@ -7,36 +7,43 @@ var tsrStartManifest = () => ({ routes: {
 			"/_authenticated",
 			"/auth",
 			"/me",
+			"/api/admin/clear-downloads",
+			"/api/admin/clear-notifications",
 			"/api/admin/dashboard",
+			"/api/admin/delete-download",
+			"/api/admin/delete-notification",
+			"/api/admin/delete-session",
+			"/api/admin/delete-user",
 			"/api/admin/login",
 			"/api/admin/logout",
+			"/api/admin/mark-notification-read",
 			"/api/me/login",
 			"/api/me/logout",
 			"/api/me/stats",
 			"/api/public/download",
 			"/api/public/mark-extracted"
 		],
-		preloads: ["/assets/index-D8AaLNC-.js", "/assets/jsx-runtime-D8nDyRPw.js"],
+		preloads: ["/assets/index-D1MA_5wL.js", "/assets/jsx-runtime-D8nDyRPw.js"],
 		scripts: [{ attrs: {
 			type: "module",
 			async: !0,
-			src: "/assets/index-D8AaLNC-.js"
+			src: "/assets/index-D1MA_5wL.js"
 		} }]
 	},
 	"/": {
 		filePath: "E:/game/src/routes/index.tsx",
 		children: void 0,
-		preloads: ["/assets/routes-D5VqHSqr.js", "/assets/fx-ByJla8Q8.js"]
+		preloads: ["/assets/routes-DBhU39vY.js", "/assets/fx-ByJla8Q8.js"]
 	},
 	"/_authenticated": {
 		filePath: "E:/game/src/routes/_authenticated/route.tsx",
 		children: ["/_authenticated/admin"],
-		preloads: ["/assets/route-ggQhPZVb.js"]
+		preloads: ["/assets/route-BrGpdJla.js"]
 	},
 	"/auth": {
 		filePath: "E:/game/src/routes/auth.tsx",
 		children: void 0,
-		preloads: ["/assets/auth-Cm67397B.js", "/assets/fx-ByJla8Q8.js"]
+		preloads: ["/assets/auth-B9BG3XoP.js", "/assets/fx-ByJla8Q8.js"]
 	},
 	"/me": {
 		filePath: "E:/game/src/routes/me.tsx",
@@ -46,7 +53,7 @@ var tsrStartManifest = () => ({ routes: {
 	"/_authenticated/admin": {
 		filePath: "E:/game/src/routes/_authenticated/admin.tsx",
 		children: void 0,
-		preloads: ["/assets/admin-C3RYG77s.js", "/assets/fx-ByJla8Q8.js"]
+		preloads: ["/assets/admin-BASpC0pe.js", "/assets/fx-ByJla8Q8.js"]
 	}
 } });
 //#endregion
