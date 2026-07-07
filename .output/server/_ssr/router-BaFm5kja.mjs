@@ -7,10 +7,10 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-BwWzI0ev.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-BaFm5kja.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-CNIXusHq.css";
+var styles_default = "/assets/styles-D7UQjLCp.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -292,31 +292,22 @@ var Route$15 = createFileRoute("/api/public/mark-extracted")({ server: { handler
 		return new Response("", { status: 500 });
 	}
 } } } });
-var RAR5_SIG = new Uint8Array([
-	82,
-	97,
-	114,
-	33,
-	26,
-	7,
-	1,
-	0
-]);
-function buildPlaceholderRar() {
-	const readme = new TextEncoder().encode("Legends of Eternity — build placeholder.\nReplace this server route with a real archive stream in production.\n");
-	const out = new Uint8Array(RAR5_SIG.length + readme.length);
-	out.set(RAR5_SIG, 0);
-	out.set(readme, RAR5_SIG.length);
-	return out;
-}
 var Route$14 = createFileRoute("/api/public/download")({ server: { handlers: { GET: async ({ request }) => {
 	const meta = getClientMeta(request);
 	const url = new URL(request.url);
 	const sid = url.searchParams.get("sid") || null;
 	const fileName = url.searchParams.get("file") || "3D Game.rar";
+	const storageObjectPath = fileName.replace(/^\/+/, "");
+	const candidateBuckets = [
+		processModule.env.SUPABASE_STORAGE_BUCKET,
+		processModule.env.VITE_SUPABASE_STORAGE_BUCKET,
+		"downloads",
+		"public",
+		"game-builds",
+		"game"
+	].filter((value) => Boolean(value));
 	let downloadId = null;
 	try {
-		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
 		const now = (/* @__PURE__ */ new Date()).toISOString();
 		const { data: insertData, error: insertError } = await supabaseAdmin.from("downloads").insert({
 			file_name: fileName,
@@ -335,71 +326,67 @@ var Route$14 = createFileRoute("/api/public/download")({ server: { handlers: { G
 	} catch (e) {
 		console.error("download log failed", e);
 	}
-	try {
-		const fs = await import("node:fs/promises");
-		const path = `public/${fileName}`;
-		const data = await fs.readFile(path);
-		try {
-			if (downloadId) {
-				const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
-				await supabaseAdmin.from("downloads").update({
-					completed: true,
-					completed_at: (/* @__PURE__ */ new Date()).toISOString()
-				}).eq("id", downloadId);
-				await supabaseAdmin.from("notifications").insert({
-					type: "download_complete",
-					title: "Download Complete",
-					body: `${meta.ip ?? "unknown"} — ${fileName}`,
-					payload: {
-						download_id: downloadId,
-						session_id: sid
-					}
-				});
-			}
-		} catch (e) {
-			console.error("post-download update failed", e);
+	let archiveBlob = null;
+	let storageError = null;
+	let usedBucket = null;
+	for (const bucketName of candidateBuckets) try {
+		const { data, error } = await supabaseAdmin.storage.from(bucketName).download(storageObjectPath);
+		if (!error && data) {
+			archiveBlob = data;
+			usedBucket = bucketName;
+			break;
 		}
-		return new Response(data.buffer, {
-			status: 200,
-			headers: {
-				"Content-Type": "application/octet-stream",
-				"Content-Disposition": `attachment; filename="${fileName}"`,
-				"Content-Length": String(data.byteLength),
-				"Cache-Control": "no-store"
-			}
-		});
+		storageError = error ?? /* @__PURE__ */ new Error("No archive returned from storage");
 	} catch (e) {
-		const body = buildPlaceholderRar();
-		try {
-			if (downloadId) {
-				const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
-				await supabaseAdmin.from("downloads").update({
-					completed: true,
-					completed_at: (/* @__PURE__ */ new Date()).toISOString()
-				}).eq("id", downloadId);
-				await supabaseAdmin.from("notifications").insert({
-					type: "download_complete",
-					title: "Download Complete (placeholder)",
-					body: `${meta.ip ?? "unknown"} — ${fileName}`,
-					payload: {
-						download_id: downloadId,
-						session_id: sid
-					}
-				});
-			}
-		} catch (e) {
-			console.error("post-download update failed", e);
-		}
-		return new Response(body.buffer, {
-			status: 200,
+		storageError = e;
+	}
+	if (!archiveBlob) {
+		console.error("[Download] Supabase Storage download failed", {
+			buckets: candidateBuckets,
+			objectPath: storageObjectPath,
+			fileName,
+			error: storageError
+		});
+		return new Response(JSON.stringify({
+			success: false,
+			error: "Archive not found"
+		}), {
+			status: 404,
 			headers: {
-				"Content-Type": "application/x-rar-compressed",
-				"Content-Disposition": `attachment; filename="${fileName}"`,
-				"Content-Length": String(body.length),
+				"content-type": "application/json",
 				"Cache-Control": "no-store"
 			}
 		});
 	}
+	try {
+		if (downloadId) {
+			await supabaseAdmin.from("downloads").update({
+				completed: true,
+				completed_at: (/* @__PURE__ */ new Date()).toISOString()
+			}).eq("id", downloadId);
+			await supabaseAdmin.from("notifications").insert({
+				type: "download_complete",
+				title: "Download Complete",
+				body: `${meta.ip ?? "unknown"} — ${fileName}`,
+				payload: {
+					download_id: downloadId,
+					session_id: sid
+				}
+			});
+		}
+	} catch (e) {
+		console.error("post-download update failed", e);
+	}
+	return new Response(archiveBlob, {
+		status: 200,
+		headers: {
+			"Content-Type": "application/x-rar-compressed",
+			"Content-Disposition": `attachment; filename="${fileName}"`,
+			"Content-Length": String(archiveBlob.size),
+			"Cache-Control": "no-store",
+			"X-Storage-Bucket": usedBucket ?? ""
+		}
+	});
 } } } });
 var COOKIE_NAME = "me_admin";
 var DEFAULT_MAX_AGE = 10080 * 60;
