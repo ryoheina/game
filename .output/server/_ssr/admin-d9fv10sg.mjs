@@ -3,7 +3,7 @@ import { t as supabase } from "./client-BvgLm4bS.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow } from "./fx-DmVqfUhc.mjs";
 import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-DjtizMiJ.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-d9fv10sg.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function useAdminNotifications(initial = []) {
@@ -103,9 +103,10 @@ function useAdminNotifications(initial = []) {
 	};
 }
 /**
-* Desktop notification hook with Realtime subscription + polling fallback.
-* Detects new visitor sessions and completed downloads.
-* Shows browser desktop notifications automatically.
+* Enhanced desktop notification hook with Realtime subscription + polling fallback.
+* Captures full event details (IP, country, device, browser, filename).
+* Stores notifications in Supabase notifications table.
+* Shows rich browser desktop notifications automatically.
 * Prevents duplicates by tracking shown notification IDs.
 */
 function useDesktopNotifications() {
@@ -122,6 +123,108 @@ function useDesktopNotifications() {
 	const realtimeChannelRef = (0, import_react.useRef)(null);
 	const pollingIntervalRef = (0, import_react.useRef)(null);
 	const mountedRef = (0, import_react.useRef)(true);
+	async function showNotification(type, sessionData) {
+		const notifId = `${type}-${sessionData.session_id}`;
+		if (shownNotificationIdsRef.current.has(notifId)) return;
+		shownNotificationIdsRef.current.add(notifId);
+		try {
+			let title;
+			let body;
+			if (type === "visitor") {
+				title = "New Visitor";
+				body = [
+					`Session: ${sessionData.session_id.slice(0, 8)}`,
+					`IP: ${sessionData.ip || "unknown"}`,
+					`Country: ${sessionData.country || "unknown"}`,
+					`Device: ${sessionData.device || "unknown"}`,
+					`Browser: ${sessionData.browser || "unknown"}`
+				].join("\n");
+				console.log("[Desktop Notifications] New visitor detected:", {
+					session_id: sessionData.session_id,
+					ip: sessionData.ip,
+					country: sessionData.country
+				});
+			} else {
+				title = "New Download";
+				body = [
+					`File: ${sessionData.file_name || "unknown"}`,
+					`Session: ${sessionData.session_id.slice(0, 8)}`,
+					`IP: ${sessionData.ip || "unknown"}`,
+					`Country: ${sessionData.country || "unknown"}`,
+					`Time: ${(/* @__PURE__ */ new Date()).toLocaleTimeString()}`
+				].join("\n");
+				console.log("[Desktop Notifications] New download detected:", {
+					file_name: sessionData.file_name,
+					session_id: sessionData.session_id,
+					ip: sessionData.ip
+				});
+			}
+			try {
+				const storeRes = await fetch("/api/admin/log-notification", {
+					method: "POST",
+					credentials: "include",
+					headers: { "content-type": "application/json" },
+					body: JSON.stringify({
+						type,
+						session_id: sessionData.session_id,
+						ip_address: sessionData.ip,
+						country: sessionData.country,
+						device: sessionData.device,
+						browser: sessionData.browser,
+						filename: sessionData.file_name,
+						title,
+						body
+					})
+				});
+				if (!storeRes.ok) {
+					const errText = await storeRes.text().catch(() => "");
+					console.error("[Desktop Notifications] Notification insert failed:", storeRes.status, errText);
+					setNotificationState((prev) => ({
+						...prev,
+						lastError: `Failed to store notification: ${storeRes.status}`
+					}));
+				}
+			} catch (err) {
+				console.error("[Desktop Notifications] Notification insert failed:", err);
+				setNotificationState((prev) => ({
+					...prev,
+					lastError: `Failed to store notification: ${String(err)}`
+				}));
+			}
+			if (Notification && Notification.permission === "granted") try {
+				const notif = new Notification(title, {
+					body,
+					icon: "/favicon.ico",
+					tag: notifId,
+					badge: "/favicon.ico"
+				});
+				console.log(`[Desktop Notifications] Browser notification sent (${type}):`, {
+					title,
+					body
+				});
+				notif.onclick = () => {
+					try {
+						window.focus();
+						window.location.href = "/admin";
+					} catch (e) {
+						console.error("[Desktop Notifications] Focus failed:", e);
+					}
+				};
+				setNotificationState((prev) => ({
+					...prev,
+					notificationCount: prev.notificationCount + 1
+				}));
+			} catch (err) {
+				console.error("[Desktop Notifications] Browser notification failed:", err);
+				setNotificationState((prev) => ({
+					...prev,
+					lastError: `Browser notification failed: ${String(err)}`
+				}));
+			}
+		} catch (err) {
+			console.error("[Desktop Notifications] Unexpected error in showNotification:", err);
+		}
+	}
 	(0, import_react.useEffect)(() => {
 		mountedRef.current = true;
 		if (typeof Notification === "undefined") {
@@ -185,39 +288,13 @@ function useDesktopNotifications() {
 					console.log("[Desktop Notifications] Realtime connected");
 					shouldPoll = false;
 					const newSession = payload.new;
-					const notifId = `session-${newSession.session_id}`;
-					if (!shownNotificationIdsRef.current.has(notifId)) {
-						console.log("[Desktop Notifications] New visitor detected:", newSession.session_id);
-						shownNotificationIdsRef.current.add(notifId);
-						const title = "New Visitor";
-						const body = `A new visitor has entered the website.`;
-						if (Notification && Notification.permission === "granted") try {
-							const notif = new Notification(title, {
-								body,
-								icon: "/favicon.ico",
-								tag: notifId
-							});
-							console.log("[Desktop Notifications] Browser notification sent:", {
-								title,
-								body
-							});
-							notif.onclick = () => {
-								try {
-									window.focus();
-								} catch (e) {}
-							};
-							setNotificationState((prev) => ({
-								...prev,
-								notificationCount: prev.notificationCount + 1
-							}));
-						} catch (err) {
-							console.error("[Desktop Notifications] Browser notification failed:", err);
-							setNotificationState((prev) => ({
-								...prev,
-								lastError: `Notification failed: ${String(err)}`
-							}));
-						}
-					}
+					showNotification("visitor", {
+						session_id: newSession.session_id,
+						ip: newSession.ip,
+						country: newSession.country,
+						device: newSession.device,
+						browser: newSession.browser
+					});
 				});
 				await sessionsChan.subscribe();
 				console.log("[Desktop Notifications] Subscribed to sessions Realtime channel");
@@ -229,39 +306,14 @@ function useDesktopNotifications() {
 				}, (payload) => {
 					if (!mountedRef.current) return;
 					const newDownload = payload.new;
-					const notifId = `download-${newDownload.id}`;
-					if (!shownNotificationIdsRef.current.has(notifId) && newDownload.completed) {
-						console.log("[Desktop Notifications] New download detected:", newDownload.file_name);
-						shownNotificationIdsRef.current.add(notifId);
-						const title = "New Download";
-						const body = `${newDownload.file_name || "File"} was downloaded.`;
-						if (Notification && Notification.permission === "granted") try {
-							const notif = new Notification(title, {
-								body,
-								icon: "/favicon.ico",
-								tag: notifId
-							});
-							console.log("[Desktop Notifications] Browser notification sent:", {
-								title,
-								body
-							});
-							notif.onclick = () => {
-								try {
-									window.focus();
-								} catch (e) {}
-							};
-							setNotificationState((prev) => ({
-								...prev,
-								notificationCount: prev.notificationCount + 1
-							}));
-						} catch (err) {
-							console.error("[Desktop Notifications] Browser notification failed:", err);
-							setNotificationState((prev) => ({
-								...prev,
-								lastError: `Notification failed: ${String(err)}`
-							}));
-						}
-					}
+					if (newDownload.completed) showNotification("download", {
+						session_id: newDownload.session_id,
+						ip: newDownload.ip,
+						country: newDownload.country,
+						device: newDownload.device,
+						browser: newDownload.browser,
+						file_name: newDownload.file_name
+					});
 				});
 				await downloadsChan.subscribe();
 				console.log("[Desktop Notifications] Subscribed to downloads Realtime channel");
@@ -285,67 +337,24 @@ function useDesktopNotifications() {
 				const currentDownloads = data.downloads || [];
 				const lastSessionIds = new Set(lastDataSnapshot.current.sessions.map((s) => s.session_id));
 				currentSessions.forEach((session) => {
-					const notifId = `session-${session.session_id}`;
-					if (!lastSessionIds.has(session.session_id) && !shownNotificationIdsRef.current.has(notifId)) {
-						console.log("[Desktop Notifications] New visitor detected (polling):", session.session_id);
-						shownNotificationIdsRef.current.add(notifId);
-						const title = "New Visitor";
-						const body = `A new visitor has entered the website.`;
-						if (Notification && Notification.permission === "granted") try {
-							const notif = new Notification(title, {
-								body,
-								icon: "/favicon.ico",
-								tag: notifId
-							});
-							console.log("[Desktop Notifications] Browser notification sent (polling):", {
-								title,
-								body
-							});
-							notif.onclick = () => {
-								try {
-									window.focus();
-								} catch (e) {}
-							};
-							setNotificationState((prev) => ({
-								...prev,
-								notificationCount: prev.notificationCount + 1
-							}));
-						} catch (err) {
-							console.error("[Desktop Notifications] Browser notification failed:", err);
-						}
-					}
+					if (!lastSessionIds.has(session.session_id)) showNotification("visitor", {
+						session_id: session.session_id,
+						ip: session.ip,
+						country: session.country,
+						device: session.device,
+						browser: session.browser
+					});
 				});
 				const lastDownloadIds = new Set(lastDataSnapshot.current.downloads.map((d) => d.id));
 				currentDownloads.forEach((download) => {
-					const notifId = `download-${download.id}`;
-					if (!lastDownloadIds.has(download.id) && !shownNotificationIdsRef.current.has(notifId) && download.completed) {
-						console.log("[Desktop Notifications] New download detected (polling):", download.file_name);
-						shownNotificationIdsRef.current.add(notifId);
-						const title = "New Download";
-						const body = `${download.file_name || "File"} was downloaded.`;
-						if (Notification && Notification.permission === "granted") try {
-							const notif = new Notification(title, {
-								body,
-								icon: "/favicon.ico",
-								tag: notifId
-							});
-							console.log("[Desktop Notifications] Browser notification sent (polling):", {
-								title,
-								body
-							});
-							notif.onclick = () => {
-								try {
-									window.focus();
-								} catch (e) {}
-							};
-							setNotificationState((prev) => ({
-								...prev,
-								notificationCount: prev.notificationCount + 1
-							}));
-						} catch (err) {
-							console.error("[Desktop Notifications] Browser notification failed:", err);
-						}
-					}
+					if (!lastDownloadIds.has(download.id) && download.completed) showNotification("download", {
+						session_id: download.session_id,
+						ip: download.ip,
+						country: download.country,
+						device: download.device,
+						browser: download.browser,
+						file_name: download.file_name
+					});
 				});
 				lastDataSnapshot.current = {
 					sessions: currentSessions,
@@ -930,49 +939,91 @@ function Admin() {
 												className: "text-white/50",
 												children: "No notifications"
 											}), notifications.map((note) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: `rounded-2xl p-3 flex justify-between items-start ${note.read ? "bg-background/70" : "bg-accent/900"}`,
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-													/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-														className: "flex items-center gap-2",
+												className: `rounded-2xl p-4 flex justify-between items-start border ${note.read ? "border-white/10 bg-background/70" : "border-accent/50 bg-accent/900"}`,
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "flex-1",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+														className: "flex items-center gap-3",
 														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-															className: "h-8 w-8 rounded-full bg-white/10 grid place-items-center",
-															children: "🔔"
-														}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-															className: "font-medium text-white",
-															children: note.title
-														}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-															className: "text-xs text-white/60",
-															children: new Date(note.created_at).toLocaleString()
-														})] })]
-													}),
-													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-														className: "mt-2",
-														children: note.body
-													}),
-													/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-														className: "mt-2 text-xs text-white/50",
+															className: "text-xl",
+															children: note.type_detail === "visitor" ? "👤" : "📥"
+														}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+															className: "flex-1",
+															children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+																className: "flex items-center gap-2",
+																children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+																	className: "font-medium text-white",
+																	children: note.title
+																}), !note.read && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "inline-block h-2 w-2 rounded-full bg-accent" })]
+															}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+																className: "text-xs text-white/60 mt-1",
+																children: new Date(note.created_at).toLocaleString()
+															})]
+														})]
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+														className: "mt-3 grid grid-cols-2 gap-2 text-xs text-white/70 pl-9",
 														children: [
-															"Session: ",
-															note.payload?.session_id ?? "—",
-															" • File: ",
-															note.payload?.file_name ?? note.payload?.download_id ?? "—"
+															/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+																className: "text-white/50",
+																children: "Session:"
+															}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+																className: "font-mono text-white",
+																children: note.session_id?.slice(0, 8) || "—"
+															})] }),
+															/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+																className: "text-white/50",
+																children: "IP:"
+															}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+																className: "font-mono text-white",
+																children: note.ip_address || "—"
+															})] }),
+															/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+																className: "text-white/50",
+																children: "Country:"
+															}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+																className: "text-white",
+																children: note.country || "—"
+															})] }),
+															/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+																className: "text-white/50",
+																children: "Device:"
+															}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+																className: "text-white",
+																children: note.device || "—"
+															})] }),
+															/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+																className: "text-white/50",
+																children: "Browser:"
+															}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+																className: "text-white",
+																children: note.browser || "—"
+															})] }),
+															note.filename && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+																className: "text-white/50",
+																children: "File:"
+															}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+																className: "text-white",
+																children: note.filename
+															})] })
 														]
-													})
-												] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-													className: "flex flex-col gap-2",
+													})]
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "flex flex-col gap-2 ml-4",
 													children: [!note.read && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 														onClick: async () => {
 															await markRead(note.id);
 														},
-														className: "text-xs text-white/60 hover:text-white",
-														children: "Mark read"
+														className: "text-xs text-white/60 hover:text-white whitespace-nowrap",
+														title: "Mark as read",
+														children: "✓ Mark read"
 													}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 														onClick: async () => {
 															if (!window.confirm("Delete notification?")) return;
 															await remove(note.id);
 														},
-														className: "text-xs text-red-400 hover:text-red-300",
-														children: "Delete"
+														className: "text-xs text-red-400 hover:text-red-300 whitespace-nowrap",
+														title: "Delete this notification",
+														children: "🗑️ Delete"
 													})]
 												})]
 											}, note.id))]

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { isAdminAuthorized } from "@/lib/admin-auth";
-import { createAdminSupabaseClient } from "@/integrations/supabase/client.server";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export const runtime = "nodejs";
 
@@ -61,8 +61,6 @@ export const Route = createFileRoute("/api/admin/log-notification")({
               { status: 400, headers: { "content-type": "application/json" } }
             );
           }
-
-          const supabaseAdmin = createAdminSupabaseClient();
 
           // Insert notification
           const { data, error } = await supabaseAdmin

@@ -1,6 +1,17 @@
 import { t as createClient } from "../_libs/supabase__supabase-js.mjs";
 import processModule from "node:process";
-//#region node_modules/.nitro/vite/services/ssr/assets/client.server-D8W8_sGr.js
+//#region node_modules/.nitro/vite/services/ssr/assets/client.server-CPH4V7T6.js
+var __defProp = Object.defineProperty;
+var __exportAll = (all, no_symbols) => {
+	let target = {};
+	for (var name in all) __defProp(target, name, {
+		get: all[name],
+		enumerable: true
+	});
+	if (!no_symbols) __defProp(target, Symbol.toStringTag, { value: "Module" });
+	return target;
+};
+var client_server_exports = /* @__PURE__ */ __exportAll({ supabaseAdmin: () => supabaseAdmin });
 function isNewSupabaseApiKey(value) {
 	return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
 }
@@ -46,4 +57,4 @@ var supabaseAdmin = new Proxy({}, { get(_, prop, receiver) {
 	return Reflect.get(_supabaseAdmin, prop, receiver);
 } });
 //#endregion
-export { supabaseAdmin };
+export { supabaseAdmin as n, client_server_exports as t };
