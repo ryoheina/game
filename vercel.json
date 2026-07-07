@@ -1,15 +1,6 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "package.json", "use": "@vercel/static-build" },
-    { "src": "api/index.ts", "use": "@vercel/node" }
-  ],
-  "outputDirectory": ".output/public",
-  "rewrites": [
-    { "source": "/__l5e/:path*", "destination": "https://c--19c86a1a-2fae-4b01-ac75-d707fb406ddc-prod.lovable.cloud/__l5e/:path*" },
-    { "source": "/api/:path*", "destination": "/api/index.ts" }
-  ],
-  "routes": [
-    { "src": "/(?!.*\\.(png|jpg|jpeg|gif|css|js|ico|webp|svg|woff|woff2|ttf)$).*", "dest": "/index.html" }
-  ]
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".output/public"
 }
