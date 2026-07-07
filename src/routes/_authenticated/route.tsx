@@ -7,12 +7,15 @@ export const Route = createFileRoute("/_authenticated")({
       throw redirect({ to: "/auth" });
     }
 
-    const token = window.localStorage.getItem("studio-admin-token");
-    if (!token) {
+    try {
+      const res = await fetch("/api/admin/dashboard", { credentials: "include" });
+      if (!res.ok) {
+        throw redirect({ to: "/auth" });
+      }
+      return {};
+    } catch {
       throw redirect({ to: "/auth" });
     }
-
-    return {};
   },
   component: () => <Outlet />,
 });

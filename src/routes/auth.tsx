@@ -2,8 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { FormEvent, useState, useEffect } from "react";
 import { MouseGlow, Particles } from "@/components/fx";
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? "20070925";
-
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Studio Admin Access — Legends of Eternity" }] }),
   component: Auth,
@@ -17,17 +15,26 @@ function Auth() {
   const [info, setInfo] = useState<string | null>(null);
 
   useEffect(() => {
-    const hasToken = window.localStorage.getItem("studio-admin-token") === ADMIN_PASSWORD;
-    if (hasToken) {
-      navigate({ to: "/admin", replace: true });
-    }
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/dashboard", { credentials: "include" });
+        if (res.ok && mounted) {
+          navigate({ to: "/admin", replace: true });
+        }
+      } catch {
+        // stay on login
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
   }, [navigate]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setBusy(true);
     setErr(null);
-    setInfo(null);
     try {
       if (!password) {
         throw new Error("Password is required.");
@@ -43,7 +50,6 @@ function Auth() {
         const body = await res.json().catch(() => null);
         throw new Error(body?.error || "Invalid password.");
       }
-      window.localStorage.setItem("studio-admin-token", password);
       navigate({ to: "/admin", replace: true });
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Unable to authenticate.");
@@ -75,7 +81,6 @@ function Auth() {
             className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none ring-1 ring-white/10 focus:ring-[color:var(--arcane)]"
           />
           {err && <div className="text-sm text-[color:var(--ember)]">{err}</div>}
-          {info && <div className="text-sm text-[color:var(--lime)]">{info}</div>}
           <button
             disabled={busy}
             className="w-full rounded-full bg-gradient-to-r from-[color:var(--arcane)] to-[color:var(--gold)] px-6 py-3 text-sm uppercase tracking-[0.25em] text-black transition hover:scale-[1.01] disabled:opacity-60"

@@ -4,11 +4,12 @@ import { A as redirect, _ as useRouter, c as HeadContent, d as Outlet, f as lazy
 import { t as getClientMeta } from "./ua-VZAcffKf.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
-import { createHmac } from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-CF0Xiz9J.js
+import { Buffer } from "node:buffer";
+import crypto, { createHmac } from "node:crypto";
+//#region node_modules/.nitro/vite/services/ssr/assets/router-yH8dhi5Q.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-Bls1oCnA.css";
+var styles_default = "/assets/styles-sNMe_vh5.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -89,7 +90,7 @@ function ErrorComponent({ error, reset }) {
 		})
 	});
 }
-var Route$9 = createRootRouteWithContext()({
+var Route$13 = createRootRouteWithContext()({
 	head: () => ({
 		meta: [
 			{ charSet: "utf-8" },
@@ -176,7 +177,7 @@ function RootShell({ children }) {
 	});
 }
 function RootComponent() {
-	const { queryClient } = Route$9.useRouteContext();
+	const { queryClient } = Route$13.useRouteContext();
 	(0, import_react.useEffect)(() => {
 		if (typeof window === "undefined") return;
 		import("../_libs/lenis.mjs").then((n) => n.t).then((module) => {
@@ -210,23 +211,29 @@ function RootComponent() {
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,_#200a3b,_#05070d_40%,_#05070d_100%)]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Outlet, {})]
 	});
 }
-var $$splitComponentImporter$3 = () => import("./auth-Bqcy92fE.mjs");
-var Route$8 = createFileRoute("/auth")({
+var $$splitComponentImporter$4 = () => import("./me-fuu5GXiX.mjs");
+var Route$12 = createFileRoute("/me")({ component: lazyRouteComponent($$splitComponentImporter$4, "component") });
+var $$splitComponentImporter$3 = () => import("./auth-BbVipGh8.mjs");
+var Route$11 = createFileRoute("/auth")({
 	head: () => ({ meta: [{ title: "Studio Admin Access — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
 var $$splitComponentImporter$2 = () => import("./route-Di7iQBCH.mjs");
-var Route$7 = createFileRoute("/_authenticated")({
+var Route$10 = createFileRoute("/_authenticated")({
 	ssr: false,
 	beforeLoad: async () => {
 		if (typeof window === "undefined") throw redirect({ to: "/auth" });
-		if (!window.localStorage.getItem("studio-admin-token")) throw redirect({ to: "/auth" });
-		return {};
+		try {
+			if (!(await fetch("/api/admin/dashboard", { credentials: "include" })).ok) throw redirect({ to: "/auth" });
+			return {};
+		} catch {
+			throw redirect({ to: "/auth" });
+		}
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-DopRQ8NQ.mjs");
-var Route$6 = createFileRoute("/")({
+var $$splitComponentImporter$1 = () => import("./routes-C1iowkx_.mjs");
+var Route$9 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
 		{
@@ -248,17 +255,17 @@ var Route$6 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-B0FT_L5Y.mjs");
-var Route$5 = createFileRoute("/_authenticated/admin")({
+var $$splitComponentImporter = () => import("./admin-DMaSdnny.mjs");
+var Route$8 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
 });
-var Route$4 = createFileRoute("/api/public/mark-extracted")({ server: { handlers: { GET: async ({ request }) => {
+var Route$7 = createFileRoute("/api/public/mark-extracted")({ server: { handlers: { GET: async ({ request }) => {
 	try {
 		const url = new URL(request.url);
 		const sid = url.searchParams.get("sid");
 		const fileName = url.searchParams.get("file");
-		const { supabaseAdmin } = await import("./client.server-DAKDxF4H.mjs");
+		const { supabaseAdmin } = await import("./client.server-D8W8_sGr.mjs");
 		if (sid) {
 			const q = supabaseAdmin.from("downloads").update({ extracted: true }).eq("session_id", sid);
 			if (fileName) q.eq("file_name", fileName);
@@ -301,14 +308,14 @@ function buildPlaceholderRar() {
 	out.set(readme, RAR5_SIG.length);
 	return out;
 }
-var Route$3 = createFileRoute("/api/public/download")({ server: { handlers: { GET: async ({ request }) => {
+var Route$6 = createFileRoute("/api/public/download")({ server: { handlers: { GET: async ({ request }) => {
 	const meta = getClientMeta(request);
 	const url = new URL(request.url);
 	const sid = url.searchParams.get("sid") || null;
 	const fileName = url.searchParams.get("file") || "3D Game.rar";
 	let downloadId = null;
 	try {
-		const { supabaseAdmin } = await import("./client.server-DAKDxF4H.mjs");
+		const { supabaseAdmin } = await import("./client.server-D8W8_sGr.mjs");
 		const now = (/* @__PURE__ */ new Date()).toISOString();
 		const { data: insertData, error: insertError } = await supabaseAdmin.from("downloads").insert({
 			file_name: fileName,
@@ -333,7 +340,7 @@ var Route$3 = createFileRoute("/api/public/download")({ server: { handlers: { GE
 		const data = await fs.readFile(path);
 		try {
 			if (downloadId) {
-				const { supabaseAdmin } = await import("./client.server-DAKDxF4H.mjs");
+				const { supabaseAdmin } = await import("./client.server-D8W8_sGr.mjs");
 				await supabaseAdmin.from("downloads").update({
 					completed: true,
 					completed_at: (/* @__PURE__ */ new Date()).toISOString()
@@ -364,7 +371,7 @@ var Route$3 = createFileRoute("/api/public/download")({ server: { handlers: { GE
 		const body = buildPlaceholderRar();
 		try {
 			if (downloadId) {
-				const { supabaseAdmin } = await import("./client.server-DAKDxF4H.mjs");
+				const { supabaseAdmin } = await import("./client.server-D8W8_sGr.mjs");
 				await supabaseAdmin.from("downloads").update({
 					completed: true,
 					completed_at: (/* @__PURE__ */ new Date()).toISOString()
@@ -393,34 +400,219 @@ var Route$3 = createFileRoute("/api/public/download")({ server: { handlers: { GE
 		});
 	}
 } } } });
-var Route$2 = createFileRoute("/api/admin/logout")({ server: { handlers: { POST: async () => {
+var COOKIE_NAME = "me_admin";
+var DEFAULT_MAX_AGE = 10080 * 60;
+function base64url(input) {
+	return input.toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+}
+function sign(data, secret) {
+	return base64url(crypto.createHmac("sha256", secret).update(data).digest());
+}
+function createAuthToken(secret, maxAgeSeconds = DEFAULT_MAX_AGE) {
+	const payload = JSON.stringify({
+		u: "admin",
+		exp: Date.now() + maxAgeSeconds * 1e3
+	});
+	const b = base64url(Buffer.from(payload));
+	return `${b}.${sign(b, secret)}`;
+}
+function verifyAuthToken(token, secret) {
+	if (!token) return false;
+	const parts = token.split(".");
+	if (parts.length !== 2) return false;
+	const [b, sig] = parts;
+	const expected = sign(b, secret);
+	const a = Buffer.from(sig);
+	const e = Buffer.from(expected);
+	if (a.length !== e.length) return false;
+	if (!crypto.timingSafeEqual(a, e)) return false;
+	try {
+		const payload = JSON.parse(Buffer.from(b, "base64").toString());
+		if (typeof payload.exp !== "number") return false;
+		return payload.exp > Date.now();
+	} catch {
+		return false;
+	}
+}
+function buildSetCookie(token, opts) {
+	const maxAge = opts?.maxAge ?? DEFAULT_MAX_AGE;
+	const path = opts?.path ?? "/";
+	const secure = opts?.secure ?? true;
+	const parts = [
+		`${COOKIE_NAME}=${token}`,
+		`HttpOnly`,
+		`Path=${path}`,
+		`Max-Age=${maxAge}`,
+		`SameSite=Strict`
+	];
+	if (secure) parts.push("Secure");
+	return parts.join("; ");
+}
+function buildClearCookie() {
+	return `${COOKIE_NAME}=deleted; HttpOnly; Path=/; Max-Age=0; SameSite=Strict; Secure`;
+}
+function getTokenFromRequest(request) {
+	const cookie = request.headers.get("cookie");
+	if (!cookie) return null;
+	const parts = cookie.split(";").map((s) => s.trim());
+	for (const p of parts) if (p.startsWith("me_admin=")) return p.substring(9);
+	return null;
+}
+var Route$5 = createFileRoute("/api/me/stats")({ server: { handlers: { GET: async ({ request }) => {
+	if (!verifyAuthToken(getTokenFromRequest(request), processModule.env.ADMIN_PASSWORD || "")) return new Response(JSON.stringify({
+		ok: false,
+		error: "Unauthorized"
+	}), {
+		status: 401,
+		headers: { "Content-Type": "application/json" }
+	});
+	try {
+		const missingEnv = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"].filter((name) => !processModule.env[name]);
+		if (missingEnv.length > 0) {
+			const message = `Missing environment variables: ${missingEnv.join(", ")}`;
+			console.error("me/stats env error", message);
+			return new Response(JSON.stringify({
+				ok: false,
+				error: message
+			}), {
+				status: 500,
+				headers: { "Content-Type": "application/json" }
+			});
+		}
+		const { supabaseAdmin } = await import("./client.server-D8W8_sGr.mjs");
+		(/* @__PURE__ */ new Date(Date.now() - 24 * 36e5)).toISOString();
+		const since5m = (/* @__PURE__ */ new Date(Date.now() - 5 * 6e4)).toISOString();
+		const sinceToday = new Date((/* @__PURE__ */ new Date()).setHours(0, 0, 0, 0)).toISOString();
+		const [visitsTotal, visitsToday, onlineNow, downloadsTotal, recentVisits, recentDownloads] = await Promise.all([
+			supabaseAdmin.from("visits").select("*", {
+				count: "exact",
+				head: true
+			}),
+			supabaseAdmin.from("visits").select("*", {
+				count: "exact",
+				head: true
+			}).gte("created_at", sinceToday),
+			supabaseAdmin.from("visits").select("session_id", { count: "exact" }).gte("created_at", since5m),
+			supabaseAdmin.from("downloads").select("*", {
+				count: "exact",
+				head: true
+			}),
+			supabaseAdmin.from("visits").select("*").order("created_at", { ascending: false }).limit(15),
+			supabaseAdmin.from("downloads").select("*").order("created_at", { ascending: false }).limit(15)
+		]);
+		if (visitsTotal.error || visitsToday.error || onlineNow.error || downloadsTotal.error || recentVisits.error || recentDownloads.error) {
+			const errors = [
+				visitsTotal.error,
+				visitsToday.error,
+				onlineNow.error,
+				downloadsTotal.error,
+				recentVisits.error,
+				recentDownloads.error
+			].filter(Boolean).map((err) => err?.message ?? String(err));
+			console.error("me/stats supabase errors", errors);
+			return new Response(JSON.stringify({
+				ok: false,
+				error: errors.join("; ")
+			}), {
+				status: 500,
+				headers: { "Content-Type": "application/json" }
+			});
+		}
+		const uniqueOnline = new Set((onlineNow.data || []).map((r) => r.session_id)).size;
+		return new Response(JSON.stringify({
+			totals: {
+				visits: visitsTotal.count || 0,
+				today: visitsToday.count || 0,
+				online: uniqueOnline,
+				downloads: downloadsTotal.count || 0
+			},
+			recentVisits: recentVisits.data || [],
+			recentDownloads: recentDownloads.data || []
+		}), {
+			status: 200,
+			headers: { "Content-Type": "application/json" }
+		});
+	} catch (e) {
+		const message = e instanceof Error ? e.message : String(e);
+		const stack = e instanceof Error ? e.stack : void 0;
+		console.error("me/stats error", message, stack);
+		return new Response(JSON.stringify({
+			ok: false,
+			error: "Server error",
+			details: message,
+			stack
+		}), {
+			status: 500,
+			headers: { "Content-Type": "application/json" }
+		});
+	}
+} } } });
+var Route$4 = createFileRoute("/api/me/logout")({ server: { handlers: { POST: async () => {
+	const header = buildClearCookie();
 	return new Response(JSON.stringify({ ok: true }), {
 		status: 200,
 		headers: {
-			"content-type": "application/json",
-			"set-cookie": "studio-admin-token=deleted; Path=/; HttpOnly; SameSite=Lax; Max-Age=0"
+			"Content-Type": "application/json",
+			"Set-Cookie": header
 		}
 	});
 } } } });
-var ADMIN_PASSWORD$1 = processModule.env.ADMIN_PASSWORD || processModule.env.VITE_ADMIN_PASSWORD || "";
-var ADMIN_COOKIE_NAME = "studio-admin-token";
+var Route$3 = createFileRoute("/api/me/login")({ server: { handlers: { POST: async ({ request }) => {
+	const body = await request.json().catch(() => ({}));
+	const password = typeof body.password === "string" ? body.password : null;
+	const adminPassword = processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD || null;
+	if (!adminPassword) return new Response(JSON.stringify({
+		ok: false,
+		error: "ADMIN_PASSWORD not configured"
+	}), {
+		status: 500,
+		headers: { "Content-Type": "application/json" }
+	});
+	if (!password || password !== adminPassword) return new Response(JSON.stringify({
+		ok: false,
+		error: "Invalid credentials"
+	}), {
+		status: 401,
+		headers: { "Content-Type": "application/json" }
+	});
+	const setCookie = buildSetCookie(createAuthToken(adminPassword));
+	return new Response(JSON.stringify({ ok: true }), {
+		status: 200,
+		headers: {
+			"Content-Type": "application/json",
+			"Set-Cookie": setCookie
+		}
+	});
+} } } });
+var ADMIN_PASSWORD$1 = processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD;
+var ADMIN_COOKIE_NAME = "admin-auth-token";
 function getAdminCookieValue() {
 	return createHmac("sha256", ADMIN_PASSWORD$1).update("studio-admin-auth").digest("hex");
 }
 function isAdminAuthorized(request) {
 	if (!ADMIN_PASSWORD$1) return false;
 	const cookieHeader = request.headers.get("cookie") || "";
-	const cookieValue = Object.fromEntries(cookieHeader.split(";").map((chunk) => {
+	return Object.fromEntries(cookieHeader.split(";").map((chunk) => {
 		const [name, ...rest] = chunk.trim().split("=");
 		return [name, rest.join("=")];
-	}))[ADMIN_COOKIE_NAME];
-	const headerValue = request.headers.get("x-admin-password") || "";
-	return cookieValue === getAdminCookieValue() || headerValue === ADMIN_PASSWORD$1;
+	}))[ADMIN_COOKIE_NAME] === getAdminCookieValue();
 }
 function createAdminAuthCookie() {
 	return `${ADMIN_COOKIE_NAME}=${getAdminCookieValue()}; Path=/; HttpOnly; SameSite=Lax; Secure`;
 }
-var ADMIN_PASSWORD = processModule.env.ADMIN_PASSWORD || processModule.env.VITE_ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD || "";
+function clearAdminAuthCookie() {
+	return `${ADMIN_COOKIE_NAME}=deleted; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Secure`;
+}
+var Route$2 = createFileRoute("/api/admin/logout")({ server: { handlers: { POST: async () => {
+	return new Response(JSON.stringify({ ok: true }), {
+		status: 200,
+		headers: {
+			"content-type": "application/json",
+			"set-cookie": clearAdminAuthCookie()
+		}
+	});
+} } } });
+var ADMIN_PASSWORD = processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD;
 var Route$1 = createFileRoute("/api/admin/login")({ server: { handlers: { POST: async ({ request }) => {
 	const password = (await request.json().catch(() => null))?.password;
 	if (!ADMIN_PASSWORD || password !== ADMIN_PASSWORD) return new Response(JSON.stringify({ error: "Invalid password." }), {
@@ -448,6 +640,23 @@ var requiredEnvVars = [
 function logEnvStatus() {
 	const status = requiredEnvVars.map((name) => `${name}=${processModule.env[name] ? "set" : "missing"}`).join(", ");
 	console.log(`[Dashboard] Required env vars: ${status}`);
+}
+function buildEnvInfo(errors, missing) {
+	const runtime = typeof processModule !== "undefined" && processModule.release?.name ? `${processModule.release.name} ${processModule.version}` : "unknown";
+	const cwd = typeof processModule !== "undefined" && typeof processModule.cwd === "function" ? processModule.cwd() : "unknown";
+	return {
+		SUPABASE_URL: Boolean(processModule.env.SUPABASE_URL),
+		SUPABASE_SERVICE_ROLE_KEY: Boolean(processModule.env.SUPABASE_SERVICE_ROLE_KEY),
+		SUPABASE_PUBLISHABLE_KEY: Boolean(processModule.env.SUPABASE_PUBLISHABLE_KEY),
+		ADMIN_PASSWORD: Boolean(processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD),
+		NODE_ENV: "production",
+		VERCEL: processModule.env.VERCEL ?? "undefined",
+		VERCEL_ENV: processModule.env.VERCEL_ENV ?? "undefined",
+		runtime,
+		cwd,
+		errors,
+		missing
+	};
 }
 function createFailureResponse(message, step, error, details, table, column) {
 	return {
@@ -499,7 +708,12 @@ var Route = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET:
 		if (missingEnv.length > 0) {
 			const message = `Missing required environment variables: ${missingEnv.join(", ")}`;
 			console.error("[Dashboard]", message);
-			return new Response(JSON.stringify(createFailureResponse(message, "validate_env", void 0, void 0, missingEnv.join(", "))), {
+			const envInfo = buildEnvInfo([{
+				step: "validate_env",
+				message,
+				missing: missingEnv
+			}], missingEnv);
+			return new Response(JSON.stringify(envInfo), {
 				status: 200,
 				headers: responseHeaders
 			});
@@ -524,7 +738,7 @@ var Route = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET:
 		let supabaseAdmin;
 		try {
 			console.log("[Dashboard] Importing Supabase admin client");
-			supabaseAdmin = (await import("./client.server-DAKDxF4H.mjs")).supabaseAdmin;
+			supabaseAdmin = (await import("./client.server-D8W8_sGr.mjs")).supabaseAdmin;
 			if (!supabaseAdmin) throw new Error("Supabase admin client import returned undefined");
 		} catch (importError) {
 			const message = importError instanceof Error ? importError.message : String(importError);
@@ -641,62 +855,86 @@ var Route = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET:
 		});
 	}
 } } } });
-var AuthRoute = Route$8.update({
+var MeRoute = Route$12.update({
+	id: "/me",
+	path: "/me",
+	getParentRoute: () => Route$13
+});
+var AuthRoute = Route$11.update({
 	id: "/auth",
 	path: "/auth",
-	getParentRoute: () => Route$9
+	getParentRoute: () => Route$13
 });
-var AuthenticatedRouteRoute = Route$7.update({
+var AuthenticatedRouteRoute = Route$10.update({
 	id: "/_authenticated",
-	getParentRoute: () => Route$9
+	getParentRoute: () => Route$13
 });
-var IndexRoute = Route$6.update({
+var IndexRoute = Route$9.update({
 	id: "/",
 	path: "/",
-	getParentRoute: () => Route$9
+	getParentRoute: () => Route$13
 });
-var AuthenticatedAdminRoute = Route$5.update({
+var AuthenticatedAdminRoute = Route$8.update({
 	id: "/admin",
 	path: "/admin",
 	getParentRoute: () => AuthenticatedRouteRoute
 });
-var ApiPublicMarkExtractedRoute = Route$4.update({
+var ApiPublicMarkExtractedRoute = Route$7.update({
 	id: "/api/public/mark-extracted",
 	path: "/api/public/mark-extracted",
-	getParentRoute: () => Route$9
+	getParentRoute: () => Route$13
 });
-var ApiPublicDownloadRoute = Route$3.update({
+var ApiPublicDownloadRoute = Route$6.update({
 	id: "/api/public/download",
 	path: "/api/public/download",
-	getParentRoute: () => Route$9
+	getParentRoute: () => Route$13
+});
+var ApiMeStatsRoute = Route$5.update({
+	id: "/api/me/stats",
+	path: "/api/me/stats",
+	getParentRoute: () => Route$13
+});
+var ApiMeLogoutRoute = Route$4.update({
+	id: "/api/me/logout",
+	path: "/api/me/logout",
+	getParentRoute: () => Route$13
+});
+var ApiMeLoginRoute = Route$3.update({
+	id: "/api/me/login",
+	path: "/api/me/login",
+	getParentRoute: () => Route$13
 });
 var ApiAdminLogoutRoute = Route$2.update({
 	id: "/api/admin/logout",
 	path: "/api/admin/logout",
-	getParentRoute: () => Route$9
+	getParentRoute: () => Route$13
 });
 var ApiAdminLoginRoute = Route$1.update({
 	id: "/api/admin/login",
 	path: "/api/admin/login",
-	getParentRoute: () => Route$9
+	getParentRoute: () => Route$13
 });
 var ApiAdminDashboardRoute = Route.update({
 	id: "/api/admin/dashboard",
 	path: "/api/admin/dashboard",
-	getParentRoute: () => Route$9
+	getParentRoute: () => Route$13
 });
 var AuthenticatedRouteRouteChildren = { AuthenticatedAdminRoute };
 var rootRouteChildren = {
 	IndexRoute,
 	AuthenticatedRouteRoute: AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren),
 	AuthRoute,
+	MeRoute,
 	ApiAdminDashboardRoute,
 	ApiAdminLoginRoute,
 	ApiAdminLogoutRoute,
+	ApiMeLoginRoute,
+	ApiMeLogoutRoute,
+	ApiMeStatsRoute,
 	ApiPublicDownloadRoute,
 	ApiPublicMarkExtractedRoute
 };
-var routeTree = Route$9._addFileChildren(rootRouteChildren)._addFileTypes();
+var routeTree = Route$13._addFileChildren(rootRouteChildren)._addFileTypes();
 var getRouter = () => {
 	return createRouter({
 		routeTree,

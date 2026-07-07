@@ -2,10 +2,9 @@ import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow, r as Particles } from "./fx-DmVqfUhc.mjs";
 import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/auth-Bqcy92fE.js
+//#region node_modules/.nitro/vite/services/ssr/assets/auth-BbVipGh8.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var ADMIN_PASSWORD = "20070925";
 function Auth() {
 	const navigate = useNavigate();
 	const [password, setPassword] = (0, import_react.useState)("");
@@ -13,16 +12,23 @@ function Auth() {
 	const [err, setErr] = (0, import_react.useState)(null);
 	const [info, setInfo] = (0, import_react.useState)(null);
 	(0, import_react.useEffect)(() => {
-		if (window.localStorage.getItem("studio-admin-token") === ADMIN_PASSWORD) navigate({
-			to: "/admin",
-			replace: true
-		});
+		let mounted = true;
+		(async () => {
+			try {
+				if ((await fetch("/api/admin/dashboard", { credentials: "include" })).ok && mounted) navigate({
+					to: "/admin",
+					replace: true
+				});
+			} catch {}
+		})();
+		return () => {
+			mounted = false;
+		};
 	}, [navigate]);
 	const onSubmit = async (e) => {
 		e.preventDefault();
 		setBusy(true);
 		setErr(null);
-		setInfo(null);
 		try {
 			if (!password) throw new Error("Password is required.");
 			const res = await fetch("/api/admin/login", {
@@ -35,7 +41,6 @@ function Auth() {
 				const body = await res.json().catch(() => null);
 				throw new Error(body?.error || "Invalid password.");
 			}
-			window.localStorage.setItem("studio-admin-token", password);
 			navigate({
 				to: "/admin",
 				replace: true
@@ -87,10 +92,6 @@ function Auth() {
 							err && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "text-sm text-[color:var(--ember)]",
 								children: err
-							}),
-							info && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "text-sm text-[color:var(--lime)]",
-								children: info
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								disabled: busy,

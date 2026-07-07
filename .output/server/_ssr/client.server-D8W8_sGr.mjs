@@ -1,6 +1,6 @@
 import { t as createClient } from "../_libs/supabase__supabase-js.mjs";
 import processModule from "node:process";
-//#region node_modules/.nitro/vite/services/ssr/assets/client.server-DAKDxF4H.js
+//#region node_modules/.nitro/vite/services/ssr/assets/client.server-D8W8_sGr.js
 function isNewSupabaseApiKey(value) {
 	return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
 }
@@ -11,6 +11,10 @@ function createSupabaseFetch(supabaseKey) {
 		console.log(`[Supabase] External request: ${method} ${url}`);
 		const headers = new Headers(typeof Request !== "undefined" && input instanceof Request ? input.headers : void 0);
 		if (init?.headers) new Headers(init.headers).forEach((value, key) => headers.set(key, value));
+		const authorizationHeader = headers.get("Authorization");
+		const keyType = isNewSupabaseApiKey(supabaseKey) ? "new" : "legacy";
+		console.log(`[Supabase] createSupabaseFetch keyType=${keyType} Authorization=${authorizationHeader ?? "none"} apikey=${headers.get("apikey") ?? "none"}`);
+		if (!isNewSupabaseApiKey(supabaseKey) && !authorizationHeader) headers.set("Authorization", `Bearer ${supabaseKey}`);
 		if (isNewSupabaseApiKey(supabaseKey) && headers.get("Authorization") === `Bearer ${supabaseKey}`) headers.delete("Authorization");
 		headers.set("apikey", supabaseKey);
 		return fetch(input, {

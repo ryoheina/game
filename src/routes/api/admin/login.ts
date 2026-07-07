@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createAdminAuthCookie } from "@/lib/admin-auth";
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.VITE_ADMIN_PASSWORD || process.env.STUDIO_ADMIN_PASSWORD || "";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.STUDIO_ADMIN_PASSWORD;
 
 export const Route = createFileRoute("/api/admin/login")({
   server: {

@@ -1,7 +1,7 @@
 import { createHmac } from "crypto";
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.VITE_ADMIN_PASSWORD || "";
-export const ADMIN_COOKIE_NAME = "studio-admin-token";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.STUDIO_ADMIN_PASSWORD;
+const ADMIN_COOKIE_NAME = "admin-auth-token";
 
 function getAdminCookieValue() {
   return createHmac("sha256", ADMIN_PASSWORD).update("studio-admin-auth").digest("hex");
@@ -15,8 +15,7 @@ export function isAdminAuthorized(request: Request) {
     return [name, rest.join("=")];
   }));
   const cookieValue = cookies[ADMIN_COOKIE_NAME];
-  const headerValue = request.headers.get("x-admin-password") || "";
-  return cookieValue === getAdminCookieValue() || headerValue === ADMIN_PASSWORD;
+  return cookieValue === getAdminCookieValue();
 }
 
 export function createAdminAuthCookie() {

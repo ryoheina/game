@@ -32,11 +32,44 @@ type DashboardFailureResponse = {
 
 const requiredEnvVars = ["ADMIN_PASSWORD", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"] as const;
 
+type DashboardEnvInfo = {
+  SUPABASE_URL: boolean;
+  SUPABASE_SERVICE_ROLE_KEY: boolean;
+  SUPABASE_PUBLISHABLE_KEY: boolean;
+  ADMIN_PASSWORD: boolean;
+  NODE_ENV: string;
+  VERCEL: string;
+  VERCEL_ENV: string;
+  runtime: string;
+  cwd: string;
+  errors: Array<{ step: string; message: string; stack?: string; missing?: string[] }>;
+  missing?: string[];
+};
+
 function logEnvStatus() {
   const status = requiredEnvVars
     .map((name) => `${name}=${process.env[name] ? "set" : "missing"}`)
     .join(", ");
   console.log(`[Dashboard] Required env vars: ${status}`);
+}
+
+function buildEnvInfo(errors: DashboardEnvInfo["errors"], missing?: string[]): DashboardEnvInfo {
+  const runtime = typeof process !== "undefined" && process.release?.name ? `${process.release.name} ${process.version}` : "unknown";
+  const cwd = typeof process !== "undefined" && typeof process.cwd === "function" ? process.cwd() : "unknown";
+
+  return {
+    SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
+    SUPABASE_SERVICE_ROLE_KEY: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    SUPABASE_PUBLISHABLE_KEY: Boolean(process.env.SUPABASE_PUBLISHABLE_KEY),
+    ADMIN_PASSWORD: Boolean(process.env.ADMIN_PASSWORD || process.env.STUDIO_ADMIN_PASSWORD),
+    NODE_ENV: process.env.NODE_ENV ?? "undefined",
+    VERCEL: process.env.VERCEL ?? "undefined",
+    VERCEL_ENV: process.env.VERCEL_ENV ?? "undefined",
+    runtime,
+    cwd,
+    errors,
+    missing,
+  };
 }
 
 function createFailureResponse(message: string, step: string, error?: unknown, details?: string, table?: string, column?: string): DashboardFailureResponse {
@@ -99,7 +132,11 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           if (missingEnv.length > 0) {
             const message = `Missing required environment variables: ${missingEnv.join(", ")}`;
             console.error("[Dashboard]", message);
-            return new Response(JSON.stringify(createFailureResponse(message, "validate_env", undefined, undefined, missingEnv.join(", "))), {
+            const envInfo = buildEnvInfo(
+              [{ step: "validate_env", message, missing: missingEnv }],
+              missingEnv,
+            );
+            return new Response(JSON.stringify(envInfo), {
               status: 200,
               headers: responseHeaders,
             });

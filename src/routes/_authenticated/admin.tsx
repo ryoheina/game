@@ -2,8 +2,6 @@
 import { useEffect, useState, useRef } from "react";
 import { MouseGlow } from "@/components/fx";
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? "20070925";
-
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
   component: Admin,
@@ -18,12 +16,22 @@ function Admin() {
   const lastSnapshotRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const token = window.localStorage.getItem("studio-admin-token");
-    const valid = token === ADMIN_PASSWORD;
-    setAuthorized(valid);
-    if (!valid) {
-      navigate({ to: "/auth", replace: true });
-    }
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/dashboard", { credentials: "include" });
+        if (res.status === 401) {
+          navigate({ to: "/auth", replace: true });
+          return;
+        }
+        if (res.ok && mounted) setAuthorized(true);
+      } catch {
+        navigate({ to: "/auth", replace: true });
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
   }, [navigate]);
 
   useEffect(() => {
@@ -34,19 +42,14 @@ function Admin() {
     }
 
     let mounted = true;
-    const token = window.localStorage.getItem("studio-admin-token") || "";
 
     async function poll() {
       try {
         const res = await fetch("/api/admin/dashboard", {
           credentials: "include",
-          headers: {
-            "content-type": "application/json",
-            "x-admin-password": token,
-          },
+          headers: { "content-type": "application/json" },
         });
         if (res.status === 401) {
-          window.localStorage.removeItem("studio-admin-token");
           navigate({ to: "/auth", replace: true });
           return;
         }
@@ -101,7 +104,6 @@ function Admin() {
   }, [authorized, navigate]);
 
   const signOut = async () => {
-    window.localStorage.removeItem("studio-admin-token");
     await fetch("/api/admin/logout", { method: "POST", credentials: "include" }).catch(() => {});
     navigate({ to: "/auth", replace: true });
   };
@@ -133,7 +135,7 @@ function Admin() {
         <section className="rounded-3xl glass p-8 text-white">
           <h1 className="display text-3xl">Studio Admin Dashboard</h1>
           <p className="mt-3 text-sm text-white/70">
-            You are signed in using the local admin password. This dashboard is now accessible without Supabase session auth.
+            You are signed in using the signed admin cookie. This dashboard is protected by cookie-based admin auth only.
           </p>
         </section>
 
@@ -221,7 +223,7 @@ function Admin() {
               <p className="text-sm text-white/70">Use the admin password to gate access to studio management content.</p>
             </div>
             <div className="rounded-2xl bg-white/5 p-4">
-              <p className="text-sm text-white/70">Sign out will clear the local admin token and return you to the login page.</p>
+              <p className="text-sm text-white/70">Sign out will clear the admin cookie and return you to the login page.</p>
             </div>
           </div>
         </section>
