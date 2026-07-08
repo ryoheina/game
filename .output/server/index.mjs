@@ -25,70 +25,70 @@ var public_assets_data_default = {
 	"/assets/admin-zK0QVYPM.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"585a-zo6ygFUqwqSxGi/3eUn8h4i+uec\"",
-		"mtime": "2026-07-07T19:17:33.588Z",
+		"mtime": "2026-07-08T11:57:16.596Z",
 		"size": 22618,
 		"path": "../public/assets/admin-zK0QVYPM.js"
 	},
 	"/assets/auth-DGcxpyay.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"a21-wn0qvq8kyTi/Dl/MUeaVUu9Uj5M\"",
-		"mtime": "2026-07-07T19:17:33.591Z",
+		"mtime": "2026-07-08T11:57:16.597Z",
 		"size": 2593,
 		"path": "../public/assets/auth-DGcxpyay.js"
 	},
 	"/assets/fx-ByJla8Q8.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"769-jQqP5cLYPNy31PLBqiEintNEybs\"",
-		"mtime": "2026-07-07T19:17:33.595Z",
+		"mtime": "2026-07-08T11:57:16.601Z",
 		"size": 1897,
 		"path": "../public/assets/fx-ByJla8Q8.js"
 	},
 	"/assets/jsx-runtime-D8nDyRPw.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"2210-qrBAUPDOR8ROKpBVNEla8AGnGKU\"",
-		"mtime": "2026-07-07T19:17:33.598Z",
+		"mtime": "2026-07-08T11:57:16.603Z",
 		"size": 8720,
 		"path": "../public/assets/jsx-runtime-D8nDyRPw.js"
 	},
 	"/assets/lenis-DdrGTsEx.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"478d-mZHPO7Pf1OkK6MydXdG+JjPcikM\"",
-		"mtime": "2026-07-07T19:17:33.605Z",
+		"mtime": "2026-07-08T11:57:16.604Z",
 		"size": 18317,
 		"path": "../public/assets/lenis-DdrGTsEx.js"
 	},
 	"/assets/me-Di_MdLF7.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"d65-WVWQqzBZNAzZ/w6QJYZxUj14x2I\"",
-		"mtime": "2026-07-07T19:17:33.609Z",
+		"mtime": "2026-07-08T11:57:16.605Z",
 		"size": 3429,
 		"path": "../public/assets/me-Di_MdLF7.js"
-	},
-	"/assets/route-CcMDxsGo.js": {
-		"type": "text/javascript; charset=utf-8",
-		"etag": "\"8d-PUgzhOVy4EEfU+hnllwwOIMaYEM\"",
-		"mtime": "2026-07-07T19:17:33.612Z",
-		"size": 141,
-		"path": "../public/assets/route-CcMDxsGo.js"
 	},
 	"/assets/styles-D7UQjLCp.css": {
 		"type": "text/css; charset=utf-8",
 		"etag": "\"17799-uWRJg9iR+/4Le+KiFXKobzpQoXQ\"",
-		"mtime": "2026-07-07T19:17:33.616Z",
+		"mtime": "2026-07-08T11:57:16.609Z",
 		"size": 96153,
 		"path": "../public/assets/styles-D7UQjLCp.css"
 	},
 	"/assets/routes-DNfSH6qy.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"398a4-ViSzOb+eGf7NwWOAMnzjJ09nHoo\"",
-		"mtime": "2026-07-07T19:17:33.614Z",
+		"mtime": "2026-07-08T11:57:16.608Z",
 		"size": 235684,
 		"path": "../public/assets/routes-DNfSH6qy.js"
+	},
+	"/assets/route-CcMDxsGo.js": {
+		"type": "text/javascript; charset=utf-8",
+		"etag": "\"8d-PUgzhOVy4EEfU+hnllwwOIMaYEM\"",
+		"mtime": "2026-07-08T11:57:16.606Z",
+		"size": 141,
+		"path": "../public/assets/route-CcMDxsGo.js"
 	},
 	"/assets/index-CiDjBQF6.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"84a0d-mVlOKcZ2Og5SxzrFA2Rqv6JSYwg\"",
-		"mtime": "2026-07-07T19:17:33.581Z",
+		"mtime": "2026-07-08T11:57:16.595Z",
 		"size": 543245,
 		"path": "../public/assets/index-CiDjBQF6.js"
 	},
@@ -106,12 +106,12 @@ var public_assets_data_default = {
 		"size": 2408806,
 		"path": "../public/game2.png"
 	},
-	"/game3.png": {
+	"/AZRAEL.png": {
 		"type": "image/png",
-		"etag": "\"26612d-e1fd+PEpVzvuzXAZZrs36ZT4bEc\"",
-		"mtime": "2026-07-06T10:39:51.873Z",
-		"size": 2515245,
-		"path": "../public/game3.png"
+		"etag": "\"28ef86-IC8QMM4enbaZRfvGlQOkyQeFbGk\"",
+		"mtime": "2026-07-06T10:39:51.756Z",
+		"size": 2682758,
+		"path": "../public/AZRAEL.png"
 	},
 	"/Background.png": {
 		"type": "image/png",
@@ -127,12 +127,19 @@ var public_assets_data_default = {
 		"size": 2346791,
 		"path": "../public/ZEREVOK.png"
 	},
-	"/AZRAEL.png": {
+	"/LUCAS.png": {
 		"type": "image/png",
-		"etag": "\"28ef86-IC8QMM4enbaZRfvGlQOkyQeFbGk\"",
-		"mtime": "2026-07-06T10:39:51.756Z",
-		"size": 2682758,
-		"path": "../public/AZRAEL.png"
+		"etag": "\"28b546-CvmltOxAfSPSdWTSDeOg5tOXOBE\"",
+		"mtime": "2026-07-06T10:39:51.810Z",
+		"size": 2667846,
+		"path": "../public/LUCAS.png"
+	},
+	"/game3.png": {
+		"type": "image/png",
+		"etag": "\"26612d-e1fd+PEpVzvuzXAZZrs36ZT4bEc\"",
+		"mtime": "2026-07-06T10:39:51.873Z",
+		"size": 2515245,
+		"path": "../public/game3.png"
 	},
 	"/ELYSIA.png": {
 		"type": "image/png",
@@ -140,13 +147,6 @@ var public_assets_data_default = {
 		"mtime": "2026-07-06T10:39:51.797Z",
 		"size": 3135347,
 		"path": "../public/ELYSIA.png"
-	},
-	"/LUCAS.png": {
-		"type": "image/png",
-		"etag": "\"28b546-CvmltOxAfSPSdWTSDeOg5tOXOBE\"",
-		"mtime": "2026-07-06T10:39:51.810Z",
-		"size": 2667846,
-		"path": "../public/LUCAS.png"
 	},
 	"/3D Game.rar": {
 		"type": "application/vnd.rar",

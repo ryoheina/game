@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { getClientMeta } from "@/lib/ua";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+const PUBLIC_ARCHIVE_NAME = "3D Game.rar";
+const PUBLIC_ARCHIVE_PATH = `/${encodeURIComponent(PUBLIC_ARCHIVE_NAME)}`;
+
 export const Route = createFileRoute("/api/public/download")({
   server: {
     handlers: {
@@ -9,16 +12,7 @@ export const Route = createFileRoute("/api/public/download")({
         const meta = getClientMeta(request);
         const url = new URL(request.url);
         const sid = url.searchParams.get("sid") || null;
-        const fileName = url.searchParams.get("file") || "3D Game.rar";
-        const storageObjectPath = fileName.replace(/^\/+/, "");
-        const candidateBuckets = [
-          process.env.SUPABASE_STORAGE_BUCKET,
-          process.env.VITE_SUPABASE_STORAGE_BUCKET,
-          "downloads",
-          "public",
-          "game-builds",
-          "game",
-        ].filter((value): value is string => Boolean(value));
+        const requestedFileName = url.searchParams.get("file") || PUBLIC_ARCHIVE_NAME;
 
         let downloadId: string | null = null;
         try {
@@ -26,7 +20,7 @@ export const Route = createFileRoute("/api/public/download")({
           const { data: insertData, error: insertError } = await supabaseAdmin
             .from("downloads")
             .insert({
-              file_name: fileName,
+              file_name: requestedFileName,
               session_id: sid,
               ip: meta.ip,
               country: meta.country,
@@ -45,32 +39,49 @@ export const Route = createFileRoute("/api/public/download")({
           console.error("download log failed", e);
         }
 
-        let archiveBlob: Blob | null = null;
-        let storageError: unknown = null;
-        let usedBucket: string | null = null;
+        const archiveUrl = new URL(PUBLIC_ARCHIVE_PATH, request.url);
 
-        for (const bucketName of candidateBuckets) {
-          try {
-            const { data, error } = await supabaseAdmin.storage.from(bucketName).download(storageObjectPath);
-            if (!error && data) {
-              archiveBlob = data;
-              usedBucket = bucketName;
-              break;
-            }
-            storageError = error ?? new Error("No archive returned from storage");
-          } catch (e) {
-            storageError = e;
-          }
-        }
-
-        if (!archiveBlob) {
-          console.error("[Download] Supabase Storage download failed", {
-            buckets: candidateBuckets,
-            objectPath: storageObjectPath,
-            fileName,
-            error: storageError,
+        try {
+          const assetResponse = await fetch(archiveUrl, {
+            headers: {
+              Accept: "application/octet-stream, */*",
+            },
           });
-          return new Response(JSON.stringify({ success: false, error: "Archive not found" }), {
+
+          if (!assetResponse.ok || !assetResponse.body) {
+            return new Response(JSON.stringify({ success: false, error: "Game file not found." }), {
+              status: 404,
+              headers: {
+                "content-type": "application/json",
+                "Cache-Control": "no-store",
+              },
+            });
+          }
+
+          try {
+            if (downloadId) {
+              await supabaseAdmin.from("downloads").update({ completed: true, completed_at: new Date().toISOString() }).eq("id", downloadId);
+              await supabaseAdmin.from("notifications").insert({ type: "download_complete", title: "Download Complete", body: `${meta.ip ?? "unknown"} — ${requestedFileName}`, payload: { download_id: downloadId, session_id: sid } });
+            }
+          } catch (e) {
+            console.error("post-download update failed", e);
+          }
+
+          return new Response(assetResponse.body, {
+            status: 200,
+            headers: {
+              "Content-Type": assetResponse.headers.get("content-type") || "application/x-rar-compressed",
+              "Content-Disposition": `attachment; filename="${requestedFileName}"`,
+              "Content-Length": assetResponse.headers.get("content-length") || "",
+              "Cache-Control": "no-store",
+            },
+          });
+        } catch (error) {
+          console.error("[Download] public archive request failed", {
+            archiveUrl: archiveUrl.toString(),
+            error,
+          });
+          return new Response(JSON.stringify({ success: false, error: "Game file not found." }), {
             status: 404,
             headers: {
               "content-type": "application/json",
@@ -78,26 +89,6 @@ export const Route = createFileRoute("/api/public/download")({
             },
           });
         }
-
-        try {
-          if (downloadId) {
-            await supabaseAdmin.from("downloads").update({ completed: true, completed_at: new Date().toISOString() }).eq("id", downloadId);
-            await supabaseAdmin.from("notifications").insert({ type: "download_complete", title: "Download Complete", body: `${meta.ip ?? "unknown"} — ${fileName}`, payload: { download_id: downloadId, session_id: sid } });
-          }
-        } catch (e) {
-          console.error("post-download update failed", e);
-        }
-
-        return new Response(archiveBlob, {
-          status: 200,
-          headers: {
-            "Content-Type": "application/x-rar-compressed",
-            "Content-Disposition": `attachment; filename="${fileName}"`,
-            "Content-Length": String(archiveBlob.size),
-            "Cache-Control": "no-store",
-            "X-Storage-Bucket": usedBucket ?? "",
-          },
-        });
       },
     },
   },

@@ -968,7 +968,7 @@ var getBaseManifest = getProdBaseManifest;
 var createEarlyHintsForRequest = createEarlyHintsCollector;
 async function loadEntries() {
 	const [routerEntry, startEntry, pluginAdapters] = await Promise.all([
-		import("./router-BaFm5kja.mjs"),
+		import("./router-BJ1cES-2.mjs"),
 		import("./start-CSF6h0BP.mjs"),
 		import("./empty-plugin-adapters-D9UWiqvJ.mjs")
 	]);
