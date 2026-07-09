@@ -32,29 +32,23 @@ export const trackVisit = createServerFn({ method: "POST" })
       const wasOffline = Date.now() - new Date(existing.last_active as string).getTime() > 120_000;
       await supabaseAdmin
         .from("sessions")
-        .update({ last_active: now, ip: meta.ip, country, browser: meta.browser, os: meta.os, device: meta.device, user_agent: meta.ua, notified_left: false })
+        .update({ last_active: now, ip: meta.ip, country, browser: meta.browser, device: meta.device, user_agent: meta.ua, notified_left: false })
         .eq("session_id", data.sessionId);
       if (data.heartbeat) return { ok: true };
       if (wasOffline) {
         try {
           await supabaseAdmin.from("notifications").insert({
             type: "visitor",
-            type_detail: "visitor",
             title: "Visitor Arrived",
             body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
-            session_id: data.sessionId,
-            ip_address: meta.ip,
-            country,
-            browser: meta.browser,
-            device: meta.device,
             payload: {
+              type_detail: "visitor",
               session_id: data.sessionId,
               ip_address: meta.ip,
               country,
               browser: meta.browser,
               device: meta.device,
             },
-            read: false,
             delivered: false,
           });
         } catch (e) {
@@ -88,7 +82,6 @@ export const trackVisit = createServerFn({ method: "POST" })
           ip: meta.ip,
           country,
           browser: meta.browser,
-          os: meta.os,
           device: meta.device,
           user_agent: meta.ua,
           first_visit: now,
@@ -98,22 +91,16 @@ export const trackVisit = createServerFn({ method: "POST" })
       try {
         await supabaseAdmin.from("notifications").insert({
           type: "visitor",
-          type_detail: "visitor",
           title: "Visitor Arrived",
           body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
-          session_id: data.sessionId,
-          ip_address: meta.ip,
-          country,
-          browser: meta.browser,
-          device: meta.device,
           payload: {
+            type_detail: "visitor",
             session_id: data.sessionId,
             ip_address: meta.ip,
             country,
             browser: meta.browser,
             device: meta.device,
           },
-          read: false,
           delivered: false,
         });
       } catch (e) {

@@ -19,6 +19,40 @@ export const Route = createFileRoute("/api/public/download")({
         let downloadId: string | null = null;
         try {
           const now = new Date().toISOString();
+          if (sid) {
+            const { data: existingSession } = await supabaseAdmin
+              .from("sessions")
+              .select("session_id")
+              .eq("session_id", sid)
+              .maybeSingle();
+
+            if (existingSession) {
+              await supabaseAdmin
+                .from("sessions")
+                .update({
+                  last_active: now,
+                  ip: meta.ip,
+                  country,
+                  browser: meta.browser,
+                  device: meta.device,
+                  user_agent: meta.ua,
+                  notified_left: false,
+                })
+                .eq("session_id", sid);
+            } else {
+              await supabaseAdmin.from("sessions").insert({
+                session_id: sid,
+                ip: meta.ip,
+                country,
+                browser: meta.browser,
+                device: meta.device,
+                user_agent: meta.ua,
+                first_visit: now,
+                last_active: now,
+              });
+            }
+          }
+
           const { data: insertData, error: insertError } = await supabaseAdmin
             .from("downloads")
             .insert({
