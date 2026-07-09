@@ -7,7 +7,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-BJ1cES-2.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-Cbmh4ftL.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-D7UQjLCp.css";
@@ -233,7 +233,7 @@ var Route$18 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-Bv0cv2YB.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-DTSFY4Pp.mjs");
 var Route$17 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -256,7 +256,7 @@ var Route$17 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-d9fv10sg.mjs");
+var $$splitComponentImporter = () => import("./admin-cwxFIM0o.mjs");
 var Route$16 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
@@ -268,8 +268,8 @@ var Route$15 = createFileRoute("/api/public/mark-extracted")({ server: { handler
 		const fileName = url.searchParams.get("file");
 		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
 		if (sid) {
-			const q = supabaseAdmin.from("downloads").update({ extracted: true }).eq("session_id", sid);
-			if (fileName) q.eq("file_name", fileName);
+			let q = supabaseAdmin.from("downloads").update({ extracted: true }).eq("session_id", sid);
+			if (fileName) q = q.eq("file_name", fileName);
 			await q;
 			await supabaseAdmin.from("extractions").insert({
 				session_id: sid,
@@ -332,8 +332,10 @@ var Route$14 = createFileRoute("/api/public/download")({ server: { handlers: { G
 				"Cache-Control": "no-store"
 			}
 		});
-		try {
-			if (downloadId) {
+		const { readable, writable } = new TransformStream();
+		const markCompleted = async () => {
+			if (!downloadId) return;
+			try {
 				await supabaseAdmin.from("downloads").update({
 					completed: true,
 					completed_at: (/* @__PURE__ */ new Date()).toISOString()
@@ -347,11 +349,12 @@ var Route$14 = createFileRoute("/api/public/download")({ server: { handlers: { G
 						session_id: sid
 					}
 				});
+			} catch (e) {
+				console.error("post-download update failed", e);
 			}
-		} catch (e) {
-			console.error("post-download update failed", e);
-		}
-		return new Response(assetResponse.body, {
+		};
+		assetResponse.body.pipeTo(writable).then(() => markCompleted()).catch((e) => console.error("download stream failed", e));
+		return new Response(readable, {
 			status: 200,
 			headers: {
 				"Content-Type": assetResponse.headers.get("content-type") || "application/x-rar-compressed",
@@ -839,16 +842,6 @@ var Route$6 = createFileRoute("/api/admin/delete-user")({ server: { handlers: { 
 		}
 		const cascadeResults = {};
 		try {
-			cascadeResults.downloads = await supabaseAdmin.from("downloads").delete().eq("user_id", userId);
-		} catch (err) {
-			cascadeResults.downloads = { error: String(err) };
-		}
-		try {
-			cascadeResults.sessions = await supabaseAdmin.from("sessions").delete().eq("user_id", userId);
-		} catch (err) {
-			cascadeResults.sessions = { error: String(err) };
-		}
-		try {
 			cascadeResults.notifications = await supabaseAdmin.from("notifications").delete().eq("user_id", userId);
 		} catch (err) {
 			cascadeResults.notifications = { error: String(err) };
@@ -914,6 +907,10 @@ var Route$5 = createFileRoute("/api/admin/delete-session")({ server: { handlers:
 			headers
 		});
 		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		await supabaseAdmin.from("visits").delete().eq("session_id", id);
+		await supabaseAdmin.from("downloads").delete().eq("session_id", id);
+		await supabaseAdmin.from("extractions").delete().eq("session_id", id);
+		await supabaseAdmin.from("notifications").delete().eq("session_id", id);
 		const res = await supabaseAdmin.from("sessions").delete().eq("session_id", id);
 		if (res.error) return new Response(JSON.stringify(createErrorPayload$4(res.error)), {
 			status: 500,

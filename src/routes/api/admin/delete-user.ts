@@ -39,22 +39,8 @@ export const Route = createFileRoute("/api/admin/delete-user")({
             return new Response(JSON.stringify(createErrorPayload(err)), { status: 500, headers });
           }
 
-          // Delete associated records first
-          const cascadeResults: Record<string, any> = {};
-          try {
-            const dl = await supabaseAdmin.from("downloads").delete().eq("user_id", userId);
-            cascadeResults.downloads = dl;
-          } catch (err) {
-            cascadeResults.downloads = { error: String(err) };
-          }
-
-          try {
-            const ss = await supabaseAdmin.from("sessions").delete().eq("user_id", userId);
-            cascadeResults.sessions = ss;
-          } catch (err) {
-            cascadeResults.sessions = { error: String(err) };
-          }
-
+          // Delete associated records first (only tables that have user_id)
+          const cascadeResults: Record<string, unknown> = {};
           try {
             const nt = await supabaseAdmin.from("notifications").delete().eq("user_id", userId);
             cascadeResults.notifications = nt;

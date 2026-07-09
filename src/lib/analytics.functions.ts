@@ -5,7 +5,15 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getClientMeta } from "./ua";
 
 export const trackVisit = createServerFn({ method: "POST" })
-  .validator((d) => z.object({ sessionId: z.string().min(8).max(64), path: z.string().max(500) }).parse(d))
+  .validator((d) =>
+    z
+      .object({
+        sessionId: z.string().min(8).max(64),
+        path: z.string().max(500),
+        heartbeat: z.boolean().optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     const req = getRequest();
     const meta = req ? getClientMeta(req) : { ip: null, country: null, ua: "", referrer: null, browser: "Unknown", os: "Unknown", device: "Desktop" };
@@ -13,7 +21,15 @@ export const trackVisit = createServerFn({ method: "POST" })
 
     const now = new Date().toISOString();
 
-    // Insert visit record
+    const { data: existing } = await supabaseAdmin.from("sessions").select("session_id").eq("session_id", data.sessionId).maybeSingle();
+    if (existing) {
+      await supabaseAdmin.from("sessions").update({ last_active: now, ip: meta.ip, country: meta.country, browser: meta.browser, os: meta.os, device: meta.device, user_agent: meta.ua }).eq("session_id", data.sessionId);
+      if (data.heartbeat) return { ok: true };
+    } else if (data.heartbeat) {
+      return { ok: true };
+    }
+
+    // Insert visit record only for real page views, not heartbeats
     await supabaseAdmin.from("visits").insert({
       session_id: data.sessionId,
       path: data.path,
@@ -26,11 +42,8 @@ export const trackVisit = createServerFn({ method: "POST" })
       referrer: meta.referrer,
     });
 
-    // Upsert session: if exists update last_active, else insert with first_visit
-    const { data: existing } = await supabaseAdmin.from("sessions").select("session_id").eq("session_id", data.sessionId).maybeSingle();
     if (existing) {
-      await supabaseAdmin.from("sessions").update({ last_active: now, ip: meta.ip, country: meta.country, browser: meta.browser, os: meta.os, device: meta.device, user_agent: meta.ua }).eq("session_id", data.sessionId);
-      // create a small heartbeat notification? we skip notifications for heartbeats
+      // session already updated above
     } else {
       await supabaseAdmin.from("sessions").insert({ session_id: data.sessionId, ip: meta.ip, country: meta.country, browser: meta.browser, os: meta.os, device: meta.device, user_agent: meta.ua, first_visit: now, last_active: now });
       // notify admin of arrival

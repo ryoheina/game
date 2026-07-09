@@ -1,6 +1,5 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import useAdminNotifications from "@/hooks/use-admin-notifications";
 import { useDesktopNotifications } from "@/hooks/use-desktop-notifications";
 import { MouseGlow } from "@/components/fx";
@@ -46,9 +45,7 @@ function Admin() {
     }
 
     let mounted = true;
-    let polling = true;
-    let pollIv: any = null;
-    let sbSubscription: any = null;
+    let pollIv: ReturnType<typeof setInterval> | null = null;
 
     async function fetchDashboard() {
       try {
@@ -101,43 +98,12 @@ function Admin() {
       }
     }
 
-    // Try Supabase Realtime subscription for downloads
-    (async () => {
-      try {
-        const chan = supabase.channel("public:downloads");
-        chan.on(
-          "postgres_changes",
-          { event: "INSERT", schema: "public", table: "downloads" },
-          (payload) => {
-            if (!mounted) return;
-            setDownloads((prev) => [payload.new, ...prev]);
-          },
-        );
-
-        sbSubscription = await chan.subscribe();
-        // if subscription succeeded, stop polling
-        // supabase channel subscribe returns object with status in newer SDKs; we assume success if no error thrown
-        polling = false;
-      } catch (e) {
-        console.warn("Realtime subscription failed, falling back to polling:", e);
-        polling = true;
-      }
-
-      // Always do an initial fetch
-      await fetchDashboard();
-      if (polling) {
-        pollIv = setInterval(fetchDashboard, 3000);
-      }
-    })();
+    void fetchDashboard();
+    pollIv = setInterval(fetchDashboard, 3000);
 
     return () => {
       mounted = false;
       if (pollIv) clearInterval(pollIv);
-      try {
-        if (sbSubscription && typeof sbSubscription.unsubscribe === "function") sbSubscription.unsubscribe();
-      } catch (e) {
-        // ignore
-      }
     };
   }, [authorized, navigate]);
 

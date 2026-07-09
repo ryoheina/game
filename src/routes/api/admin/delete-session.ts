@@ -19,6 +19,10 @@ export const Route = createFileRoute("/api/admin/delete-session")({
           const id = body?.id;
           if (!id) return new Response(JSON.stringify({ success: false, error: "Missing id" }), { status: 400, headers });
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          await supabaseAdmin.from("visits").delete().eq("session_id", id);
+          await supabaseAdmin.from("downloads").delete().eq("session_id", id);
+          await supabaseAdmin.from("extractions").delete().eq("session_id", id);
+          await supabaseAdmin.from("notifications").delete().eq("session_id", id);
           const res = await supabaseAdmin.from("sessions").delete().eq("session_id", id);
           if (res.error) return new Response(JSON.stringify(createErrorPayload(res.error)), { status: 500, headers });
           return new Response(JSON.stringify({ success: true }), { status: 200, headers });

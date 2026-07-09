@@ -3508,7 +3508,7 @@ var stringType = ZodString.create;
 ZodNumber.create;
 ZodNaN.create;
 ZodBigInt.create;
-ZodBoolean.create;
+var booleanType = ZodBoolean.create;
 ZodDate.create;
 ZodSymbol.create;
 ZodUndefined.create;
@@ -3539,4 +3539,4 @@ ZodNullable.create;
 ZodEffects.createWithPreprocess;
 ZodPipeline.create;
 //#endregion
-export { stringType as n, objectType as t };
+export { objectType as n, stringType as r, booleanType as t };

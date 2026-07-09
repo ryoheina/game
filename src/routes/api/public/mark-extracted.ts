@@ -12,8 +12,8 @@ export const Route = createFileRoute("/api/public/mark-extracted")({
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
           if (sid) {
-            const q = supabaseAdmin.from("downloads").update({ extracted: true }).eq("session_id", sid);
-            if (fileName) (q as any).eq("file_name", fileName);
+            let q = supabaseAdmin.from("downloads").update({ extracted: true }).eq("session_id", sid);
+            if (fileName) q = q.eq("file_name", fileName);
             await q;
             // record extraction event
             await supabaseAdmin.from("extractions").insert({ session_id: sid, file_name: fileName, device: null });

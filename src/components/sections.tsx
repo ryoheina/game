@@ -1,7 +1,8 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
-import { IMG } from "@/lib/assets";
+import { AssetImg } from "@/components/asset-img";
+import type { ImgKey } from "@/lib/assets";
 import { Particles, Fog } from "./fx";
 
 export function Hero({ onDownload }: { onDownload: () => void }) {
@@ -37,8 +38,8 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
         style={{ y, scale }}
         className="absolute inset-0 z-0"
       >
-        <img
-          src={IMG.azrael}
+        <AssetImg
+          asset="azrael"
           alt="Azrael, the Chosen"
           className="h-full w-full object-cover"
           style={{ objectPosition: "18% center", animation: "slowZoom 30s ease-in-out infinite alternate", transform: "scale(1.12)", transformOrigin: "20% center" }}
@@ -171,7 +172,7 @@ export function Story() {
 type Character = {
   name: string;
   title: string;
-  img: string;
+  asset: ImgKey;
   color: "arcane" | "gold" | "ember";
   power: number;
   description: string;
@@ -182,7 +183,7 @@ const characters: Character[] = [
   {
     name: "Azrael",
     title: "The Chosen · Champion of Light and Shadow",
-    img: IMG.azrael,
+    asset: "azrael",
     color: "arcane",
     power: 98,
     description:
@@ -192,7 +193,7 @@ const characters: Character[] = [
   {
     name: "Lucas",
     title: "The Light Guardian · Loyal Brother in Arms",
-    img: IMG.lucas,
+    asset: "lucas",
     color: "gold",
     power: 88,
     description:
@@ -202,7 +203,7 @@ const characters: Character[] = [
   {
     name: "Elysia",
     title: "Goddess of Harmony · The Balance",
-    img: IMG.elysia,
+    asset: "elysia",
     color: "gold",
     power: 100,
     description:
@@ -212,7 +213,7 @@ const characters: Character[] = [
   {
     name: "Zerevok",
     title: "The Soul Devourer · End of All Light",
-    img: IMG.zerevok,
+    asset: "zerevok",
     color: "ember",
     power: 96,
     description:
@@ -242,8 +243,8 @@ export function Characters({ onOpen }: { onOpen: (c: Character) => void }) {
                 onClick={() => onOpen(c)}
                 className="group relative block h-[520px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_0_50px_rgba(74,20,140,0.6)] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)] backdrop-blur-xl border border-white/10 hover:border-white/30"
               >
-                <img
-                  src={c.img}
+                <AssetImg
+                  asset={c.asset}
                   alt={c.name}
                   loading="lazy"
                   className="absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110"
@@ -341,7 +342,7 @@ export function CharacterModal({ c, onClose }: { c: Character | null; onClose: (
         className="relative grid max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-2xl glass md:grid-cols-2"
       >
         <div className="relative h-72 md:h-auto">
-          <img src={c.img} alt={c.name} className="absolute inset-0 h-full w-full object-cover" />
+          <AssetImg asset={c.asset} alt={c.name} className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent md:bg-gradient-to-r" />
         </div>
         <div className="relative overflow-auto p-8 md:p-10">
@@ -399,7 +400,7 @@ export function World() {
   return (
     <section id="world" ref={ref} className="relative overflow-hidden py-32">
       <motion.div style={{ y }} className="absolute inset-0">
-        <img src={IMG.background} alt="" aria-hidden className="h-[120%] w-full object-cover opacity-40" />
+        <AssetImg asset="background" alt="" aria-hidden className="h-[120%] w-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
       </motion.div>
       <Fog opacity={0.5} />
@@ -439,7 +440,7 @@ export function Battle() {
   return (
     <section ref={ref} className="relative isolate h-[100vh] min-h-[600px] w-full overflow-hidden">
       <motion.div style={{ scale, rotate: rot }} className="absolute inset-0">
-        <img src={IMG.background} alt="Battle of Aldreth" className="h-full w-full object-cover" />
+        <AssetImg asset="background" alt="Battle of Aldreth" className="h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/10 to-background/20" />
       </motion.div>
       <div

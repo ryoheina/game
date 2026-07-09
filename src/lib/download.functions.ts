@@ -23,8 +23,8 @@ export const markExtracted = createServerFn({ method: "POST" })
     }
 
     if (data.sessionId) {
-      const q = supabaseAdmin.from("downloads").update({ extracted: true }).eq("session_id", data.sessionId);
-      if (data.fileName) q.eq("file_name", data.fileName);
+      let q = supabaseAdmin.from("downloads").update({ extracted: true }).eq("session_id", data.sessionId);
+      if (data.fileName) q = q.eq("file_name", data.fileName);
       const { error } = await q;
       if (error) throw error;
       return { ok: true };

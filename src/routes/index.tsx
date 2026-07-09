@@ -43,23 +43,40 @@ function Home() {
     if (!sid) return;
     trackVisit({ data: { sessionId: sid, path: window.location.pathname } }).catch(() => {});
     const heartbeat = setInterval(() => {
-      trackVisit({ data: { sessionId: sid, path: window.location.pathname } }).catch(() => {});
+      trackVisit({ data: { sessionId: sid, path: window.location.pathname, heartbeat: true } }).catch(() => {});
     }, 60_000);
     return () => clearInterval(heartbeat);
   }, []);
 
   const handleDownload = useCallback(async () => {
     setDownloadStatus("loading");
-    const iframe = document.createElement("iframe");
-    iframe.style.display = "none";
     const sid = ensureSession();
-    const fileName = encodeURIComponent("3D Game.rar");
-    iframe.src = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${fileName}`;
-    document.body.appendChild(iframe);
-    setTimeout(() => {
+    const fileName = "3D Game.rar";
+    const url = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${encodeURIComponent(fileName)}`;
+
+    try {
+      const res = await fetch(url, { credentials: "same-origin" });
+      if (!res.ok) {
+        setDownloadStatus("idle");
+        return;
+      }
+
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = fileName;
+      anchor.style.display = "none";
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(objectUrl);
+
       setDownloadStatus("done");
-      setTimeout(() => document.body.removeChild(iframe), 3000);
-    }, 900);
+      window.setTimeout(() => setDownloadStatus("idle"), 3000);
+    } catch {
+      setDownloadStatus("idle");
+    }
   }, []);
 
   const handleContact = useCallback(async (d: { name: string; email: string; message: string }) => {

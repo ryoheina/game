@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 type NotificationEvent = {
   type: "visitor" | "download";
@@ -31,7 +30,6 @@ export function useDesktopNotifications() {
 
   const shownNotificationIdsRef = useRef<Set<string>>(new Set());
   const lastDataSnapshot = useRef<{ sessions: any[]; downloads: any[] }>({ sessions: [], downloads: [] });
-  const realtimeChannelRef = useRef<any>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
 
@@ -217,78 +215,12 @@ export function useDesktopNotifications() {
     };
   }, []);
 
-  // Set up Realtime and polling subscriptions
+  // Poll dashboard for new sessions and completed downloads.
   useEffect(() => {
     if (!mountedRef.current || notificationState.permission !== "granted") return;
 
-    let isRealtimeConnected = false;
-    let shouldPoll = true;
-
-    // Subscribe to new visitor sessions (inserts)
-    async function setupRealtimeSubscriptions() {
-      try {
-        // Subscribe to sessions
-        const sessionsChan = supabase.channel("desktop-notif:sessions");
-        sessionsChan.on(
-          "postgres_changes",
-          { event: "INSERT", schema: "public", table: "sessions" },
-          (payload) => {
-            if (!mountedRef.current) return;
-            console.log("[Desktop Notifications] Realtime connected");
-            isRealtimeConnected = true;
-            shouldPoll = false;
-
-            const newSession = payload.new;
-            showNotification("visitor", {
-              session_id: newSession.session_id,
-              ip: newSession.ip,
-              country: newSession.country,
-              device: newSession.device,
-              browser: newSession.browser,
-            });
-          }
-        );
-
-        await sessionsChan.subscribe();
-        console.log("[Desktop Notifications] Subscribed to sessions Realtime channel");
-
-        // Subscribe to downloads
-        const downloadsChan = supabase.channel("desktop-notif:downloads");
-        downloadsChan.on(
-          "postgres_changes",
-          { event: "INSERT", schema: "public", table: "downloads" },
-          (payload) => {
-            if (!mountedRef.current) return;
-
-            const newDownload = payload.new;
-            // Only notify if download is completed
-            if (newDownload.completed) {
-              showNotification("download", {
-                session_id: newDownload.session_id,
-                ip: newDownload.ip,
-                country: newDownload.country,
-                device: newDownload.device,
-                browser: newDownload.browser,
-                file_name: newDownload.file_name,
-              });
-            }
-          }
-        );
-
-        await downloadsChan.subscribe();
-        console.log("[Desktop Notifications] Subscribed to downloads Realtime channel");
-
-        realtimeChannelRef.current = { sessionsChan, downloadsChan };
-      } catch (err) {
-        console.warn("[Desktop Notifications] Realtime subscription failed, falling back to polling:", err);
-        isRealtimeConnected = false;
-        shouldPoll = true;
-      }
-    }
-
-    // Poll fallback to detect new rows every 2.5 seconds
     async function pollDashboard() {
-      if (!shouldPoll || !mountedRef.current) return;
+      if (!mountedRef.current) return;
 
       try {
         const res = await fetch("/api/admin/dashboard", { credentials: "include" });
@@ -300,7 +232,6 @@ export function useDesktopNotifications() {
         const currentSessions = data.sessions || [];
         const currentDownloads = data.downloads || [];
 
-        // Check for new sessions
         const lastSessionIds = new Set(lastDataSnapshot.current.sessions.map((s: any) => s.session_id));
         currentSessions.forEach((session: any) => {
           if (!lastSessionIds.has(session.session_id)) {
@@ -314,7 +245,6 @@ export function useDesktopNotifications() {
           }
         });
 
-        // Check for new downloads
         const lastDownloadIds = new Set(lastDataSnapshot.current.downloads.map((d: any) => d.id));
         currentDownloads.forEach((download: any) => {
           if (!lastDownloadIds.has(download.id) && download.completed) {
@@ -335,30 +265,12 @@ export function useDesktopNotifications() {
       }
     }
 
-    // Start subscriptions and polling
-    setupRealtimeSubscriptions();
-
-    // Polling interval (2.5 seconds)
-    pollingIntervalRef.current = setInterval(() => {
-      if (shouldPoll) {
-        pollDashboard();
-      }
-    }, 2500);
+    void pollDashboard();
+    pollingIntervalRef.current = setInterval(pollDashboard, 2500);
 
     return () => {
-      mountedRef.current = false;
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
-      }
-      try {
-        if (realtimeChannelRef.current?.sessionsChan) {
-          realtimeChannelRef.current.sessionsChan.unsubscribe();
-        }
-        if (realtimeChannelRef.current?.downloadsChan) {
-          realtimeChannelRef.current.downloadsChan.unsubscribe();
-        }
-      } catch (e) {
-        // ignore
       }
     };
   }, [notificationState.permission]);

@@ -5,10 +5,10 @@ import { n as MouseGlow, r as Particles, t as Fog } from "./fx-DmVqfUhc.mjs";
 import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-9EjmF9OT.mjs";
 import { t as requireSupabaseAuth } from "./auth-middleware-DZO41X7i.mjs";
-import { n as stringType, t as objectType } from "../_libs/zod.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-BcrBkvCE.mjs";
+import { n as objectType, r as stringType, t as booleanType } from "../_libs/zod.mjs";
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-5HBHUvG0.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-Bv0cv2YB.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-DTSFY4Pp.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -73,13 +73,94 @@ function Nav() {
 		})
 	});
 }
-var IMG = {
+var azrael_png_asset_default = {
+	version: 1,
+	asset_id: "d25da4f4-c48e-4aa6-aafc-aae001964652",
+	project_id: "19c86a1a-2fae-4b01-ac75-d707fb406ddc",
+	url: "/__l5e/assets-v1/d25da4f4-c48e-4aa6-aafc-aae001964652/azrael.png",
+	r2_key: "a/v1/19c86a1a-2fae-4b01-ac75-d707fb406ddc/d25da4f4-c48e-4aa6-aafc-aae001964652/azrael.png",
+	original_filename: "azrael.png",
+	size: 2682758,
+	content_type: "image/png",
+	created_at: "2026-07-05T20:44:30Z"
+};
+var background_png_asset_default = {
+	version: 1,
+	asset_id: "5ab0fb45-87a3-4874-afde-22203a9dd8c3",
+	project_id: "19c86a1a-2fae-4b01-ac75-d707fb406ddc",
+	url: "/__l5e/assets-v1/5ab0fb45-87a3-4874-afde-22203a9dd8c3/background.png",
+	r2_key: "a/v1/19c86a1a-2fae-4b01-ac75-d707fb406ddc/5ab0fb45-87a3-4874-afde-22203a9dd8c3/background.png",
+	original_filename: "background.png",
+	size: 2827878,
+	content_type: "image/png",
+	created_at: "2026-07-05T20:44:44Z"
+};
+var elysia_png_asset_default = {
+	version: 1,
+	asset_id: "5f320de6-7a8d-46f9-aca3-150116e95d68",
+	project_id: "19c86a1a-2fae-4b01-ac75-d707fb406ddc",
+	url: "/__l5e/assets-v1/5f320de6-7a8d-46f9-aca3-150116e95d68/elysia.png",
+	r2_key: "a/v1/19c86a1a-2fae-4b01-ac75-d707fb406ddc/5f320de6-7a8d-46f9-aca3-150116e95d68/elysia.png",
+	original_filename: "elysia.png",
+	size: 3135347,
+	content_type: "image/png",
+	created_at: "2026-07-05T20:44:48Z"
+};
+var lucas_png_asset_default = {
+	version: 1,
+	asset_id: "430dab87-0f2e-442b-99a3-08e6a804bdc1",
+	project_id: "19c86a1a-2fae-4b01-ac75-d707fb406ddc",
+	url: "/__l5e/assets-v1/430dab87-0f2e-442b-99a3-08e6a804bdc1/lucas.png",
+	r2_key: "a/v1/19c86a1a-2fae-4b01-ac75-d707fb406ddc/430dab87-0f2e-442b-99a3-08e6a804bdc1/lucas.png",
+	original_filename: "lucas.png",
+	size: 2667846,
+	content_type: "image/png",
+	created_at: "2026-07-05T20:44:52Z"
+};
+var zerevok_png_asset_default = {
+	version: 1,
+	asset_id: "6bf527d3-19d5-4046-92f9-59cc8dde1648",
+	project_id: "19c86a1a-2fae-4b01-ac75-d707fb406ddc",
+	url: "/__l5e/assets-v1/6bf527d3-19d5-4046-92f9-59cc8dde1648/zerevok.png",
+	r2_key: "a/v1/19c86a1a-2fae-4b01-ac75-d707fb406ddc/6bf527d3-19d5-4046-92f9-59cc8dde1648/zerevok.png",
+	original_filename: "zerevok.png",
+	size: 2346791,
+	content_type: "image/png",
+	created_at: "2026-07-05T20:44:55Z"
+};
+var LOCAL = {
 	azrael: "/AZRAEL.png",
 	background: "/Background.png",
 	elysia: "/ELYSIA.png",
 	lucas: "/LUCAS.png",
 	zerevok: "/ZEREVOK.png"
 };
+var CDN = {
+	azrael: azrael_png_asset_default.url,
+	background: background_png_asset_default.url,
+	elysia: elysia_png_asset_default.url,
+	lucas: lucas_png_asset_default.url,
+	zerevok: zerevok_png_asset_default.url
+};
+({ ...LOCAL });
+function assetSources(key) {
+	return {
+		local: LOCAL[key],
+		cdn: CDN[key]
+	};
+}
+function AssetImg({ asset, onError, ...props }) {
+	const { local, cdn } = assetSources(asset);
+	const [src, setSrc] = (0, import_react.useState)(local);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+		...props,
+		src,
+		onError: (e) => {
+			if (src !== cdn) setSrc(cdn);
+			onError?.(e);
+		}
+	});
+}
 function Hero({ onDownload }) {
 	const ref = (0, import_react.useRef)(null);
 	const titleRef = (0, import_react.useRef)(null);
@@ -117,8 +198,8 @@ function Hero({ onDownload }) {
 				},
 				className: "absolute inset-0 z-0",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-						src: IMG.azrael,
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
+						asset: "azrael",
 						alt: "Azrael, the Chosen",
 						className: "h-full w-full object-cover",
 						style: {
@@ -331,7 +412,7 @@ var characters = [
 	{
 		name: "Azrael",
 		title: "The Chosen · Champion of Light and Shadow",
-		img: IMG.azrael,
+		asset: "azrael",
 		color: "arcane",
 		power: 98,
 		description: "Born from destiny, forged in darkness. Azrael wields Heaven's Requiem — a blade that can cleave both light and shadow.",
@@ -346,7 +427,7 @@ var characters = [
 	{
 		name: "Lucas",
 		title: "The Light Guardian · Loyal Brother in Arms",
-		img: IMG.lucas,
+		asset: "lucas",
 		color: "gold",
 		power: 88,
 		description: "\"I may not be the strongest in might, but I will always stand by your side.\" Support, defender, unbroken light.",
@@ -361,7 +442,7 @@ var characters = [
 	{
 		name: "Elysia",
 		title: "Goddess of Harmony · The Balance",
-		img: IMG.elysia,
+		asset: "elysia",
 		color: "gold",
 		power: 100,
 		description: "She sees beyond the veil of light and darkness. Her wisdom heals, her power unites, her grace redeems.",
@@ -376,7 +457,7 @@ var characters = [
 	{
 		name: "Zerevok",
 		title: "The Soul Devourer · End of All Light",
-		img: IMG.zerevok,
+		asset: "zerevok",
 		color: "ember",
 		power: 96,
 		description: "Born from the void of darkness, Zerevok feeds on souls and spreads despair. None who face him survive.",
@@ -419,8 +500,8 @@ function Characters({ onOpen }) {
 						onClick: () => onOpen(c),
 						className: "group relative block h-[520px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_0_50px_rgba(74,20,140,0.6)] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)] backdrop-blur-xl border border-white/10 hover:border-white/30",
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-								src: c.img,
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
+								asset: c.asset,
 								alt: c.name,
 								loading: "lazy",
 								className: "absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110",
@@ -514,8 +595,8 @@ function CharacterModal({ c, onClose }) {
 			className: "relative grid max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-2xl glass md:grid-cols-2",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "relative h-72 md:h-auto",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-					src: c.img,
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
+					asset: c.asset,
 					alt: c.name,
 					className: "absolute inset-0 h-full w-full object-cover"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent md:bg-gradient-to-r" })]
@@ -603,8 +684,8 @@ function World() {
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				style: { y },
 				className: "absolute inset-0",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-					src: IMG.background,
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
+					asset: "background",
 					alt: "",
 					"aria-hidden": true,
 					className: "h-[120%] w-full object-cover opacity-40"
@@ -690,8 +771,8 @@ function Battle() {
 					rotate: rot
 				},
 				className: "absolute inset-0",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-					src: IMG.background,
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
+					asset: "background",
 					alt: "Battle of Aldreth",
 					className: "h-full w-full object-cover"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-b from-background/20 via-background/10 to-background/20" })]
@@ -1064,7 +1145,8 @@ var createSsrRpc = (functionId) => {
 };
 var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType({
 	sessionId: stringType().min(8).max(64),
-	path: stringType().max(500)
+	path: stringType().max(500),
+	heartbeat: booleanType().optional()
 }).parse(d)).handler(createSsrRpc("5e7bc6b7985a4c5567ec29c826f97eeb7805c320edefacaaf2df3b19b86050da"));
 var submitContact = createServerFn({ method: "POST" }).validator((d) => objectType({
 	name: stringType().trim().min(1).max(120),
@@ -1098,22 +1180,38 @@ function Home() {
 		const heartbeat = setInterval(() => {
 			trackVisit({ data: {
 				sessionId: sid,
-				path: window.location.pathname
+				path: window.location.pathname,
+				heartbeat: true
 			} }).catch(() => {});
 		}, 6e4);
 		return () => clearInterval(heartbeat);
 	}, []);
 	const handleDownload = (0, import_react.useCallback)(async () => {
 		setDownloadStatus("loading");
-		const iframe = document.createElement("iframe");
-		iframe.style.display = "none";
 		const sid = ensureSession();
-		iframe.src = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${encodeURIComponent("3D Game.rar")}`;
-		document.body.appendChild(iframe);
-		setTimeout(() => {
+		const fileName = "3D Game.rar";
+		const url = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${encodeURIComponent(fileName)}`;
+		try {
+			const res = await fetch(url, { credentials: "same-origin" });
+			if (!res.ok) {
+				setDownloadStatus("idle");
+				return;
+			}
+			const blob = await res.blob();
+			const objectUrl = URL.createObjectURL(blob);
+			const anchor = document.createElement("a");
+			anchor.href = objectUrl;
+			anchor.download = fileName;
+			anchor.style.display = "none";
+			document.body.appendChild(anchor);
+			anchor.click();
+			document.body.removeChild(anchor);
+			URL.revokeObjectURL(objectUrl);
 			setDownloadStatus("done");
-			setTimeout(() => document.body.removeChild(iframe), 3e3);
-		}, 900);
+			window.setTimeout(() => setDownloadStatus("idle"), 3e3);
+		} catch {
+			setDownloadStatus("idle");
+		}
 	}, []);
 	const handleContact = (0, import_react.useCallback)(async (d) => {
 		await submitContact({ data: d });

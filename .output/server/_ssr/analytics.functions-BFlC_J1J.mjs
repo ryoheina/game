@@ -1,8 +1,8 @@
 import { f as getRequest, i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-9EjmF9OT.mjs";
 import { t as requireSupabaseAuth } from "./auth-middleware-DZO41X7i.mjs";
 import { t as getClientMeta } from "./ua-VZAcffKf.mjs";
-import { n as stringType, t as objectType } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-CCG0pRjx.js
+import { n as objectType, r as stringType, t as booleanType } from "../_libs/zod.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-BFlC_J1J.js
 var createServerRpc = (serverFnMeta, splitImportFn) => {
 	const url = "/_serverFn/" + serverFnMeta.id;
 	return Object.assign(splitImportFn, {
@@ -18,7 +18,8 @@ var trackVisit_createServerFn_handler = createServerRpc({
 }, (opts) => trackVisit.__executeServer(opts));
 var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType({
 	sessionId: stringType().min(8).max(64),
-	path: stringType().max(500)
+	path: stringType().max(500),
+	heartbeat: booleanType().optional()
 }).parse(d)).handler(trackVisit_createServerFn_handler, async ({ data }) => {
 	const req = getRequest();
 	const meta = req ? getClientMeta(req) : {
@@ -32,6 +33,19 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 	};
 	const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
 	const now = (/* @__PURE__ */ new Date()).toISOString();
+	const { data: existing } = await supabaseAdmin.from("sessions").select("session_id").eq("session_id", data.sessionId).maybeSingle();
+	if (existing) {
+		await supabaseAdmin.from("sessions").update({
+			last_active: now,
+			ip: meta.ip,
+			country: meta.country,
+			browser: meta.browser,
+			os: meta.os,
+			device: meta.device,
+			user_agent: meta.ua
+		}).eq("session_id", data.sessionId);
+		if (data.heartbeat) return { ok: true };
+	} else if (data.heartbeat) return { ok: true };
 	await supabaseAdmin.from("visits").insert({
 		session_id: data.sessionId,
 		path: data.path,
@@ -43,17 +57,7 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 		user_agent: meta.ua,
 		referrer: meta.referrer
 	});
-	const { data: existing } = await supabaseAdmin.from("sessions").select("session_id").eq("session_id", data.sessionId).maybeSingle();
-	if (existing) await supabaseAdmin.from("sessions").update({
-		last_active: now,
-		ip: meta.ip,
-		country: meta.country,
-		browser: meta.browser,
-		os: meta.os,
-		device: meta.device,
-		user_agent: meta.ua
-	}).eq("session_id", data.sessionId);
-	else {
+	if (existing) {} else {
 		await supabaseAdmin.from("sessions").insert({
 			session_id: data.sessionId,
 			ip: meta.ip,

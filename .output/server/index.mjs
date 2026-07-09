@@ -22,117 +22,75 @@ var public_assets_data_default = {
 		"size": 104970,
 		"path": "../public/favicon.ico"
 	},
-	"/assets/admin-zK0QVYPM.js": {
+	"/assets/admin-oREbr3rH.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"585a-zo6ygFUqwqSxGi/3eUn8h4i+uec\"",
-		"mtime": "2026-07-08T11:57:16.596Z",
-		"size": 22618,
-		"path": "../public/assets/admin-zK0QVYPM.js"
+		"etag": "\"5006-R8gYKbLVKhwNod2XX3pMS0wnt2U\"",
+		"mtime": "2026-07-09T02:39:03.741Z",
+		"size": 20486,
+		"path": "../public/assets/admin-oREbr3rH.js"
 	},
-	"/assets/auth-DGcxpyay.js": {
+	"/assets/auth-D_9a-Zh0.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"a21-wn0qvq8kyTi/Dl/MUeaVUu9Uj5M\"",
-		"mtime": "2026-07-08T11:57:16.597Z",
-		"size": 2593,
-		"path": "../public/assets/auth-DGcxpyay.js"
+		"etag": "\"a26-nk4z0PTEkzQTobLOcsiEGFxnRh0\"",
+		"mtime": "2026-07-09T02:39:03.742Z",
+		"size": 2598,
+		"path": "../public/assets/auth-D_9a-Zh0.js"
 	},
 	"/assets/fx-ByJla8Q8.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"769-jQqP5cLYPNy31PLBqiEintNEybs\"",
-		"mtime": "2026-07-08T11:57:16.601Z",
+		"mtime": "2026-07-09T02:39:03.744Z",
 		"size": 1897,
 		"path": "../public/assets/fx-ByJla8Q8.js"
 	},
 	"/assets/jsx-runtime-D8nDyRPw.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"2210-qrBAUPDOR8ROKpBVNEla8AGnGKU\"",
-		"mtime": "2026-07-08T11:57:16.603Z",
+		"mtime": "2026-07-09T02:39:03.745Z",
 		"size": 8720,
 		"path": "../public/assets/jsx-runtime-D8nDyRPw.js"
 	},
 	"/assets/lenis-DdrGTsEx.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"478d-mZHPO7Pf1OkK6MydXdG+JjPcikM\"",
-		"mtime": "2026-07-08T11:57:16.604Z",
+		"mtime": "2026-07-09T02:39:03.746Z",
 		"size": 18317,
 		"path": "../public/assets/lenis-DdrGTsEx.js"
 	},
 	"/assets/me-Di_MdLF7.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"d65-WVWQqzBZNAzZ/w6QJYZxUj14x2I\"",
-		"mtime": "2026-07-08T11:57:16.605Z",
+		"mtime": "2026-07-09T02:39:03.749Z",
 		"size": 3429,
 		"path": "../public/assets/me-Di_MdLF7.js"
+	},
+	"/assets/route-7QGg4U5A.js": {
+		"type": "text/javascript; charset=utf-8",
+		"etag": "\"8d-0hRchNEa4KA867rGJEMmglcH8Gg\"",
+		"mtime": "2026-07-09T02:39:03.752Z",
+		"size": 141,
+		"path": "../public/assets/route-7QGg4U5A.js"
+	},
+	"/assets/routes-B9a44YfG.js": {
+		"type": "text/javascript; charset=utf-8",
+		"etag": "\"3a228-9zcbqoAXnFFtPU9WkifYFa2zAXA\"",
+		"mtime": "2026-07-09T02:39:03.754Z",
+		"size": 238120,
+		"path": "../public/assets/routes-B9a44YfG.js"
 	},
 	"/assets/styles-D7UQjLCp.css": {
 		"type": "text/css; charset=utf-8",
 		"etag": "\"17799-uWRJg9iR+/4Le+KiFXKobzpQoXQ\"",
-		"mtime": "2026-07-08T11:57:16.609Z",
+		"mtime": "2026-07-09T02:39:03.755Z",
 		"size": 96153,
 		"path": "../public/assets/styles-D7UQjLCp.css"
 	},
-	"/assets/routes-DNfSH6qy.js": {
+	"/assets/index-Bg6BtR3S.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"398a4-ViSzOb+eGf7NwWOAMnzjJ09nHoo\"",
-		"mtime": "2026-07-08T11:57:16.608Z",
-		"size": 235684,
-		"path": "../public/assets/routes-DNfSH6qy.js"
-	},
-	"/assets/route-CcMDxsGo.js": {
-		"type": "text/javascript; charset=utf-8",
-		"etag": "\"8d-PUgzhOVy4EEfU+hnllwwOIMaYEM\"",
-		"mtime": "2026-07-08T11:57:16.606Z",
-		"size": 141,
-		"path": "../public/assets/route-CcMDxsGo.js"
-	},
-	"/assets/index-CiDjBQF6.js": {
-		"type": "text/javascript; charset=utf-8",
-		"etag": "\"84a0d-mVlOKcZ2Og5SxzrFA2Rqv6JSYwg\"",
-		"mtime": "2026-07-08T11:57:16.595Z",
-		"size": 543245,
-		"path": "../public/assets/index-CiDjBQF6.js"
-	},
-	"/game1.png": {
-		"type": "image/png",
-		"etag": "\"239916-m1u12UM76spJwvYwyyDuXoOGXs4\"",
-		"mtime": "2026-07-06T10:39:51.837Z",
-		"size": 2332950,
-		"path": "../public/game1.png"
-	},
-	"/game2.png": {
-		"type": "image/png",
-		"etag": "\"24c166-wnJi3rPG5xUgSA0A3JZVWaNuuH8\"",
-		"mtime": "2026-07-06T10:39:51.855Z",
-		"size": 2408806,
-		"path": "../public/game2.png"
-	},
-	"/AZRAEL.png": {
-		"type": "image/png",
-		"etag": "\"28ef86-IC8QMM4enbaZRfvGlQOkyQeFbGk\"",
-		"mtime": "2026-07-06T10:39:51.756Z",
-		"size": 2682758,
-		"path": "../public/AZRAEL.png"
-	},
-	"/Background.png": {
-		"type": "image/png",
-		"etag": "\"2b2666-5981RG2D3WJ/wK7GeX+MNRfBSCw\"",
-		"mtime": "2026-07-06T10:39:51.777Z",
-		"size": 2827878,
-		"path": "../public/Background.png"
-	},
-	"/ZEREVOK.png": {
-		"type": "image/png",
-		"etag": "\"23cf27-dd4lHKipIKmwumTzFWIB7LtoWTc\"",
-		"mtime": "2026-07-06T10:39:51.819Z",
-		"size": 2346791,
-		"path": "../public/ZEREVOK.png"
-	},
-	"/LUCAS.png": {
-		"type": "image/png",
-		"etag": "\"28b546-CvmltOxAfSPSdWTSDeOg5tOXOBE\"",
-		"mtime": "2026-07-06T10:39:51.810Z",
-		"size": 2667846,
-		"path": "../public/LUCAS.png"
+		"etag": "\"84a05-mco4yoIyy9z91H4hBQ4ziWS9qvE\"",
+		"mtime": "2026-07-09T02:39:03.740Z",
+		"size": 543237,
+		"path": "../public/assets/index-Bg6BtR3S.js"
 	},
 	"/game3.png": {
 		"type": "image/png",
@@ -141,12 +99,54 @@ var public_assets_data_default = {
 		"size": 2515245,
 		"path": "../public/game3.png"
 	},
+	"/game2.png": {
+		"type": "image/png",
+		"etag": "\"24c166-wnJi3rPG5xUgSA0A3JZVWaNuuH8\"",
+		"mtime": "2026-07-06T10:39:51.855Z",
+		"size": 2408806,
+		"path": "../public/game2.png"
+	},
+	"/game1.png": {
+		"type": "image/png",
+		"etag": "\"239916-m1u12UM76spJwvYwyyDuXoOGXs4\"",
+		"mtime": "2026-07-06T10:39:51.837Z",
+		"size": 2332950,
+		"path": "../public/game1.png"
+	},
+	"/ZEREVOK.png": {
+		"type": "image/png",
+		"etag": "\"23cf27-dd4lHKipIKmwumTzFWIB7LtoWTc\"",
+		"mtime": "2026-07-06T10:39:51.819Z",
+		"size": 2346791,
+		"path": "../public/ZEREVOK.png"
+	},
+	"/AZRAEL.png": {
+		"type": "image/png",
+		"etag": "\"28ef86-IC8QMM4enbaZRfvGlQOkyQeFbGk\"",
+		"mtime": "2026-07-06T10:39:51.756Z",
+		"size": 2682758,
+		"path": "../public/AZRAEL.png"
+	},
 	"/ELYSIA.png": {
 		"type": "image/png",
 		"etag": "\"2fd773-QXnVNrFbDb8I7lh9hb4l43Jq8vs\"",
 		"mtime": "2026-07-06T10:39:51.797Z",
 		"size": 3135347,
 		"path": "../public/ELYSIA.png"
+	},
+	"/Background.png": {
+		"type": "image/png",
+		"etag": "\"2b2666-5981RG2D3WJ/wK7GeX+MNRfBSCw\"",
+		"mtime": "2026-07-06T10:39:51.777Z",
+		"size": 2827878,
+		"path": "../public/Background.png"
+	},
+	"/LUCAS.png": {
+		"type": "image/png",
+		"etag": "\"28b546-CvmltOxAfSPSdWTSDeOg5tOXOBE\"",
+		"mtime": "2026-07-06T10:39:51.810Z",
+		"size": 2667846,
+		"path": "../public/LUCAS.png"
 	},
 	"/3D Game.rar": {
 		"type": "application/vnd.rar",

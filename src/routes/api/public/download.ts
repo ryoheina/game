@@ -58,16 +58,31 @@ export const Route = createFileRoute("/api/public/download")({
             });
           }
 
-          try {
-            if (downloadId) {
-              await supabaseAdmin.from("downloads").update({ completed: true, completed_at: new Date().toISOString() }).eq("id", downloadId);
-              await supabaseAdmin.from("notifications").insert({ type: "download_complete", title: "Download Complete", body: `${meta.ip ?? "unknown"} — ${requestedFileName}`, payload: { download_id: downloadId, session_id: sid } });
+          const { readable, writable } = new TransformStream();
+          const markCompleted = async () => {
+            if (!downloadId) return;
+            try {
+              await supabaseAdmin
+                .from("downloads")
+                .update({ completed: true, completed_at: new Date().toISOString() })
+                .eq("id", downloadId);
+              await supabaseAdmin.from("notifications").insert({
+                type: "download_complete",
+                title: "Download Complete",
+                body: `${meta.ip ?? "unknown"} — ${requestedFileName}`,
+                payload: { download_id: downloadId, session_id: sid },
+              });
+            } catch (e) {
+              console.error("post-download update failed", e);
             }
-          } catch (e) {
-            console.error("post-download update failed", e);
-          }
+          };
 
-          return new Response(assetResponse.body, {
+          void assetResponse.body
+            .pipeTo(writable)
+            .then(() => markCompleted())
+            .catch((e) => console.error("download stream failed", e));
+
+          return new Response(readable, {
             status: 200,
             headers: {
               "Content-Type": assetResponse.headers.get("content-type") || "application/x-rar-compressed",
