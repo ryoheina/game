@@ -5,7 +5,7 @@ import { Nav } from "@/components/nav";
 import { MouseGlow, Particles } from "@/components/fx";
 import {
   Hero, Story, Characters, CharacterModal, World, Battle,
-  BattleToFeaturesBreak, Features, Technology, Download, Contact, Footer,
+  BattleToFeaturesBreak, Features, Technology, Download, Contact, FinalVideo, Footer,
 } from "@/components/sections";
 import { submitContact, trackVisit } from "@/lib/analytics.functions";
 
@@ -63,7 +63,7 @@ function Home() {
         setSiteImpact(false);
         document.body.style.overflow = "";
       }, 1250);
-    }, prefersReducedMotion ? 650 : 7800);
+    }, prefersReducedMotion ? 350 : 2600);
     document.body.style.overflow = "hidden";
     return () => {
       window.clearTimeout(timeout);
@@ -74,7 +74,7 @@ function Home() {
   const handleDownload = useCallback(async () => {
     setDownloadStatus("loading");
     const sid = ensureSession();
-    const fileName = "3D Game.rar";
+    const fileName = "LegendsofEternity.exe";
     const url = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${encodeURIComponent(fileName)}`;
 
     try {
@@ -131,6 +131,7 @@ function Home() {
           <Technology />
           <Download onDownload={handleDownload} status={downloadStatus} />
           <Contact onSubmit={handleContact} />
+          <FinalVideo />
         </main>
         <Footer />
       </motion.div>

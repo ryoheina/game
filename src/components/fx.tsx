@@ -1,10 +1,28 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export function Particles({ count = 20, color = "arcane", className = "" }: { count?: number; color?: "arcane" | "ember" | "gold"; className?: string }) {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-  const items = Array.from({ length: count });
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const items = useMemo(
+    () =>
+      Array.from({ length: count }, (_, i) => ({
+        id: i,
+        size: 2 + Math.random() * 4,
+        left: Math.random() * 100,
+        delay: Math.random() * 12,
+        dur: 14 + Math.random() * 20,
+        blur: Math.random() > 0.8 ? "blur(1px)" : "none",
+      })),
+    [count],
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(media.matches);
+    setMounted(true);
+  }, []);
+
+  if (!mounted || reducedMotion) return null;
   const colors = {
     arcane: "rgba(170, 195, 255, 0.35)",
     ember: "rgba(255, 148, 100, 0.32)",
@@ -12,26 +30,21 @@ export function Particles({ count = 20, color = "arcane", className = "" }: { co
   };
   return (
     <div aria-hidden className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
-      {items.map((_, i) => {
-        const size = 2 + Math.random() * 4;
-        const left = Math.random() * 100;
-        const delay = Math.random() * 12;
-        const dur = 14 + Math.random() * 20;
-        const blur = Math.random() > 0.8 ? "blur(1px)" : "none";
+      {items.map((item) => {
         return (
           <span
-            key={i}
+            key={item.id}
             style={{
               position: "absolute",
               bottom: "-10vh",
-              left: `${left}%`,
-              width: size,
-              height: size,
+              left: `${item.left}%`,
+              width: item.size,
+              height: item.size,
               borderRadius: 999,
               background: colors[color],
-              boxShadow: `0 0 ${10 + size * 4}px ${colors[color]}`,
-              filter: blur,
-              animation: `drift ${dur}s linear ${delay}s infinite`,
+              boxShadow: `0 0 ${10 + item.size * 4}px ${colors[color]}`,
+              filter: item.blur,
+              animation: `drift ${item.dur}s linear ${item.delay}s infinite`,
               opacity: 0.35,
             }}
           />

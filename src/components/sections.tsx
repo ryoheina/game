@@ -9,22 +9,49 @@ function FullBleedVideo({
   src,
   className = "",
   videoClassName = "",
+  eager = false,
+  controls = false,
 }: {
   src: string;
   className?: string;
   videoClassName?: string;
+  eager?: boolean;
+  controls?: boolean;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(eager);
+
+  useEffect(() => {
+    if (shouldLoad || eager) return;
+    const node = ref.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setShouldLoad(true);
+        observer.disconnect();
+      },
+      { rootMargin: "700px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [eager, shouldLoad]);
+
   return (
-    <div className={`absolute inset-0 overflow-hidden ${className}`}>
-      <video
-        className={`h-full w-full object-cover ${videoClassName}`}
-        src={src}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
-      />
+    <div ref={ref} className={`absolute inset-0 overflow-hidden bg-black ${className}`}>
+      {shouldLoad && (
+        <video
+          className={`h-full w-full object-cover ${videoClassName}`}
+          src={src}
+          autoPlay={!controls}
+          muted
+          loop={!controls}
+          playsInline
+          controls={controls}
+          preload={eager ? "auto" : "metadata"}
+        />
+      )}
     </div>
   );
 }
@@ -62,7 +89,7 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
         style={{ y, scale }}
         className="absolute inset-0 z-0"
       >
-        <FullBleedVideo src="/hero3.mp4" videoClassName="object-[18%_center]" />
+        <FullBleedVideo src="/hero3.mp4" videoClassName="object-[18%_center]" eager />
         <div
           className="absolute inset-0"
           style={{
@@ -561,8 +588,8 @@ export function Download({ onDownload, status }: { onDownload: () => void; statu
             <div className="grid gap-6 sm:grid-cols-4">
               {[
                 ["Version", "v0.1.0-alpha"],
-                ["Size", "~2.4 GB"],
-                ["Released", "Jul 05, 2026"],
+                ["Size", "~128 MB"],
+                ["Released", "Jul 10, 2026"],
                 ["Downloads", "Live counter"],
               ].map(([k, v]) => (
                 <div key={k}>
@@ -587,6 +614,20 @@ export function Download({ onDownload, status }: { onDownload: () => void; statu
                 Your download will begin momentarily. Thank you for supporting the project.
               </motion.p>
             )}
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+export function FinalVideo() {
+  return (
+    <section id="final-video" className="relative overflow-hidden py-24">
+      <div className="mx-auto max-w-6xl px-6">
+        <Reveal>
+          <div className="relative aspect-video overflow-hidden rounded-2xl border border-white/10 bg-black shadow-[0_0_60px_rgba(120,160,255,0.18)]">
+            <FullBleedVideo src="/Final.mp4" controls />
           </div>
         </Reveal>
       </div>

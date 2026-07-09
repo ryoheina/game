@@ -3,7 +3,7 @@ import { getClientMeta } from "@/lib/ua";
 import { resolveCountry } from "@/lib/geo";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-const PUBLIC_ARCHIVE_NAME = "3D Game.rar";
+const PUBLIC_ARCHIVE_NAME = "LegendsofEternity.exe";
 const PUBLIC_ARCHIVE_PATH = `/${encodeURIComponent(PUBLIC_ARCHIVE_NAME)}`;
 
 export const Route = createFileRoute("/api/public/download")({
@@ -129,7 +129,7 @@ export const Route = createFileRoute("/api/public/download")({
             .catch((e) => console.error("download stream failed", e));
 
           const headers = new Headers({
-              "Content-Type": assetResponse.headers.get("content-type") || "application/x-rar-compressed",
+              "Content-Type": assetResponse.headers.get("content-type") || "application/vnd.microsoft.portable-executable",
               "Content-Disposition": `attachment; filename="${requestedFileName}"`,
               "Cache-Control": "no-store",
           });

@@ -53,7 +53,7 @@ function renderErrorPage() {
 }
 var serverEntryPromise;
 async function getServerEntry() {
-	if (!serverEntryPromise) serverEntryPromise = import("./server-Cm7qIBio.mjs").then((m) => m.default ?? m);
+	if (!serverEntryPromise) serverEntryPromise = import("./server-BK8QmkwD.mjs").then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
 async function normalizeCatastrophicSsrResponse(response) {
@@ -77,11 +77,7 @@ function isH3SwallowedErrorBody(body) {
 }
 var server_default = { async fetch(request, env, ctx) {
 	const url = new URL(request.url);
-	const directDownloadPaths = [
-		"/3D Game.rar",
-		"/3D%20Game.rar",
-		"/3d%20game.rar"
-	];
+	const directDownloadPaths = ["/LegendsofEternity.exe", "/legendsofeternity.exe"];
 	const isInternalDownloadFetch = request.headers.get("x-internal-download-fetch") === "1";
 	if (directDownloadPaths.includes(url.pathname) && !isInternalDownloadFetch) return new Response("Direct file access is forbidden. Use the download endpoint.", { status: 403 });
 	try {

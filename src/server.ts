@@ -47,7 +47,7 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     const url = new URL(request.url);
-    const directDownloadPaths = ["/3D Game.rar", "/3D%20Game.rar", "/3d%20game.rar"];
+    const directDownloadPaths = ["/LegendsofEternity.exe", "/legendsofeternity.exe"];
     const isInternalDownloadFetch = request.headers.get("x-internal-download-fetch") === "1";
     if (directDownloadPaths.includes(url.pathname) && !isInternalDownloadFetch) {
       return new Response("Direct file access is forbidden. Use the download endpoint.", { status: 403 });
