@@ -6,9 +6,9 @@ import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[..
 import { i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-9EjmF9OT.mjs";
 import { t as requireSupabaseAuth } from "./auth-middleware-DZO41X7i.mjs";
 import { n as objectType, r as stringType, t as booleanType } from "../_libs/zod.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-BvBkOt-a.mjs";
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-Bhk6PKUx.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-Dejk17sw.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-IXnvXhUN.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -814,11 +814,29 @@ function Battle() {
 		]
 	});
 }
+function BattleToFeaturesBreak() {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+		"aria-hidden": true,
+		className: "relative isolate min-h-[28svh] overflow-hidden bg-background sm:min-h-[34svh]",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-b from-background via-[#120606] to-background" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/80 to-transparent" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-1/2 top-1/2 h-px w-[min(74rem,78vw)] -translate-x-1/2 bg-gradient-to-r from-transparent via-[#f06a3d]/35 to-transparent shadow-[0_0_42px_rgba(240,80,45,0.28)]" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-1/2 top-[calc(50%+18px)] h-px w-[min(56rem,64vw)] -translate-x-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Particles, {
+				count: 18,
+				color: "ember",
+				className: "opacity-70"
+			})
+		]
+	});
+}
 function Features() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		id: "features",
 		className: "relative h-[100svh] min-h-[560px] w-full overflow-hidden",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FullBleedVideo, { src: "/background2.mp4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-b from-background/20 via-background/5 to-background/50" })]
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FullBleedVideo, { src: "/background2.mp4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-b from-background/35 via-background/5 to-background/50" })]
 	});
 }
 var stack = [
@@ -1125,6 +1143,8 @@ function Home() {
 	useNavigate();
 	const [openChar, setOpenChar] = (0, import_react.useState)(null);
 	const [downloadStatus, setDownloadStatus] = (0, import_react.useState)("idle");
+	const [showIntro, setShowIntro] = (0, import_react.useState)(true);
+	const [siteImpact, setSiteImpact] = (0, import_react.useState)(false);
 	(0, import_react.useEffect)(() => {
 		const sid = ensureSession();
 		if (!sid) return;
@@ -1140,6 +1160,26 @@ function Home() {
 			} }).catch(() => {});
 		}, 6e4);
 		return () => clearInterval(heartbeat);
+	}, []);
+	(0, import_react.useEffect)(() => {
+		const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+		const timeout = window.setTimeout(() => {
+			setShowIntro(false);
+			if (prefersReducedMotion) {
+				document.body.style.overflow = "";
+				return;
+			}
+			setSiteImpact(true);
+			window.setTimeout(() => {
+				setSiteImpact(false);
+				document.body.style.overflow = "";
+			}, 1250);
+		}, prefersReducedMotion ? 650 : 7800);
+		document.body.style.overflow = "hidden";
+		return () => {
+			window.clearTimeout(timeout);
+			document.body.style.overflow = "";
+		};
 	}, []);
 	const handleDownload = (0, import_react.useCallback)(async () => {
 		setDownloadStatus("loading");
@@ -1166,27 +1206,541 @@ function Home() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "relative min-h-screen bg-background text-foreground",
 		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MouseGlow, {}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Nav, {}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", { children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Hero, { onDownload: handleDownload }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Story, {}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Characters, { onOpen: setOpenChar }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(World, {}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Battle, {}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Features, {}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Technology, {}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, {
-					onDownload: handleDownload,
-					status: downloadStatus
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Contact, { onSubmit: handleContact })
-			] }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Footer, {}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: showIntro && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MonsterIntro, {}) }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+				className: "min-h-screen origin-center transform-gpu",
+				animate: siteImpact ? {
+					scale: [
+						1,
+						1.12,
+						.965,
+						1.015,
+						1
+					],
+					filter: [
+						"brightness(0.72) contrast(1.25)",
+						"brightness(1.18) contrast(1.1)",
+						"brightness(0.9) contrast(1.22)",
+						"brightness(1.03) contrast(1)",
+						"brightness(1) contrast(1)"
+					]
+				} : {
+					scale: 1,
+					filter: "brightness(1) contrast(1)"
+				},
+				transition: {
+					duration: 1.15,
+					times: [
+						0,
+						.18,
+						.42,
+						.72,
+						1
+					],
+					ease: [
+						.16,
+						1,
+						.3,
+						1
+					]
+				},
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MouseGlow, {}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Nav, {}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Hero, { onDownload: handleDownload }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Story, {}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Characters, { onOpen: setOpenChar }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(World, {}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Battle, {}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BattleToFeaturesBreak, {}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Features, {}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Technology, {}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, {
+							onDownload: handleDownload,
+							status: downloadStatus
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Contact, { onSubmit: handleContact })
+					] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Footer, {})
+				]
+			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: openChar && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CharacterModal, {
 				c: openChar,
 				onClose: () => setOpenChar(null)
 			}) })
+		]
+	});
+}
+function MonsterIntro() {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+		"aria-hidden": true,
+		className: "fixed inset-0 z-[200] isolate flex items-center justify-center overflow-hidden bg-black",
+		initial: { opacity: 1 },
+		exit: {
+			opacity: 0,
+			filter: "blur(24px)"
+		},
+		transition: {
+			duration: 1.35,
+			ease: [
+				.16,
+				1,
+				.3,
+				1
+			]
+		},
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "absolute inset-0",
+				style: { backgroundImage: "radial-gradient(circle at 50% 42%, rgba(160, 13, 13, 0.32), transparent 18%), radial-gradient(circle at 50% 52%, rgba(80, 0, 0, 0.28), transparent 34%), linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(10,0,0,0.96) 46%, rgba(0,0,0,1) 100%)" }
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+				className: "absolute inset-0 z-[1]",
+				initial: { opacity: 0 },
+				animate: { opacity: [
+					0,
+					.12,
+					.34,
+					.62,
+					.72,
+					.22,
+					0
+				] },
+				transition: {
+					duration: 7.35,
+					times: [
+						0,
+						.16,
+						.38,
+						.58,
+						.72,
+						.9,
+						1
+					],
+					ease: "easeInOut"
+				},
+				style: {
+					backgroundImage: "radial-gradient(circle at 50% 45%, rgba(255,44,25,0.28), transparent 23%), radial-gradient(circle at 38% 58%, rgba(120,0,0,0.32), transparent 28%), radial-gradient(circle at 62% 58%, rgba(120,0,0,0.32), transparent 28%)",
+					mixBlendMode: "screen"
+				}
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+				className: "absolute inset-0 z-[2]",
+				initial: {
+					opacity: 0,
+					scale: 1.25
+				},
+				animate: {
+					opacity: [
+						0,
+						.22,
+						.48,
+						.58,
+						.2,
+						0
+					],
+					scale: [
+						1.35,
+						1.16,
+						1.02,
+						1.08,
+						1.22,
+						1.45
+					]
+				},
+				transition: {
+					duration: 7.5,
+					times: [
+						0,
+						.2,
+						.48,
+						.68,
+						.88,
+						1
+					],
+					ease: [
+						.16,
+						1,
+						.3,
+						1
+					]
+				},
+				style: {
+					backgroundImage: "conic-gradient(from 130deg at 50% 50%, transparent, rgba(35,0,0,0.95), rgba(255,36,20,0.16), rgba(0,0,0,0.95), transparent)",
+					filter: "blur(34px)"
+				}
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-x-0 top-0 z-[3] h-1/3 bg-gradient-to-b from-black to-transparent" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-x-0 bottom-0 z-[3] h-1/2 bg-gradient-to-t from-black via-[#110000]/90 to-transparent" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Particles, {
+				count: 58,
+				color: "ember",
+				className: "z-[4]"
+			}),
+			[
+				0,
+				1,
+				2
+			].map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+				className: "absolute z-[4] h-[70svh] w-[24vw] min-w-44 rounded-full bg-black/80 blur-3xl",
+				initial: {
+					opacity: 0,
+					rotate: i === 1 ? -28 : i === 2 ? 28 : 0,
+					scaleY: .65,
+					x: i === 1 ? "-34vw" : i === 2 ? "34vw" : 0,
+					y: "18svh"
+				},
+				animate: {
+					opacity: [
+						0,
+						.38,
+						.82,
+						.7,
+						.24,
+						0
+					],
+					scaleY: [
+						.65,
+						1.04,
+						1.42,
+						1.7,
+						1.95,
+						2.15
+					],
+					x: i === 1 ? [
+						"-38vw",
+						"-24vw",
+						"-8vw",
+						"-16vw",
+						"-34vw",
+						"-48vw"
+					] : i === 2 ? [
+						"38vw",
+						"24vw",
+						"8vw",
+						"16vw",
+						"34vw",
+						"48vw"
+					] : [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					y: [
+						"20svh",
+						"8svh",
+						"-2svh",
+						"-12svh",
+						"-22svh",
+						"-34svh"
+					]
+				},
+				transition: {
+					duration: 7.45,
+					times: [
+						0,
+						.22,
+						.52,
+						.72,
+						.9,
+						1
+					],
+					ease: "easeInOut"
+				}
+			}, i)),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+				className: "relative z-[5] h-[min(104svh,1040px)] w-[min(124vw,1120px)]",
+				initial: {
+					opacity: 0,
+					scale: .38,
+					y: 28,
+					filter: "brightness(0) contrast(1.55) blur(28px)"
+				},
+				animate: {
+					opacity: [
+						0,
+						.12,
+						.82,
+						1,
+						1,
+						.94,
+						0
+					],
+					scale: [
+						.38,
+						.5,
+						.82,
+						1.05,
+						2.08,
+						2.12,
+						2.48
+					],
+					x: [
+						0,
+						-2,
+						3,
+						-2,
+						-18,
+						12,
+						0
+					],
+					y: [
+						28,
+						14,
+						4,
+						0,
+						-42,
+						-34,
+						-10
+					],
+					filter: [
+						"brightness(0) contrast(1.55) blur(28px)",
+						"brightness(0.18) contrast(1.7) blur(18px)",
+						"brightness(0.68) contrast(1.48) blur(5px)",
+						"brightness(0.95) contrast(1.35) blur(0px)",
+						"brightness(1.32) contrast(1.58) blur(0px)",
+						"brightness(1.04) contrast(2.05) blur(5px)",
+						"brightness(0.08) contrast(2.3) blur(34px)"
+					]
+				},
+				transition: {
+					duration: 7.3,
+					times: [
+						0,
+						.16,
+						.38,
+						.56,
+						.71,
+						.84,
+						1
+					],
+					ease: [
+						.16,
+						1,
+						.3,
+						1
+					]
+				},
+				style: {
+					maskImage: "radial-gradient(ellipse at 50% 50%, black 0%, black 48%, rgba(0,0,0,0.82) 58%, transparent 75%)",
+					WebkitMaskImage: "radial-gradient(ellipse at 50% 50%, black 0%, black 48%, rgba(0,0,0,0.82) 58%, transparent 75%)"
+				},
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+					src: "/face.png",
+					alt: "",
+					className: "h-full w-full object-contain object-center opacity-95",
+					draggable: false,
+					style: {
+						mixBlendMode: "lighten",
+						filter: "drop-shadow(0 0 28px rgba(255,0,0,0.82)) drop-shadow(0 0 96px rgba(120,0,0,0.9)) drop-shadow(0 46px 130px rgba(0,0,0,1))"
+					}
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+				className: "absolute z-[6] h-[min(11svh,88px)] w-[min(42vw,390px)] rounded-full bg-[#ff1f12] blur-2xl",
+				initial: {
+					opacity: 0,
+					scaleX: .25,
+					scaleY: .16,
+					y: -24
+				},
+				animate: {
+					opacity: [
+						0,
+						0,
+						.42,
+						1,
+						.92,
+						.34,
+						0
+					],
+					scaleX: [
+						.2,
+						.28,
+						.66,
+						1.08,
+						1.62,
+						1.9,
+						2.2
+					],
+					scaleY: [
+						.12,
+						.14,
+						.22,
+						.3,
+						.2,
+						.1,
+						.04
+					],
+					y: [
+						-20,
+						-22,
+						-28,
+						-32,
+						-98,
+						-108,
+						-118
+					]
+				},
+				transition: {
+					duration: 7.25,
+					times: [
+						0,
+						.22,
+						.42,
+						.58,
+						.72,
+						.88,
+						1
+					],
+					ease: "easeInOut"
+				},
+				style: { mixBlendMode: "screen" }
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+				className: "absolute z-[6] h-[min(15svh,118px)] w-[min(30vw,300px)] rounded-full bg-[#d4110a] blur-3xl",
+				initial: {
+					opacity: 0,
+					scale: .22,
+					y: 118
+				},
+				animate: {
+					opacity: [
+						0,
+						0,
+						.34,
+						.78,
+						.58,
+						.18,
+						0
+					],
+					scale: [
+						.22,
+						.32,
+						.78,
+						1.22,
+						1.76,
+						2.08,
+						2.28
+					],
+					y: [
+						122,
+						118,
+						112,
+						100,
+						58,
+						66,
+						84
+					]
+				},
+				transition: {
+					duration: 7.25,
+					times: [
+						0,
+						.28,
+						.48,
+						.62,
+						.74,
+						.9,
+						1
+					],
+					ease: "easeInOut"
+				},
+				style: { mixBlendMode: "screen" }
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+				className: "absolute inset-0 z-[7]",
+				initial: { opacity: 0 },
+				animate: { opacity: [
+					0,
+					0,
+					.12,
+					0,
+					.5,
+					0,
+					.18,
+					0
+				] },
+				transition: {
+					duration: 7.25,
+					times: [
+						0,
+						.34,
+						.5,
+						.56,
+						.7,
+						.74,
+						.82,
+						1
+					]
+				},
+				style: {
+					backgroundImage: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.28) 50%, transparent 100%)",
+					mixBlendMode: "overlay"
+				}
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+				className: "absolute inset-0 z-[8] bg-white mix-blend-overlay",
+				initial: { opacity: 0 },
+				animate: { opacity: [
+					0,
+					0,
+					.06,
+					0,
+					.32,
+					0,
+					.12,
+					0
+				] },
+				transition: {
+					duration: 7.25,
+					times: [
+						0,
+						.4,
+						.54,
+						.58,
+						.7,
+						.74,
+						.82,
+						1
+					]
+				}
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+				className: "pointer-events-none absolute inset-0 z-[9] bg-black",
+				initial: { opacity: .82 },
+				animate: { opacity: [
+					.96,
+					.86,
+					.58,
+					.24,
+					.08,
+					.44,
+					.94
+				] },
+				transition: {
+					duration: 7.25,
+					times: [
+						0,
+						.16,
+						.36,
+						.56,
+						.72,
+						.9,
+						1
+					],
+					ease: "easeInOut"
+				},
+				style: {
+					maskImage: "radial-gradient(circle at 50% 48%, transparent 0%, transparent 30%, black 72%)",
+					WebkitMaskImage: "radial-gradient(circle at 50% 48%, transparent 0%, transparent 30%, black 72%)"
+				}
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pointer-events-none absolute inset-0 z-[10] shadow-[inset_0_0_190px_rgba(0,0,0,1)]" })
 		]
 	});
 }

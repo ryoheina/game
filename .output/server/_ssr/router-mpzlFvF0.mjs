@@ -7,10 +7,10 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-BrLFxbWL.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-mpzlFvF0.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-BPUxhoKz.css";
+var styles_default = "/assets/styles-F6CLsP2Q.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -233,7 +233,7 @@ var Route$19 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-Dejk17sw.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-IXnvXhUN.mjs");
 var Route$18 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -303,6 +303,28 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 	let downloadId = null;
 	try {
 		const now = (/* @__PURE__ */ new Date()).toISOString();
+		if (sid) {
+			const { data: existingSession } = await supabaseAdmin.from("sessions").select("session_id").eq("session_id", sid).maybeSingle();
+			if (existingSession) await supabaseAdmin.from("sessions").update({
+				last_active: now,
+				ip: meta.ip,
+				country,
+				browser: meta.browser,
+				device: meta.device,
+				user_agent: meta.ua,
+				notified_left: false
+			}).eq("session_id", sid);
+			else await supabaseAdmin.from("sessions").insert({
+				session_id: sid,
+				ip: meta.ip,
+				country,
+				browser: meta.browser,
+				device: meta.device,
+				user_agent: meta.ua,
+				first_visit: now,
+				last_active: now
+			});
+		}
 		const { data: insertData, error: insertError } = await supabaseAdmin.from("downloads").insert({
 			file_name: requestedFileName,
 			session_id: sid,

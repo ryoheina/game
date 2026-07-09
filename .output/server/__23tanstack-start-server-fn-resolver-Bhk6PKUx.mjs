@@ -1,24 +1,24 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/__23tanstack-start-server-fn-resolver-BvBkOt-a.js
+//#region node_modules/.nitro/vite/services/ssr/assets/__23tanstack-start-server-fn-resolver-Bhk6PKUx.js
 var manifest = {
 	"5058339e4274bf852ada72847e61fa713d72a2a54e6e0f6d25efda66bc028b9f": {
 		functionName: "getAdminStats_createServerFn_handler",
-		importer: () => import("./_ssr/analytics.functions-CzS4ARna.mjs")
+		importer: () => import("./_ssr/analytics.functions-CJJGKG1i.mjs")
 	},
 	"5e7bc6b7985a4c5567ec29c826f97eeb7805c320edefacaaf2df3b19b86050da": {
 		functionName: "trackVisit_createServerFn_handler",
-		importer: () => import("./_ssr/analytics.functions-CzS4ARna.mjs")
+		importer: () => import("./_ssr/analytics.functions-CJJGKG1i.mjs")
 	},
 	"6d92e280c68cd3c11aac298fc57f9269dca8d85ae15c9747e0c8a8d46051fccf": {
 		functionName: "getAdminStatus_createServerFn_handler",
-		importer: () => import("./_ssr/analytics.functions-CzS4ARna.mjs")
+		importer: () => import("./_ssr/analytics.functions-CJJGKG1i.mjs")
 	},
 	"8043f9f461a2e106a6aa3ba0474234bd1598036ef6e2dc8a67dea4ff61dab955": {
 		functionName: "submitContact_createServerFn_handler",
-		importer: () => import("./_ssr/analytics.functions-CzS4ARna.mjs")
+		importer: () => import("./_ssr/analytics.functions-CJJGKG1i.mjs")
 	},
 	"abd124c618fd11979349d78fa7b5705a4311550c5a02f311710e53685f427a7f": {
 		functionName: "promoteToAdmin_createServerFn_handler",
-		importer: () => import("./_ssr/analytics.functions-CzS4ARna.mjs")
+		importer: () => import("./_ssr/analytics.functions-CJJGKG1i.mjs")
 	}
 };
 async function getServerFnById(id, access) {
