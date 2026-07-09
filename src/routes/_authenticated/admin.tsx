@@ -113,6 +113,28 @@ function Admin() {
     navigate({ to: "/auth", replace: true });
   };
 
+  const clearAllHistory = async () => {
+    const ok = window.confirm("Clear all visitor, download, extraction, and notification history? This cannot be undone.");
+    if (!ok) return;
+
+    try {
+      const res = await fetch("/api/admin/clear-history", { method: "POST", credentials: "include" });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) {
+        window.alert("Clear history failed: " + (body?.error || res.statusText));
+        return;
+      }
+
+      setSessions([]);
+      setDownloads([]);
+      setNotifications([]);
+      setSessionsPage(1);
+      window.alert("All history cleared");
+    } catch (error) {
+      window.alert("Clear history failed: " + String(error));
+    }
+  };
+
   const sessionsPerPage = 10;
   const totalSessionPages = Math.max(1, Math.ceil(sessions.length / sessionsPerPage));
   const currentSessionPage = Math.min(sessionsPage, totalSessionPages);
@@ -208,6 +230,14 @@ function Admin() {
               {desktopNotifState.notificationCount > 0 && ` (${desktopNotifState.notificationCount} notifications sent)`}
             </p>
           )}
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={clearAllHistory}
+              className="rounded-full border border-red-400/40 bg-red-950/30 px-4 py-2 text-xs uppercase tracking-widest text-red-200 hover:bg-red-900/40"
+            >
+              Clear all history
+            </button>
+          </div>
           <div className="mt-6 space-y-8">
             <div className="overflow-x-auto rounded-3xl bg-white/5 p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

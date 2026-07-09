@@ -2,7 +2,7 @@ import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow } from "./fx-DmVqfUhc.mjs";
 import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-BpRBzv-V.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-pYqsgS5n.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function useAdminNotifications(initial = []) {
@@ -79,56 +79,32 @@ function useDesktopNotifications() {
 		lastError: null
 	});
 	const shownNotificationIdsRef = (0, import_react.useRef)(/* @__PURE__ */ new Set());
-	const lastDataSnapshot = (0, import_react.useRef)({
-		sessions: [],
-		downloads: []
-	});
+	const mountedAtRef = (0, import_react.useRef)(Date.now());
 	const pollingIntervalRef = (0, import_react.useRef)(null);
 	const mountedRef = (0, import_react.useRef)(true);
-	async function showNotification(type, sessionData) {
-		const notifId = `${type}-${sessionData.session_id}`;
+	async function showStoredNotification(note) {
+		const notifId = String(note.id || `${note.type}-${note.session_id}-${note.created_at}`);
 		if (shownNotificationIdsRef.current.has(notifId)) return;
 		shownNotificationIdsRef.current.add(notifId);
+		const isVisitor = note.type_detail === "visitor" || note.type === "visitor" || note.type === "visitor_arrival" || note.type === "visitor_left";
+		const title = note.title || (isVisitor ? "Visitor Activity" : "Download Activity");
+		const body = note.body || [
+			note.session_id ? `Session: ${String(note.session_id).slice(0, 8)}` : null,
+			`IP: ${note.ip_address || note.payload?.ip_address || "unknown"}`,
+			`Country: ${note.country || note.payload?.country || "unknown"}`,
+			note.device ? `Device: ${note.device}` : null,
+			note.browser ? `Browser: ${note.browser}` : null,
+			note.filename ? `File: ${note.filename}` : null
+		].filter(Boolean).join("\n");
 		try {
-			let title;
-			let body;
-			if (type === "visitor") {
-				title = "New Visitor";
-				body = [
-					`Session: ${sessionData.session_id.slice(0, 8)}`,
-					`IP: ${sessionData.ip || "unknown"}`,
-					`Country: ${sessionData.country || "unknown"}`,
-					`Device: ${sessionData.device || "unknown"}`,
-					`Browser: ${sessionData.browser || "unknown"}`
-				].join("\n");
-				console.log("[Desktop Notifications] New visitor detected:", {
-					session_id: sessionData.session_id,
-					ip: sessionData.ip,
-					country: sessionData.country
-				});
-			} else {
-				title = "New Download";
-				body = [
-					`File: ${sessionData.file_name || "unknown"}`,
-					`Session: ${sessionData.session_id.slice(0, 8)}`,
-					`IP: ${sessionData.ip || "unknown"}`,
-					`Country: ${sessionData.country || "unknown"}`,
-					`Time: ${(/* @__PURE__ */ new Date()).toLocaleTimeString()}`
-				].join("\n");
-				console.log("[Desktop Notifications] New download detected:", {
-					file_name: sessionData.file_name,
-					session_id: sessionData.session_id,
-					ip: sessionData.ip
-				});
-			}
-			if (Notification && Notification.permission === "granted") try {
+			if (typeof Notification !== "undefined" && Notification.permission === "granted") try {
 				const notif = new Notification(title, {
 					body,
 					icon: "/favicon.ico",
 					tag: notifId,
 					badge: "/favicon.ico"
 				});
-				console.log(`[Desktop Notifications] Browser notification sent (${type}):`, {
+				console.log("[Desktop Notifications] Browser notification sent:", {
 					title,
 					body
 				});
@@ -212,33 +188,13 @@ function useDesktopNotifications() {
 				if (!res.ok || res.status === 401) return;
 				const data = await res.json();
 				if (!mountedRef.current) return;
-				const currentSessions = data.sessions || [];
-				const currentDownloads = data.downloads || [];
-				const lastSessionIds = new Set(lastDataSnapshot.current.sessions.map((s) => s.session_id));
-				currentSessions.forEach((session) => {
-					if (!lastSessionIds.has(session.session_id)) showNotification("visitor", {
-						session_id: session.session_id,
-						ip: session.ip,
-						country: session.country,
-						device: session.device,
-						browser: session.browser
-					});
+				(data.notifications || []).filter((note) => {
+					if (note.read) return false;
+					const createdAt = new Date(note.created_at || 0).getTime();
+					return Number.isFinite(createdAt) && createdAt >= mountedAtRef.current - 5e3;
+				}).slice().reverse().forEach((note) => {
+					showStoredNotification(note);
 				});
-				const lastDownloadIds = new Set(lastDataSnapshot.current.downloads.map((d) => d.id));
-				currentDownloads.forEach((download) => {
-					if (!lastDownloadIds.has(download.id) && download.completed) showNotification("download", {
-						session_id: download.session_id,
-						ip: download.ip,
-						country: download.country,
-						device: download.device,
-						browser: download.browser,
-						file_name: download.file_name
-					});
-				});
-				lastDataSnapshot.current = {
-					sessions: currentSessions,
-					downloads: currentDownloads
-				};
 			} catch (err) {
 				console.error("[Desktop Notifications] Polling error:", err);
 			}
@@ -354,6 +310,27 @@ function Admin() {
 			to: "/auth",
 			replace: true
 		});
+	};
+	const clearAllHistory = async () => {
+		if (!window.confirm("Clear all visitor, download, extraction, and notification history? This cannot be undone.")) return;
+		try {
+			const res = await fetch("/api/admin/clear-history", {
+				method: "POST",
+				credentials: "include"
+			});
+			const body = await res.json().catch(() => null);
+			if (!res.ok) {
+				window.alert("Clear history failed: " + (body?.error || res.statusText));
+				return;
+			}
+			setSessions([]);
+			setDownloads([]);
+			setNotifications([]);
+			setSessionsPage(1);
+			window.alert("All history cleared");
+		} catch (error) {
+			window.alert("Clear history failed: " + String(error));
+		}
 	};
 	const sessionsPerPage = 10;
 	const totalSessionPages = Math.max(1, Math.ceil(sessions.length / sessionsPerPage));
@@ -485,6 +462,14 @@ function Admin() {
 							desktopNotifState.permission === "granted" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 								className: "mt-2 text-xs text-emerald-300",
 								children: ["✓ Desktop notifications enabled. You will receive real-time alerts for new visitors and downloads.", desktopNotifState.notificationCount > 0 && ` (${desktopNotifState.notificationCount} notifications sent)`]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "mt-4 flex justify-end",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									onClick: clearAllHistory,
+									className: "rounded-full border border-red-400/40 bg-red-950/30 px-4 py-2 text-xs uppercase tracking-widest text-red-200 hover:bg-red-900/40",
+									children: "Clear all history"
+								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "mt-6 space-y-8",

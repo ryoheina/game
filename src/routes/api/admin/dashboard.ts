@@ -44,6 +44,10 @@ function computeStatus(lastActive: string) {
   return Date.now() - last <= 120_000 ? "online" : "offline";
 }
 
+function notificationIsUnread(notification: any) {
+  return notification.read !== true;
+}
+
 type DashboardSuccessResponse = {
   success: true;
   sessions: any[];
@@ -289,7 +293,7 @@ export const Route = createFileRoute("/api/admin/dashboard")({
             ...download,
             status: download.completed ? "completed" : "in_progress",
           }));
-          const unreadNotifications = notifications.filter((notification: any) => !notification.read);
+          const unreadNotifications = notifications.filter(notificationIsUnread);
 
           // ===== STEP 7: OPTIONAL BACKGROUND UPDATES =====
           try {

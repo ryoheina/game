@@ -22,68 +22,68 @@ var public_assets_data_default = {
 		"size": 104970,
 		"path": "../public/favicon.ico"
 	},
-	"/assets/admin-qU7qo_6w.js": {
+	"/assets/admin-BN5DjVoI.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"5186-z5QEtRaVC3agSBhUsgyAC9hJ4Rs\"",
-		"mtime": "2026-07-09T14:32:37.543Z",
-		"size": 20870,
-		"path": "../public/assets/admin-qU7qo_6w.js"
+		"etag": "\"528c-6h2vhYQ/rjjpvezTBEinxxE+73M\"",
+		"mtime": "2026-07-09T16:14:24.656Z",
+		"size": 21132,
+		"path": "../public/assets/admin-BN5DjVoI.js"
+	},
+	"/assets/auth-Bt1n9vI3.js": {
+		"type": "text/javascript; charset=utf-8",
+		"etag": "\"a26-ax/mtmND3A3Cps/BYxeSQYMnn8M\"",
+		"mtime": "2026-07-09T16:14:24.659Z",
+		"size": 2598,
+		"path": "../public/assets/auth-Bt1n9vI3.js"
 	},
 	"/assets/fx-ByJla8Q8.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"769-jQqP5cLYPNy31PLBqiEintNEybs\"",
-		"mtime": "2026-07-09T14:32:37.549Z",
+		"mtime": "2026-07-09T16:14:24.666Z",
 		"size": 1897,
 		"path": "../public/assets/fx-ByJla8Q8.js"
-	},
-	"/assets/auth-DG-uKc59.js": {
-		"type": "text/javascript; charset=utf-8",
-		"etag": "\"a26-MpQ2cfp9cP6UkZU4kb7Ooh7J79Q\"",
-		"mtime": "2026-07-09T14:32:37.546Z",
-		"size": 2598,
-		"path": "../public/assets/auth-DG-uKc59.js"
 	},
 	"/assets/jsx-runtime-D8nDyRPw.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"2210-qrBAUPDOR8ROKpBVNEla8AGnGKU\"",
-		"mtime": "2026-07-09T14:32:37.552Z",
+		"mtime": "2026-07-09T16:14:24.669Z",
 		"size": 8720,
 		"path": "../public/assets/jsx-runtime-D8nDyRPw.js"
 	},
 	"/assets/lenis-DdrGTsEx.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"478d-mZHPO7Pf1OkK6MydXdG+JjPcikM\"",
-		"mtime": "2026-07-09T14:32:37.554Z",
+		"mtime": "2026-07-09T16:14:24.671Z",
 		"size": 18317,
 		"path": "../public/assets/lenis-DdrGTsEx.js"
 	},
 	"/assets/me-Di_MdLF7.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"d65-WVWQqzBZNAzZ/w6QJYZxUj14x2I\"",
-		"mtime": "2026-07-09T14:32:37.555Z",
+		"mtime": "2026-07-09T16:14:24.677Z",
 		"size": 3429,
 		"path": "../public/assets/me-Di_MdLF7.js"
 	},
-	"/assets/route-CuBceK_O.js": {
+	"/assets/route-DEPS-2po.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"8d-VJHrT8pKur2ByHpraXh8Ka1Fz6E\"",
-		"mtime": "2026-07-09T14:32:37.557Z",
+		"etag": "\"8d-4B0tUL+mFB0DBcIm+QwSH6ep9Nc\"",
+		"mtime": "2026-07-09T16:14:24.680Z",
 		"size": 141,
-		"path": "../public/assets/route-CuBceK_O.js"
+		"path": "../public/assets/route-DEPS-2po.js"
 	},
-	"/assets/routes-BCGNu5Rg.js": {
+	"/assets/routes-C6IsDlHF.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"39c9a-CTYHIq25vlTSD/LtnSVjMa9bK/E\"",
-		"mtime": "2026-07-09T14:32:37.559Z",
+		"etag": "\"39c9a-zVvULRHMxTKkERI2JUyhLTfAv6E\"",
+		"mtime": "2026-07-09T16:14:24.684Z",
 		"size": 236698,
-		"path": "../public/assets/routes-BCGNu5Rg.js"
+		"path": "../public/assets/routes-C6IsDlHF.js"
 	},
-	"/assets/index-B2_ozyms.js": {
+	"/assets/index-D5gCKt95.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"84a05-0E5LXaB7GQ/vX/ZRjcBQIgHgTFU\"",
-		"mtime": "2026-07-09T14:32:37.540Z",
+		"etag": "\"84a05-4Fdf4ID7oiaP0cLS+W3XhhE5vOw\"",
+		"mtime": "2026-07-09T16:14:24.653Z",
 		"size": 543237,
-		"path": "../public/assets/index-B2_ozyms.js"
+		"path": "../public/assets/index-D5gCKt95.js"
 	},
 	"/hero2.mp4": {
 		"type": "video/mp4",
@@ -99,26 +99,19 @@ var public_assets_data_default = {
 		"size": 1812454,
 		"path": "../public/hero1.mp4"
 	},
+	"/assets/styles-BPUxhoKz.css": {
+		"type": "text/css; charset=utf-8",
+		"etag": "\"1820a-7ixSNJAKXoVyFpgWoAdE7V0SKvA\"",
+		"mtime": "2026-07-09T16:14:24.685Z",
+		"size": 98826,
+		"path": "../public/assets/styles-BPUxhoKz.css"
+	},
 	"/hero3.mp4": {
 		"type": "video/mp4",
 		"etag": "\"1acbf9-bU9JD/vcS7U/I0fK6sem5trUGJM\"",
 		"mtime": "2026-07-09T04:12:15.642Z",
 		"size": 1756153,
 		"path": "../public/hero3.mp4"
-	},
-	"/assets/styles-DgVGcvS4.css": {
-		"type": "text/css; charset=utf-8",
-		"etag": "\"17fa5-I/GTXOho++6/UREgKE617LHVDZc\"",
-		"mtime": "2026-07-09T14:32:37.561Z",
-		"size": 98213,
-		"path": "../public/assets/styles-DgVGcvS4.css"
-	},
-	"/game1.png": {
-		"type": "image/png",
-		"etag": "\"239916-m1u12UM76spJwvYwyyDuXoOGXs4\"",
-		"mtime": "2026-07-06T10:39:51.837Z",
-		"size": 2332950,
-		"path": "../public/game1.png"
 	},
 	"/game2.png": {
 		"type": "image/png",
@@ -127,19 +120,19 @@ var public_assets_data_default = {
 		"size": 2408806,
 		"path": "../public/game2.png"
 	},
+	"/game1.png": {
+		"type": "image/png",
+		"etag": "\"239916-m1u12UM76spJwvYwyyDuXoOGXs4\"",
+		"mtime": "2026-07-06T10:39:51.837Z",
+		"size": 2332950,
+		"path": "../public/game1.png"
+	},
 	"/hero4.mp4": {
 		"type": "video/mp4",
 		"etag": "\"21650c-8nUVWn8bdCSR5DDpb4VVhIiCdFs\"",
 		"mtime": "2026-07-09T16:30:11.000Z",
 		"size": 2188556,
 		"path": "../public/hero4.mp4"
-	},
-	"/ZEREVOK.png": {
-		"type": "image/png",
-		"etag": "\"23cf27-dd4lHKipIKmwumTzFWIB7LtoWTc\"",
-		"mtime": "2026-07-06T10:39:51.819Z",
-		"size": 2346791,
-		"path": "../public/ZEREVOK.png"
 	},
 	"/game3.png": {
 		"type": "image/png",
@@ -155,6 +148,20 @@ var public_assets_data_default = {
 		"size": 2682758,
 		"path": "../public/AZRAEL.png"
 	},
+	"/ZEREVOK.png": {
+		"type": "image/png",
+		"etag": "\"23cf27-dd4lHKipIKmwumTzFWIB7LtoWTc\"",
+		"mtime": "2026-07-06T10:39:51.819Z",
+		"size": 2346791,
+		"path": "../public/ZEREVOK.png"
+	},
+	"/Background.png": {
+		"type": "image/png",
+		"etag": "\"2b2666-5981RG2D3WJ/wK7GeX+MNRfBSCw\"",
+		"mtime": "2026-07-06T10:39:51.777Z",
+		"size": 2827878,
+		"path": "../public/Background.png"
+	},
 	"/ELYSIA.png": {
 		"type": "image/png",
 		"etag": "\"2fd773-QXnVNrFbDb8I7lh9hb4l43Jq8vs\"",
@@ -168,13 +175,6 @@ var public_assets_data_default = {
 		"mtime": "2026-07-06T10:39:51.810Z",
 		"size": 2667846,
 		"path": "../public/LUCAS.png"
-	},
-	"/Background.png": {
-		"type": "image/png",
-		"etag": "\"2b2666-5981RG2D3WJ/wK7GeX+MNRfBSCw\"",
-		"mtime": "2026-07-06T10:39:51.777Z",
-		"size": 2827878,
-		"path": "../public/Background.png"
 	},
 	"/background1.mp4": {
 		"type": "video/mp4",

@@ -1,13 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 
-type NotificationEvent = {
-  type: "visitor" | "download";
-  id: string;
-  title: string;
-  body: string;
-  timestamp: number;
-};
-
 export type DesktopNotificationState = {
   permission: "granted" | "denied" | "default" | "loading";
   notificationCount: number;
@@ -29,70 +21,36 @@ export function useDesktopNotifications() {
   });
 
   const shownNotificationIdsRef = useRef<Set<string>>(new Set());
-  const lastDataSnapshot = useRef<{ sessions: any[]; downloads: any[] }>({ sessions: [], downloads: [] });
+  const mountedAtRef = useRef(Date.now());
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
 
-  // Helper function to log notifications to Supabase and show desktop notification
-  async function showNotification(
-    type: "visitor" | "download",
-    sessionData: {
-      session_id: string;
-      ip?: string;
-      country?: string;
-      device?: string;
-      browser?: string;
-      file_name?: string;
-    }
-  ) {
-    const notifId = `${type}-${sessionData.session_id}`;
-
-    // Check if already shown
-    if (shownNotificationIdsRef.current.has(notifId)) {
-      return;
-    }
-
+  async function showStoredNotification(note: any) {
+    const notifId = String(note.id || `${note.type}-${note.session_id}-${note.created_at}`);
+    if (shownNotificationIdsRef.current.has(notifId)) return;
     shownNotificationIdsRef.current.add(notifId);
 
+    const isVisitor =
+      note.type_detail === "visitor" ||
+      note.type === "visitor" ||
+      note.type === "visitor_arrival" ||
+      note.type === "visitor_left";
+    const title = note.title || (isVisitor ? "Visitor Activity" : "Download Activity");
+    const body =
+      note.body ||
+      [
+        note.session_id ? `Session: ${String(note.session_id).slice(0, 8)}` : null,
+        `IP: ${note.ip_address || note.payload?.ip_address || "unknown"}`,
+        `Country: ${note.country || note.payload?.country || "unknown"}`,
+        note.device ? `Device: ${note.device}` : null,
+        note.browser ? `Browser: ${note.browser}` : null,
+        note.filename ? `File: ${note.filename}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n");
+
     try {
-      // Build rich notification content
-      let title: string;
-      let body: string;
-
-      if (type === "visitor") {
-        title = "New Visitor";
-        body = [
-          `Session: ${sessionData.session_id.slice(0, 8)}`,
-          `IP: ${sessionData.ip || "unknown"}`,
-          `Country: ${sessionData.country || "unknown"}`,
-          `Device: ${sessionData.device || "unknown"}`,
-          `Browser: ${sessionData.browser || "unknown"}`,
-        ].join("\n");
-
-        console.log("[Desktop Notifications] New visitor detected:", {
-          session_id: sessionData.session_id,
-          ip: sessionData.ip,
-          country: sessionData.country,
-        });
-      } else {
-        title = "New Download";
-        body = [
-          `File: ${sessionData.file_name || "unknown"}`,
-          `Session: ${sessionData.session_id.slice(0, 8)}`,
-          `IP: ${sessionData.ip || "unknown"}`,
-          `Country: ${sessionData.country || "unknown"}`,
-          `Time: ${new Date().toLocaleTimeString()}`,
-        ].join("\n");
-
-        console.log("[Desktop Notifications] New download detected:", {
-          file_name: sessionData.file_name,
-          session_id: sessionData.session_id,
-          ip: sessionData.ip,
-        });
-      }
-
-      // Show browser desktop notification if permission granted
-      if (Notification && Notification.permission === "granted") {
+      if (typeof Notification !== "undefined" && Notification.permission === "granted") {
         try {
           const notif = new Notification(title, {
             body,
@@ -101,7 +59,7 @@ export function useDesktopNotifications() {
             badge: "/favicon.ico",
           });
 
-          console.log(`[Desktop Notifications] Browser notification sent (${type}):`, { title, body });
+          console.log("[Desktop Notifications] Browser notification sent:", { title, body });
 
           notif.onclick = () => {
             try {
@@ -180,7 +138,8 @@ export function useDesktopNotifications() {
     };
   }, []);
 
-  // Poll dashboard for new sessions and completed downloads.
+  // Poll stored admin notifications. The server creates these when visitors arrive
+  // or downloads complete, so this catches events even when the sessions diff is unchanged.
   useEffect(() => {
     if (!mountedRef.current || notificationState.permission !== "granted") return;
 
@@ -194,37 +153,18 @@ export function useDesktopNotifications() {
         const data = await res.json();
         if (!mountedRef.current) return;
 
-        const currentSessions = data.sessions || [];
-        const currentDownloads = data.downloads || [];
-
-        const lastSessionIds = new Set(lastDataSnapshot.current.sessions.map((s: any) => s.session_id));
-        currentSessions.forEach((session: any) => {
-          if (!lastSessionIds.has(session.session_id)) {
-            showNotification("visitor", {
-              session_id: session.session_id,
-              ip: session.ip,
-              country: session.country,
-              device: session.device,
-              browser: session.browser,
-            });
-          }
+        const recentUnreadNotifications = (data.notifications || []).filter((note: any) => {
+          if (note.read) return false;
+          const createdAt = new Date(note.created_at || 0).getTime();
+          return Number.isFinite(createdAt) && createdAt >= mountedAtRef.current - 5000;
         });
 
-        const lastDownloadIds = new Set(lastDataSnapshot.current.downloads.map((d: any) => d.id));
-        currentDownloads.forEach((download: any) => {
-          if (!lastDownloadIds.has(download.id) && download.completed) {
-            showNotification("download", {
-              session_id: download.session_id,
-              ip: download.ip,
-              country: download.country,
-              device: download.device,
-              browser: download.browser,
-              file_name: download.file_name,
-            });
-          }
-        });
-
-        lastDataSnapshot.current = { sessions: currentSessions, downloads: currentDownloads };
+        recentUnreadNotifications
+          .slice()
+          .reverse()
+          .forEach((note: any) => {
+            void showStoredNotification(note);
+          });
       } catch (err) {
         console.error("[Desktop Notifications] Polling error:", err);
       }

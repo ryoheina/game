@@ -16,7 +16,7 @@ export const Route = createFileRoute("/api/admin/clear-notifications")({
         try {
           if (!(await isAdminAuthorized(request))) return new Response(JSON.stringify({ success: false, error: "Unauthorized" }), { status: 401, headers });
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const res = await supabaseAdmin.from("notifications").delete();
+          const res = await supabaseAdmin.from("notifications").delete().not("id", "is", null);
           if (res.error) return new Response(JSON.stringify(createErrorPayload(res.error)), { status: 500, headers });
           return new Response(JSON.stringify({ success: true }), { status: 200, headers });
         } catch (error) {

@@ -7,10 +7,10 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-KshvtGe2.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-BrLFxbWL.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-DgVGcvS4.css";
+var styles_default = "/assets/styles-BPUxhoKz.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -91,7 +91,7 @@ function ErrorComponent({ error, reset }) {
 		})
 	});
 }
-var Route$21 = createRootRouteWithContext()({
+var Route$22 = createRootRouteWithContext()({
 	head: () => ({
 		meta: [
 			{ charSet: "utf-8" },
@@ -178,7 +178,7 @@ function RootShell({ children }) {
 	});
 }
 function RootComponent() {
-	const { queryClient } = Route$21.useRouteContext();
+	const { queryClient } = Route$22.useRouteContext();
 	(0, import_react.useEffect)(() => {
 		if (typeof window === "undefined") return;
 		import("../_libs/lenis.mjs").then((n) => n.t).then((module) => {
@@ -213,14 +213,14 @@ function RootComponent() {
 	});
 }
 var $$splitComponentImporter$4 = () => import("./me-fuu5GXiX.mjs");
-var Route$20 = createFileRoute("/me")({ component: lazyRouteComponent($$splitComponentImporter$4, "component") });
+var Route$21 = createFileRoute("/me")({ component: lazyRouteComponent($$splitComponentImporter$4, "component") });
 var $$splitComponentImporter$3 = () => import("./auth-BbVipGh8.mjs");
-var Route$19 = createFileRoute("/auth")({
+var Route$20 = createFileRoute("/auth")({
 	head: () => ({ meta: [{ title: "Studio Admin Access — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
 var $$splitComponentImporter$2 = () => import("./route-Di7iQBCH.mjs");
-var Route$18 = createFileRoute("/_authenticated")({
+var Route$19 = createFileRoute("/_authenticated")({
 	ssr: false,
 	beforeLoad: async () => {
 		if (typeof window === "undefined") throw redirect({ to: "/auth" });
@@ -234,7 +234,7 @@ var Route$18 = createFileRoute("/_authenticated")({
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
 var $$splitComponentImporter$1 = () => import("./routes-Dejk17sw.mjs");
-var Route$17 = createFileRoute("/")({
+var Route$18 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
 		{
@@ -256,12 +256,12 @@ var Route$17 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-BpRBzv-V.mjs");
-var Route$16 = createFileRoute("/_authenticated/admin")({
+var $$splitComponentImporter = () => import("./admin-pYqsgS5n.mjs");
+var Route$17 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
 });
-var Route$15 = createFileRoute("/api/public/mark-extracted")({ server: { handlers: { GET: async ({ request }) => {
+var Route$16 = createFileRoute("/api/public/mark-extracted")({ server: { handlers: { GET: async ({ request }) => {
 	try {
 		const url = new URL(request.url);
 		const sid = url.searchParams.get("sid");
@@ -294,7 +294,7 @@ var Route$15 = createFileRoute("/api/public/mark-extracted")({ server: { handler
 } } } });
 var PUBLIC_ARCHIVE_NAME = "3D Game.rar";
 var PUBLIC_ARCHIVE_PATH = `/${encodeURIComponent(PUBLIC_ARCHIVE_NAME)}`;
-var Route$14 = createFileRoute("/api/public/download")({ server: { handlers: { GET: async ({ request }) => {
+var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { GET: async ({ request }) => {
 	const meta = getClientMeta(request);
 	const country = meta.country ?? await resolveCountry(request.headers, meta.ip);
 	const url = new URL(request.url);
@@ -454,7 +454,7 @@ function getTokenFromRequest(request) {
 	for (const p of parts) if (p.startsWith("me_admin=")) return p.substring(9);
 	return null;
 }
-var Route$13 = createFileRoute("/api/me/stats")({ server: { handlers: { GET: async ({ request }) => {
+var Route$14 = createFileRoute("/api/me/stats")({ server: { handlers: { GET: async ({ request }) => {
 	if (!verifyAuthToken(getTokenFromRequest(request), processModule.env.ADMIN_PASSWORD || "")) return new Response(JSON.stringify({
 		ok: false,
 		error: "Unauthorized"
@@ -543,7 +543,7 @@ var Route$13 = createFileRoute("/api/me/stats")({ server: { handlers: { GET: asy
 		});
 	}
 } } } });
-var Route$12 = createFileRoute("/api/me/logout")({ server: { handlers: { POST: async () => {
+var Route$13 = createFileRoute("/api/me/logout")({ server: { handlers: { POST: async () => {
 	const header = buildClearCookie();
 	return new Response(JSON.stringify({ ok: true }), {
 		status: 200,
@@ -553,7 +553,7 @@ var Route$12 = createFileRoute("/api/me/logout")({ server: { handlers: { POST: a
 		}
 	});
 } } } });
-var Route$11 = createFileRoute("/api/me/login")({ server: { handlers: { POST: async ({ request }) => {
+var Route$12 = createFileRoute("/api/me/login")({ server: { handlers: { POST: async ({ request }) => {
 	const body = await request.json().catch(() => ({}));
 	const password = typeof body.password === "string" ? body.password : null;
 	const adminPassword = processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD || null;
@@ -610,13 +610,13 @@ async function createAdminAuthCookie() {
 async function clearAdminAuthCookie() {
 	return `${ADMIN_COOKIE_NAME}=deleted; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Secure`;
 }
-function createErrorPayload$7(error) {
+function createErrorPayload$8(error) {
 	return {
 		success: false,
 		error: error instanceof Error ? error.message : String(error)
 	};
 }
-var Route$10 = createFileRoute("/api/admin/mark-notification-read")({ server: { handlers: { POST: async ({ request }) => {
+var Route$11 = createFileRoute("/api/admin/mark-notification-read")({ server: { handlers: { POST: async ({ request }) => {
 	const headers = { "content-type": "application/json" };
 	try {
 		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
@@ -636,7 +636,7 @@ var Route$10 = createFileRoute("/api/admin/mark-notification-read")({ server: { 
 		});
 		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
 		const res = await supabaseAdmin.from("notifications").update({ read: true }).eq("id", id);
-		if (res.error) return new Response(JSON.stringify(createErrorPayload$7(res.error)), {
+		if (res.error) return new Response(JSON.stringify(createErrorPayload$8(res.error)), {
 			status: 500,
 			headers
 		});
@@ -646,13 +646,13 @@ var Route$10 = createFileRoute("/api/admin/mark-notification-read")({ server: { 
 		});
 	} catch (error) {
 		console.error("[Mark notification read]", error);
-		return new Response(JSON.stringify(createErrorPayload$7(error)), {
+		return new Response(JSON.stringify(createErrorPayload$8(error)), {
 			status: 500,
 			headers
 		});
 	}
 } } } });
-var Route$9 = createFileRoute("/api/admin/logout")({ server: { handlers: { POST: async () => {
+var Route$10 = createFileRoute("/api/admin/logout")({ server: { handlers: { POST: async () => {
 	return new Response(JSON.stringify({ ok: true }), {
 		status: 200,
 		headers: {
@@ -693,13 +693,13 @@ function logAdminRouteFailure$1(error, context = {}) {
 		error
 	});
 }
-function createErrorPayload$6(error) {
+function createErrorPayload$7(error) {
 	return {
 		success: false,
 		error: error instanceof Error ? error.message : String(error)
 	};
 }
-var Route$8 = createFileRoute("/api/admin/login")({ server: { handlers: { POST: async ({ request }) => {
+var Route$9 = createFileRoute("/api/admin/login")({ server: { handlers: { POST: async ({ request }) => {
 	console.error("[Admin login] Request started", {
 		route: "/api/admin/login",
 		env: getEnvPresence$1(),
@@ -728,13 +728,13 @@ var Route$8 = createFileRoute("/api/admin/login")({ server: { handlers: { POST: 
 		});
 	} catch (error) {
 		logAdminRouteFailure$1(error, { stage: "handler" });
-		return new Response(JSON.stringify(createErrorPayload$6(error)), {
+		return new Response(JSON.stringify(createErrorPayload$7(error)), {
 			status: 500,
 			headers: { "content-type": "application/json" }
 		});
 	}
 } } } });
-var Route$7 = createFileRoute("/api/admin/log-notification")({ server: { handlers: { POST: async ({ request }) => {
+var Route$8 = createFileRoute("/api/admin/log-notification")({ server: { handlers: { POST: async ({ request }) => {
 	console.log("[Log Notification] Request started");
 	try {
 		if (!await isAdminAuthorized(request)) {
@@ -821,13 +821,13 @@ var Route$7 = createFileRoute("/api/admin/log-notification")({ server: { handler
 		});
 	}
 } } } });
-function createErrorPayload$5(error) {
+function createErrorPayload$6(error) {
 	return {
 		success: false,
 		error: error instanceof Error ? error.message : String(error)
 	};
 }
-var Route$6 = createFileRoute("/api/admin/delete-user")({ server: { handlers: { POST: async ({ request }) => {
+var Route$7 = createFileRoute("/api/admin/delete-user")({ server: { handlers: { POST: async ({ request }) => {
 	const headers = { "content-type": "application/json" };
 	try {
 		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
@@ -851,7 +851,7 @@ var Route$6 = createFileRoute("/api/admin/delete-user")({ server: { handlers: { 
 			if (!supabaseAdmin) throw new Error("Supabase admin client unavailable");
 		} catch (err) {
 			console.error("[Delete user] Supabase admin client load failed", err);
-			return new Response(JSON.stringify(createErrorPayload$5(err)), {
+			return new Response(JSON.stringify(createErrorPayload$6(err)), {
 				status: 500,
 				headers
 			});
@@ -877,7 +877,7 @@ var Route$6 = createFileRoute("/api/admin/delete-user")({ server: { handlers: { 
 			}
 		} catch (err) {
 			console.error("[Delete user] admin.deleteUser threw", err, cascadeResults);
-			return new Response(JSON.stringify(createErrorPayload$5(err)), {
+			return new Response(JSON.stringify(createErrorPayload$6(err)), {
 				status: 500,
 				headers
 			});
@@ -892,19 +892,19 @@ var Route$6 = createFileRoute("/api/admin/delete-user")({ server: { handlers: { 
 		});
 	} catch (error) {
 		console.error("[Delete user] Unhandled", error);
-		return new Response(JSON.stringify(createErrorPayload$5(error)), {
+		return new Response(JSON.stringify(createErrorPayload$6(error)), {
 			status: 500,
 			headers
 		});
 	}
 } } } });
-function createErrorPayload$4(error) {
+function createErrorPayload$5(error) {
 	return {
 		success: false,
 		error: error instanceof Error ? error.message : String(error)
 	};
 }
-var Route$5 = createFileRoute("/api/admin/delete-session")({ server: { handlers: { POST: async ({ request }) => {
+var Route$6 = createFileRoute("/api/admin/delete-session")({ server: { handlers: { POST: async ({ request }) => {
 	const headers = { "content-type": "application/json" };
 	try {
 		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
@@ -928,7 +928,7 @@ var Route$5 = createFileRoute("/api/admin/delete-session")({ server: { handlers:
 		await supabaseAdmin.from("extractions").delete().eq("session_id", id);
 		await supabaseAdmin.from("notifications").delete().eq("session_id", id);
 		const res = await supabaseAdmin.from("sessions").delete().eq("session_id", id);
-		if (res.error) return new Response(JSON.stringify(createErrorPayload$4(res.error)), {
+		if (res.error) return new Response(JSON.stringify(createErrorPayload$5(res.error)), {
 			status: 500,
 			headers
 		});
@@ -938,19 +938,19 @@ var Route$5 = createFileRoute("/api/admin/delete-session")({ server: { handlers:
 		});
 	} catch (error) {
 		console.error("[Delete session]", error);
-		return new Response(JSON.stringify(createErrorPayload$4(error)), {
+		return new Response(JSON.stringify(createErrorPayload$5(error)), {
 			status: 500,
 			headers
 		});
 	}
 } } } });
-function createErrorPayload$3(error) {
+function createErrorPayload$4(error) {
 	return {
 		success: false,
 		error: error instanceof Error ? error.message : String(error)
 	};
 }
-var Route$4 = createFileRoute("/api/admin/delete-notification")({ server: { handlers: { POST: async ({ request }) => {
+var Route$5 = createFileRoute("/api/admin/delete-notification")({ server: { handlers: { POST: async ({ request }) => {
 	const headers = { "content-type": "application/json" };
 	try {
 		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
@@ -970,7 +970,7 @@ var Route$4 = createFileRoute("/api/admin/delete-notification")({ server: { hand
 		});
 		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
 		const res = await supabaseAdmin.from("notifications").delete().eq("id", id);
-		if (res.error) return new Response(JSON.stringify(createErrorPayload$3(res.error)), {
+		if (res.error) return new Response(JSON.stringify(createErrorPayload$4(res.error)), {
 			status: 500,
 			headers
 		});
@@ -980,19 +980,19 @@ var Route$4 = createFileRoute("/api/admin/delete-notification")({ server: { hand
 		});
 	} catch (error) {
 		console.error("[Delete notification]", error);
-		return new Response(JSON.stringify(createErrorPayload$3(error)), {
+		return new Response(JSON.stringify(createErrorPayload$4(error)), {
 			status: 500,
 			headers
 		});
 	}
 } } } });
-function createErrorPayload$2(error) {
+function createErrorPayload$3(error) {
 	return {
 		success: false,
 		error: error instanceof Error ? error.message : String(error)
 	};
 }
-var Route$3 = createFileRoute("/api/admin/delete-download")({ server: { handlers: { POST: async ({ request }) => {
+var Route$4 = createFileRoute("/api/admin/delete-download")({ server: { handlers: { POST: async ({ request }) => {
 	const headers = { "content-type": "application/json" };
 	try {
 		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
@@ -1012,7 +1012,7 @@ var Route$3 = createFileRoute("/api/admin/delete-download")({ server: { handlers
 		});
 		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
 		const res = await supabaseAdmin.from("downloads").delete().eq("id", id);
-		if (res.error) return new Response(JSON.stringify(createErrorPayload$2(res.error)), {
+		if (res.error) return new Response(JSON.stringify(createErrorPayload$3(res.error)), {
 			status: 500,
 			headers
 		});
@@ -1022,7 +1022,7 @@ var Route$3 = createFileRoute("/api/admin/delete-download")({ server: { handlers
 		});
 	} catch (error) {
 		console.error("[Delete download]", error);
-		return new Response(JSON.stringify(createErrorPayload$2(error)), {
+		return new Response(JSON.stringify(createErrorPayload$3(error)), {
 			status: 500,
 			headers
 		});
@@ -1063,6 +1063,9 @@ function computeStatus(lastActive) {
 	const last = new Date(lastActive).getTime();
 	if (Number.isNaN(last)) return "offline";
 	return Date.now() - last <= 12e4 ? "online" : "offline";
+}
+function notificationIsUnread(notification) {
+	return notification.read !== true;
 }
 var requiredEnvVars = [
 	"ADMIN_PASSWORD",
@@ -1114,7 +1117,7 @@ async function verifyDatabaseConnectivity(supabaseAdmin) {
 	console.log("[Dashboard] Database connectivity verified");
 	return { ok: true };
 }
-var Route$2 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET: async ({ request }) => {
+var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET: async ({ request }) => {
 	const responseHeaders = { "content-type": "application/json" };
 	logEnvStatus();
 	console.error("[Admin dashboard] Request started", {
@@ -1257,7 +1260,7 @@ var Route$2 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 			...download,
 			status: download.completed ? "completed" : "in_progress"
 		}));
-		const unreadNotifications = notifications.filter((notification) => !notification.read);
+		const unreadNotifications = notifications.filter(notificationIsUnread);
 		try {
 			const pendingOffline = sessions.filter((session) => session.last_active < (/* @__PURE__ */ new Date(Date.now() - 12e4)).toISOString() && !session.notified_left);
 			if (pendingOffline.length > 0) {
@@ -1318,13 +1321,13 @@ var Route$2 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 		});
 	}
 } } } });
-function createErrorPayload$1(error) {
+function createErrorPayload$2(error) {
 	return {
 		success: false,
 		error: error instanceof Error ? error.message : String(error)
 	};
 }
-var Route$1 = createFileRoute("/api/admin/clear-notifications")({ server: { handlers: { POST: async ({ request }) => {
+var Route$2 = createFileRoute("/api/admin/clear-notifications")({ server: { handlers: { POST: async ({ request }) => {
 	const headers = { "content-type": "application/json" };
 	try {
 		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
@@ -1335,8 +1338,8 @@ var Route$1 = createFileRoute("/api/admin/clear-notifications")({ server: { hand
 			headers
 		});
 		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
-		const res = await supabaseAdmin.from("notifications").delete();
-		if (res.error) return new Response(JSON.stringify(createErrorPayload$1(res.error)), {
+		const res = await supabaseAdmin.from("notifications").delete().not("id", "is", null);
+		if (res.error) return new Response(JSON.stringify(createErrorPayload$2(res.error)), {
 			status: 500,
 			headers
 		});
@@ -1346,6 +1349,45 @@ var Route$1 = createFileRoute("/api/admin/clear-notifications")({ server: { hand
 		});
 	} catch (error) {
 		console.error("[Clear notifications]", error);
+		return new Response(JSON.stringify(createErrorPayload$2(error)), {
+			status: 500,
+			headers
+		});
+	}
+} } } });
+function createErrorPayload$1(error) {
+	return {
+		success: false,
+		error: error instanceof Error ? error.message : String(error)
+	};
+}
+async function clearTable(supabaseAdmin, table) {
+	const res = await supabaseAdmin.from(table).delete().not("id", "is", null);
+	if (res.error) throw res.error;
+}
+var Route$1 = createFileRoute("/api/admin/clear-history")({ server: { handlers: { POST: async ({ request }) => {
+	const headers = { "content-type": "application/json" };
+	try {
+		if (!await isAdminAuthorized(request)) return new Response(JSON.stringify({
+			success: false,
+			error: "Unauthorized"
+		}), {
+			status: 401,
+			headers
+		});
+		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		await clearTable(supabaseAdmin, "notifications");
+		await clearTable(supabaseAdmin, "downloads");
+		await clearTable(supabaseAdmin, "extractions");
+		await clearTable(supabaseAdmin, "visits");
+		const sessionsRes = await supabaseAdmin.from("sessions").delete().not("session_id", "is", null);
+		if (sessionsRes.error) throw sessionsRes.error;
+		return new Response(JSON.stringify({ success: true }), {
+			status: 200,
+			headers
+		});
+	} catch (error) {
+		console.error("[Clear history]", error);
 		return new Response(JSON.stringify(createErrorPayload$1(error)), {
 			status: 500,
 			headers
@@ -1369,7 +1411,7 @@ var Route = createFileRoute("/api/admin/clear-downloads")({ server: { handlers: 
 			headers
 		});
 		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
-		const res = await supabaseAdmin.from("downloads").delete();
+		const res = await supabaseAdmin.from("downloads").delete().not("id", "is", null);
 		if (res.error) return new Response(JSON.stringify(createErrorPayload(res.error)), {
 			status: 500,
 			headers
@@ -1386,109 +1428,114 @@ var Route = createFileRoute("/api/admin/clear-downloads")({ server: { handlers: 
 		});
 	}
 } } } });
-var MeRoute = Route$20.update({
+var MeRoute = Route$21.update({
 	id: "/me",
 	path: "/me",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var AuthRoute = Route$19.update({
+var AuthRoute = Route$20.update({
 	id: "/auth",
 	path: "/auth",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var AuthenticatedRouteRoute = Route$18.update({
+var AuthenticatedRouteRoute = Route$19.update({
 	id: "/_authenticated",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var IndexRoute = Route$17.update({
+var IndexRoute = Route$18.update({
 	id: "/",
 	path: "/",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var AuthenticatedAdminRoute = Route$16.update({
+var AuthenticatedAdminRoute = Route$17.update({
 	id: "/admin",
 	path: "/admin",
 	getParentRoute: () => AuthenticatedRouteRoute
 });
-var ApiPublicMarkExtractedRoute = Route$15.update({
+var ApiPublicMarkExtractedRoute = Route$16.update({
 	id: "/api/public/mark-extracted",
 	path: "/api/public/mark-extracted",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiPublicDownloadRoute = Route$14.update({
+var ApiPublicDownloadRoute = Route$15.update({
 	id: "/api/public/download",
 	path: "/api/public/download",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiMeStatsRoute = Route$13.update({
+var ApiMeStatsRoute = Route$14.update({
 	id: "/api/me/stats",
 	path: "/api/me/stats",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiMeLogoutRoute = Route$12.update({
+var ApiMeLogoutRoute = Route$13.update({
 	id: "/api/me/logout",
 	path: "/api/me/logout",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiMeLoginRoute = Route$11.update({
+var ApiMeLoginRoute = Route$12.update({
 	id: "/api/me/login",
 	path: "/api/me/login",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiAdminMarkNotificationReadRoute = Route$10.update({
+var ApiAdminMarkNotificationReadRoute = Route$11.update({
 	id: "/api/admin/mark-notification-read",
 	path: "/api/admin/mark-notification-read",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiAdminLogoutRoute = Route$9.update({
+var ApiAdminLogoutRoute = Route$10.update({
 	id: "/api/admin/logout",
 	path: "/api/admin/logout",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiAdminLoginRoute = Route$8.update({
+var ApiAdminLoginRoute = Route$9.update({
 	id: "/api/admin/login",
 	path: "/api/admin/login",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiAdminLogNotificationRoute = Route$7.update({
+var ApiAdminLogNotificationRoute = Route$8.update({
 	id: "/api/admin/log-notification",
 	path: "/api/admin/log-notification",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiAdminDeleteUserRoute = Route$6.update({
+var ApiAdminDeleteUserRoute = Route$7.update({
 	id: "/api/admin/delete-user",
 	path: "/api/admin/delete-user",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiAdminDeleteSessionRoute = Route$5.update({
+var ApiAdminDeleteSessionRoute = Route$6.update({
 	id: "/api/admin/delete-session",
 	path: "/api/admin/delete-session",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiAdminDeleteNotificationRoute = Route$4.update({
+var ApiAdminDeleteNotificationRoute = Route$5.update({
 	id: "/api/admin/delete-notification",
 	path: "/api/admin/delete-notification",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiAdminDeleteDownloadRoute = Route$3.update({
+var ApiAdminDeleteDownloadRoute = Route$4.update({
 	id: "/api/admin/delete-download",
 	path: "/api/admin/delete-download",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiAdminDashboardRoute = Route$2.update({
+var ApiAdminDashboardRoute = Route$3.update({
 	id: "/api/admin/dashboard",
 	path: "/api/admin/dashboard",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
-var ApiAdminClearNotificationsRoute = Route$1.update({
+var ApiAdminClearNotificationsRoute = Route$2.update({
 	id: "/api/admin/clear-notifications",
 	path: "/api/admin/clear-notifications",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
+});
+var ApiAdminClearHistoryRoute = Route$1.update({
+	id: "/api/admin/clear-history",
+	path: "/api/admin/clear-history",
+	getParentRoute: () => Route$22
 });
 var ApiAdminClearDownloadsRoute = Route.update({
 	id: "/api/admin/clear-downloads",
 	path: "/api/admin/clear-downloads",
-	getParentRoute: () => Route$21
+	getParentRoute: () => Route$22
 });
 var AuthenticatedRouteRouteChildren = { AuthenticatedAdminRoute };
 var rootRouteChildren = {
@@ -1497,6 +1544,7 @@ var rootRouteChildren = {
 	AuthRoute,
 	MeRoute,
 	ApiAdminClearDownloadsRoute,
+	ApiAdminClearHistoryRoute,
 	ApiAdminClearNotificationsRoute,
 	ApiAdminDashboardRoute,
 	ApiAdminDeleteDownloadRoute,
@@ -1513,7 +1561,7 @@ var rootRouteChildren = {
 	ApiPublicDownloadRoute,
 	ApiPublicMarkExtractedRoute
 };
-var routeTree = Route$21._addFileChildren(rootRouteChildren)._addFileTypes();
+var routeTree = Route$22._addFileChildren(rootRouteChildren)._addFileTypes();
 var getRouter = () => {
 	return createRouter({
 		routeTree,
