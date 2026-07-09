@@ -491,11 +491,27 @@ export function Battle() {
   );
 }
 
+export function BattleToFeaturesBreak() {
+  return (
+    <section
+      aria-hidden
+      className="relative isolate min-h-[28svh] overflow-hidden bg-background sm:min-h-[34svh]"
+    >
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-[#120606] to-background" />
+      <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/80 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent" />
+      <div className="absolute left-1/2 top-1/2 h-px w-[min(74rem,78vw)] -translate-x-1/2 bg-gradient-to-r from-transparent via-[#f06a3d]/35 to-transparent shadow-[0_0_42px_rgba(240,80,45,0.28)]" />
+      <div className="absolute left-1/2 top-[calc(50%+18px)] h-px w-[min(56rem,64vw)] -translate-x-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <Particles count={18} color="ember" className="opacity-70" />
+    </section>
+  );
+}
+
 export function Features() {
   return (
     <section id="features" className="relative h-[100svh] min-h-[560px] w-full overflow-hidden">
       <FullBleedVideo src="/background2.mp4" />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/5 to-background/50" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/35 via-background/5 to-background/50" />
     </section>
   );
 }
