@@ -3,6 +3,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getClientMeta } from "./ua";
+import { resolveCountry } from "./geo";
 
 export const trackVisit = createServerFn({ method: "POST" })
   .validator((d) =>
@@ -17,14 +18,49 @@ export const trackVisit = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const req = getRequest();
     const meta = req ? getClientMeta(req) : { ip: null, country: null, ua: "", referrer: null, browser: "Unknown", os: "Unknown", device: "Desktop" };
+    const country = meta.country ?? (req ? await resolveCountry(req.headers, meta.ip) : null);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const now = new Date().toISOString();
 
-    const { data: existing } = await supabaseAdmin.from("sessions").select("session_id").eq("session_id", data.sessionId).maybeSingle();
+    const { data: existing } = await supabaseAdmin
+      .from("sessions")
+      .select("session_id,last_active")
+      .eq("session_id", data.sessionId)
+      .maybeSingle();
     if (existing) {
-      await supabaseAdmin.from("sessions").update({ last_active: now, ip: meta.ip, country: meta.country, browser: meta.browser, os: meta.os, device: meta.device, user_agent: meta.ua }).eq("session_id", data.sessionId);
+      const wasOffline = Date.now() - new Date(existing.last_active as string).getTime() > 120_000;
+      await supabaseAdmin
+        .from("sessions")
+        .update({ last_active: now, ip: meta.ip, country, browser: meta.browser, os: meta.os, device: meta.device, user_agent: meta.ua, notified_left: false })
+        .eq("session_id", data.sessionId);
       if (data.heartbeat) return { ok: true };
+      if (wasOffline) {
+        try {
+          await supabaseAdmin.from("notifications").insert({
+            type: "visitor",
+            type_detail: "visitor",
+            title: "Visitor Arrived",
+            body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
+            session_id: data.sessionId,
+            ip_address: meta.ip,
+            country,
+            browser: meta.browser,
+            device: meta.device,
+            payload: {
+              session_id: data.sessionId,
+              ip_address: meta.ip,
+              country,
+              browser: meta.browser,
+              device: meta.device,
+            },
+            read: false,
+            delivered: false,
+          });
+        } catch (e) {
+          console.error("notify failed", e);
+        }
+      }
     } else if (data.heartbeat) {
       return { ok: true };
     }
@@ -34,7 +70,7 @@ export const trackVisit = createServerFn({ method: "POST" })
       session_id: data.sessionId,
       path: data.path,
       ip: meta.ip,
-      country: meta.country,
+      country,
       browser: meta.browser,
       os: meta.os,
       device: meta.device,
@@ -45,12 +81,43 @@ export const trackVisit = createServerFn({ method: "POST" })
     if (existing) {
       // session already updated above
     } else {
-      await supabaseAdmin.from("sessions").insert({ session_id: data.sessionId, ip: meta.ip, country: meta.country, browser: meta.browser, os: meta.os, device: meta.device, user_agent: meta.ua, first_visit: now, last_active: now });
-      // notify admin of arrival
+      await supabaseAdmin
+        .from("sessions")
+        .insert({
+          session_id: data.sessionId,
+          ip: meta.ip,
+          country,
+          browser: meta.browser,
+          os: meta.os,
+          device: meta.device,
+          user_agent: meta.ua,
+          first_visit: now,
+          last_active: now,
+        });
+
       try {
-        await supabaseAdmin.from("notifications").insert({ type: "visitor_arrival", title: "Visitor Arrived", body: `${meta.ip ?? 'unknown'} — ${meta.device} — ${meta.browser}`, payload: { session_id: data.sessionId } });
+        await supabaseAdmin.from("notifications").insert({
+          type: "visitor",
+          type_detail: "visitor",
+          title: "Visitor Arrived",
+          body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
+          session_id: data.sessionId,
+          ip_address: meta.ip,
+          country,
+          browser: meta.browser,
+          device: meta.device,
+          payload: {
+            session_id: data.sessionId,
+            ip_address: meta.ip,
+            country,
+            browser: meta.browser,
+            device: meta.device,
+          },
+          read: false,
+          delivered: false,
+        });
       } catch (e) {
-        console.error('notify failed', e);
+        console.error("notify failed", e);
       }
     }
 

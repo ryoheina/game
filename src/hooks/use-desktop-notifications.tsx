@@ -91,41 +91,6 @@ export function useDesktopNotifications() {
         });
       }
 
-      // Store in notifications table
-      try {
-        const storeRes = await fetch("/api/admin/log-notification", {
-          method: "POST",
-          credentials: "include",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            type,
-            session_id: sessionData.session_id,
-            ip_address: sessionData.ip,
-            country: sessionData.country,
-            device: sessionData.device,
-            browser: sessionData.browser,
-            filename: sessionData.file_name,
-            title,
-            body,
-          }),
-        });
-
-        if (!storeRes.ok) {
-          const errText = await storeRes.text().catch(() => "");
-          console.error("[Desktop Notifications] Notification insert failed:", storeRes.status, errText);
-          setNotificationState((prev) => ({
-            ...prev,
-            lastError: `Failed to store notification: ${storeRes.status}`,
-          }));
-        }
-      } catch (err) {
-        console.error("[Desktop Notifications] Notification insert failed:", err);
-        setNotificationState((prev) => ({
-          ...prev,
-          lastError: `Failed to store notification: ${String(err)}`,
-        }));
-      }
-
       // Show browser desktop notification if permission granted
       if (Notification && Notification.permission === "granted") {
         try {

@@ -53,7 +53,7 @@ function renderErrorPage() {
 }
 var serverEntryPromise;
 async function getServerEntry() {
-	if (!serverEntryPromise) serverEntryPromise = import("./server-B7t7Cb9m.mjs").then((m) => m.default ?? m);
+	if (!serverEntryPromise) serverEntryPromise = import("./server-SUVC_uIE.mjs").then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
 async function normalizeCatastrophicSsrResponse(response) {
@@ -77,11 +77,13 @@ function isH3SwallowedErrorBody(body) {
 }
 var server_default = { async fetch(request, env, ctx) {
 	const url = new URL(request.url);
-	if ([
+	const directDownloadPaths = [
 		"/3D Game.rar",
 		"/3D%20Game.rar",
 		"/3d%20game.rar"
-	].includes(url.pathname)) return new Response("Direct file access is forbidden. Use the download endpoint.", { status: 403 });
+	];
+	const isInternalDownloadFetch = request.headers.get("x-internal-download-fetch") === "1";
+	if (directDownloadPaths.includes(url.pathname) && !isInternalDownloadFetch) return new Response("Direct file access is forbidden. Use the download endpoint.", { status: 403 });
 	try {
 		return await normalizeCatastrophicSsrResponse(await (await getServerEntry()).fetch(request, env, ctx));
 	} catch (error) {

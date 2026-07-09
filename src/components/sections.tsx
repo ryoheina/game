@@ -5,6 +5,30 @@ import { AssetImg } from "@/components/asset-img";
 import type { ImgKey } from "@/lib/assets";
 import { Particles, Fog } from "./fx";
 
+function FullBleedVideo({
+  src,
+  className = "",
+  videoClassName = "",
+}: {
+  src: string;
+  className?: string;
+  videoClassName?: string;
+}) {
+  return (
+    <div className={`absolute inset-0 overflow-hidden ${className}`}>
+      <video
+        className={`h-full w-full object-cover ${videoClassName}`}
+        src={src}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+      />
+    </div>
+  );
+}
+
 export function Hero({ onDownload }: { onDownload: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
@@ -33,17 +57,12 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
   }, []);
 
   return (
-    <section ref={ref} className="relative isolate h-[100vh] min-h-[720px] w-full overflow-hidden">
+    <section ref={ref} className="relative isolate h-[100svh] min-h-[640px] w-full overflow-hidden sm:min-h-[720px]">
       <motion.div
         style={{ y, scale }}
         className="absolute inset-0 z-0"
       >
-        <AssetImg
-          asset="azrael"
-          alt="Azrael, the Chosen"
-          className="h-full w-full object-cover"
-          style={{ objectPosition: "18% center", animation: "slowZoom 30s ease-in-out infinite alternate", transform: "scale(1.12)", transformOrigin: "20% center" }}
-        />
+        <FullBleedVideo src="/hero3.mp4" videoClassName="object-[18%_center]" />
         <div
           className="absolute inset-0"
           style={{
@@ -66,7 +85,7 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
 
       <motion.div
         style={{ opacity }}
-        className="relative z-[20] mx-auto flex h-full max-w-7xl flex-col justify-center px-6 pt-24"
+        className="relative z-[20] mx-auto flex h-full max-w-7xl flex-col justify-center px-4 pt-24 sm:px-6"
       >
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -74,28 +93,28 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
           transition={{ duration: 1.2 }}
           className="max-w-2xl"
         >
-          <div className="mb-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500 shadow-[0_0_28px_rgba(255,255,255,0.14)]">
+          <div className="mb-6 inline-flex max-w-full items-center gap-3 rounded-full glass px-4 py-2 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500 shadow-[0_0_28px_rgba(255,255,255,0.14)]">
             <span className="h-2 w-2 rounded-full bg-[color:var(--gold)] shadow-lg shadow-[color:var(--gold)]" style={{ animation: "shimmer 2s ease-in-out infinite" }} />
             <span className="text-xs uppercase tracking-[0.35em] text-[rgba(255,255,255,0.85)]">Chapter I · The Awakening</span>
           </div>
-          <h1 ref={titleRef} className="display text-6xl leading-[0.92] text-white md:text-8xl font-black drop-shadow-[0_0_45px_rgba(255,255,255,0.2)]">
+          <h1 ref={titleRef} className="display text-5xl leading-[0.92] text-white sm:text-6xl md:text-8xl font-black drop-shadow-[0_0_45px_rgba(255,255,255,0.2)]">
             <span className="block text-white">Legends</span>
             <span className="block text-white">of</span>
             <span className="block text-white">Eternity</span>
           </h1>
-          <p className="mt-8 max-w-xl text-lg text-[rgba(255,255,255,0.85)] md:text-xl leading-relaxed font-light drop-shadow-[0_0_20px_rgba(0,0,0,0.24)]">
+          <p className="mt-6 max-w-xl text-base text-[rgba(255,255,255,0.85)] sm:mt-8 md:text-xl leading-relaxed font-light drop-shadow-[0_0_20px_rgba(0,0,0,0.24)]">
             A next-generation 3D multiplayer fantasy RPG. Forge alliances, wield forbidden magic, and stand against the tide of eternal darkness.
           </p>
-          <div className="mt-12 flex flex-wrap gap-4">
+          <div className="mt-10 flex flex-col gap-3 sm:mt-12 sm:flex-row sm:flex-wrap sm:gap-4">
             <button
               onClick={onDownload}
-              className="relative overflow-hidden rounded-full bg-gradient-to-r from-[#ffd96c] via-[#f9f3de] to-[#b9d2ff] px-10 py-4 text-sm uppercase tracking-[0.25em] text-black font-black transition-all duration-500 border border-[#d8c07c]/40 shadow-[0_0_30px_rgba(255,211,133,0.28)] hover:scale-[1.02] hover:shadow-[0_0_45px_rgba(255,211,133,0.45)]"
+              className="relative overflow-hidden rounded-full bg-gradient-to-r from-[#ffd96c] via-[#f9f3de] to-[#b9d2ff] px-6 py-4 text-xs uppercase tracking-[0.18em] text-black font-black transition-all duration-500 border border-[#d8c07c]/40 shadow-[0_0_30px_rgba(255,211,133,0.28)] hover:scale-[1.02] hover:shadow-[0_0_45px_rgba(255,211,133,0.45)] sm:px-10 sm:text-sm sm:tracking-[0.25em]"
             >
               <span className="relative z-10">Download Project</span>
             </button>
             <a
               href="#characters"
-              className="relative inline-flex items-center justify-center rounded-full bg-[#0c1d48]/90 px-10 py-4 text-sm uppercase tracking-[0.25em] text-white shadow-[0_0_30px_rgba(106,151,255,0.25)] border border-[#6e9cff]/50 transition-all duration-500 hover:bg-[#10255e]/95 hover:shadow-[0_0_45px_rgba(106,151,255,0.42)]"
+              className="relative inline-flex items-center justify-center rounded-full bg-[#0c1d48]/90 px-6 py-4 text-xs uppercase tracking-[0.18em] text-white shadow-[0_0_30px_rgba(106,151,255,0.25)] border border-[#6e9cff]/50 transition-all duration-500 hover:bg-[#10255e]/95 hover:shadow-[0_0_45px_rgba(106,151,255,0.42)] sm:px-10 sm:text-sm sm:tracking-[0.25em]"
             >
               Explore Characters
             </a>
@@ -222,6 +241,13 @@ const characters: Character[] = [
   },
 ];
 
+const characterVideos: Record<Character["name"], string> = {
+  Azrael: "/hero3.mp4",
+  Lucas: "/hero1.mp4",
+  Elysia: "/hero2.mp4",
+  Zerevok: "/hero4.mp4",
+};
+
 export function Characters({ onOpen }: { onOpen: (c: Character) => void }) {
   return (
     <section id="characters" className="relative py-32">
@@ -236,19 +262,16 @@ export function Characters({ onOpen }: { onOpen: (c: Character) => void }) {
           </div>
         </Reveal>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:gap-6">
           {characters.map((c, i) => (
             <Reveal key={c.name} delay={i * 0.08}>
               <button
                 onClick={() => onOpen(c)}
-                className="group relative block h-[520px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_0_50px_rgba(74,20,140,0.6)] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)] backdrop-blur-xl border border-white/10 hover:border-white/30"
+                className="group relative block h-[420px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_0_50px_rgba(74,20,140,0.6)] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)] backdrop-blur-xl border border-white/10 hover:border-white/30 sm:h-[500px] lg:h-[520px]"
               >
-                <AssetImg
-                  asset={c.asset}
-                  alt={c.name}
-                  loading="lazy"
-                  className="absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110"
-                  style={{ objectPosition: c.name === "Elysia" ? "50% 20%" : "50% 15%" }}
+                <FullBleedVideo
+                  src={characterVideos[c.name]}
+                  videoClassName="transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110"
                 />
                 {/* Cinematic lighting overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent group-hover:from-black via-black/40 transition-all duration-500" />
@@ -342,7 +365,7 @@ export function CharacterModal({ c, onClose }: { c: Character | null; onClose: (
         className="relative grid max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-2xl glass md:grid-cols-2"
       >
         <div className="relative h-72 md:h-auto">
-          <AssetImg asset={c.asset} alt={c.name} className="absolute inset-0 h-full w-full object-cover" />
+          <FullBleedVideo src={characterVideos[c.name]} />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent md:bg-gradient-to-r" />
         </div>
         <div className="relative overflow-auto p-8 md:p-10">
@@ -438,9 +461,9 @@ export function Battle() {
     return () => clearInterval(t);
   }, []);
   return (
-    <section ref={ref} className="relative isolate h-[100vh] min-h-[600px] w-full overflow-hidden">
+    <section ref={ref} className="relative isolate h-[100svh] min-h-[600px] w-full overflow-hidden">
       <motion.div style={{ scale, rotate: rot }} className="absolute inset-0">
-        <AssetImg asset="background" alt="Battle of Aldreth" className="h-full w-full object-cover" />
+        <FullBleedVideo src="/background1.mp4" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/10 to-background/20" />
       </motion.div>
       <div
@@ -453,11 +476,11 @@ export function Battle() {
         }}
       />
       <Particles count={30} color="ember" />
-      <div className="relative z-20 mx-auto flex h-full max-w-6xl items-end px-6 pb-24">
+      <div className="relative z-20 mx-auto flex h-full max-w-6xl items-end px-4 pb-20 sm:px-6 sm:pb-24">
         <Reveal>
           <div className="max-w-2xl">
             <span className="text-xs uppercase tracking-[0.5em] text-[color:var(--ember)]">The Siege</span>
-            <h2 className="display mt-4 text-5xl text-white md:text-7xl">Fifty against fifty thousand.</h2>
+            <h2 className="display mt-4 text-4xl text-white sm:text-5xl md:text-7xl">Fifty against fifty thousand.</h2>
             <p className="mt-6 text-white/70 md:text-lg">
               Real-time massed combat. Elemental storms. Guild-level tactics. Every clash is remembered by the realm.
             </p>
@@ -468,46 +491,11 @@ export function Battle() {
   );
 }
 
-const featureList = [
-  ["Real-Time Multiplayer", "Sub-40ms authoritative netcode."],
-  ["Cloud Hosting", "Global regions, zero-config scaling."],
-  ["Dedicated Servers", "Bare-metal for tournament play."],
-  ["Character Progression", "Deep skill trees, no dead ends."],
-  ["Magic System", "Nine schools, infinite combinations."],
-  ["Boss Battles", "Cinematic raid encounters."],
-  ["Guild System", "Sieges, alliances, betrayals."],
-  ["PvP Arenas", "Ranked, seasonal, cosmetic-only."],
-  ["PvE Dungeons", "Procedurally-woven story dungeons."],
-  ["Achievements", "Legacy meta across all seasons."],
-  ["Leaderboards", "Global, regional, guild-wide."],
-  ["Secure Backend", "End-to-end signed player state."],
-  ["Cross Platform", "PC, console, and cloud clients."],
-];
-
 export function Features() {
   return (
-    <section id="features" className="relative py-32">
-      <div className="mx-auto max-w-7xl px-6">
-        <Reveal>
-          <span className="text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]">Systems</span>
-          <h2 className="display mt-4 text-5xl text-white md:text-6xl">Built for legends.</h2>
-        </Reveal>
-        <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {featureList.map(([t, d], i) => (
-            <Reveal key={t} delay={(i % 6) * 0.05}>
-              <div className="group relative h-full overflow-hidden rounded-2xl glass p-6 transition hover:glow-blue">
-                <div
-                  aria-hidden
-                  className="absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
-                  style={{ background: "radial-gradient(closest-side, oklch(0.72 0.19 245 / 0.35), transparent)" }}
-                />
-                <div className="display text-xl text-white">{t}</div>
-                <p className="mt-2 text-sm text-white/60">{d}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
+    <section id="features" className="relative h-[100svh] min-h-[560px] w-full overflow-hidden">
+      <FullBleedVideo src="/background2.mp4" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/5 to-background/50" />
     </section>
   );
 }

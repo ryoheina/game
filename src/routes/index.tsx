@@ -55,22 +55,13 @@ function Home() {
     const url = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${encodeURIComponent(fileName)}`;
 
     try {
-      const res = await fetch(url, { credentials: "same-origin" });
-      if (!res.ok) {
-        setDownloadStatus("idle");
-        return;
-      }
-
-      const blob = await res.blob();
-      const objectUrl = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
-      anchor.href = objectUrl;
+      anchor.href = url;
       anchor.download = fileName;
       anchor.style.display = "none";
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
-      URL.revokeObjectURL(objectUrl);
 
       setDownloadStatus("done");
       window.setTimeout(() => setDownloadStatus("idle"), 3000);

@@ -13,6 +13,7 @@ function Admin() {
   const navigate = useNavigate();
   const [authorized, setAuthorized] = useState<boolean | undefined>(undefined);
   const [sessions, setSessions] = useState<any[]>([]);
+  const [sessionsPage, setSessionsPage] = useState(1);
   const [downloads, setDownloads] = useState<any[]>([]);
   const { notifications, setNotifications, markRead, remove, clearAll } = useAdminNotifications([]);
   const desktopNotifState = useDesktopNotifications();
@@ -40,7 +41,7 @@ function Admin() {
   useEffect(() => {
     if (!authorized) return;
 
-    if (Notification && Notification.permission === "default") {
+    if (typeof Notification !== "undefined" && Notification.permission === "default") {
       Notification.requestPermission().catch(() => {});
     }
 
@@ -79,7 +80,7 @@ function Admin() {
           const prevMap = new Map(prev.map((p: any) => [p.id, p.last_active]));
           (data.sessions || []).forEach((item: any) => {
             const prevVal = prevMap.get(item.session_id);
-            if (prevVal && prevVal !== item.last_active && Notification && Notification.permission === "granted") {
+            if (prevVal && prevVal !== item.last_active && typeof Notification !== "undefined" && Notification.permission === "granted") {
               new Notification("Visitor activity", {
                 body: `${item.ip ?? "unknown"} — ${item.device ?? item.os} — ${item.status}`,
               });
@@ -111,6 +112,18 @@ function Admin() {
     await fetch("/api/admin/logout", { method: "POST", credentials: "include" }).catch(() => {});
     navigate({ to: "/auth", replace: true });
   };
+
+  const sessionsPerPage = 10;
+  const totalSessionPages = Math.max(1, Math.ceil(sessions.length / sessionsPerPage));
+  const currentSessionPage = Math.min(sessionsPage, totalSessionPages);
+  const paginatedSessions = sessions.slice(
+    (currentSessionPage - 1) * sessionsPerPage,
+    currentSessionPage * sessionsPerPage,
+  );
+
+  useEffect(() => {
+    setSessionsPage((page) => Math.min(page, Math.max(1, Math.ceil(sessions.length / sessionsPerPage))));
+  }, [sessions.length]);
 
   if (authorized === undefined) {
     return <div className="grid min-h-dvh place-items-center text-white/60">Loading admin…</div>;
@@ -197,7 +210,28 @@ function Admin() {
           )}
           <div className="mt-6 space-y-8">
             <div className="overflow-x-auto rounded-3xl bg-white/5 p-4">
-              <h3 className="text-lg font-medium">Active visitors</h3>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h3 className="text-lg font-medium">Active visitors</h3>
+                <div className="flex items-center gap-2 text-xs text-white/60">
+                  <button
+                    disabled={currentSessionPage <= 1}
+                    onClick={() => setSessionsPage((page) => Math.max(1, page - 1))}
+                    className="rounded-full glass px-3 py-1 disabled:opacity-40"
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    Page {currentSessionPage} of {totalSessionPages}
+                  </span>
+                  <button
+                    disabled={currentSessionPage >= totalSessionPages}
+                    onClick={() => setSessionsPage((page) => Math.min(totalSessionPages, page + 1))}
+                    className="rounded-full glass px-3 py-1 disabled:opacity-40"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
               <table className="w-full table-auto text-left text-sm text-white/80">
                 <thead>
                   <tr>
@@ -214,7 +248,7 @@ function Admin() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sessions.map((d) => (
+                  {paginatedSessions.map((d) => (
                     <tr key={d.session_id} className="border-t border-white/5 text-white/70">
                       <td className="px-2 py-2">{d.session_id.slice(0, 8)}</td>
                       <td className="px-2 py-2">{d.ip ?? '—'}</td>
@@ -222,7 +256,11 @@ function Admin() {
                       <td className="px-2 py-2">{d.device ?? '—'}</td>
                       <td className="px-2 py-2">{d.browser ?? '—'}</td>
                       <td className="px-2 py-2">{d.os ?? '—'}</td>
-                      <td className="px-2 py-2">{d.status}</td>
+                      <td className="px-2 py-2">
+                        <span className={`rounded-full px-2 py-1 text-xs ${d.status === "online" ? "bg-emerald-500/15 text-emerald-300" : "bg-white/5 text-white/50"}`}>
+                          {d.status}
+                        </span>
+                      </td>
                       <td className="px-2 py-2">{new Date(d.last_active).toLocaleTimeString()}</td>
                       <td className="px-2 py-2">{new Date(d.first_visit).toLocaleTimeString()}</td>
                       <td className="px-2 py-2">
@@ -371,7 +409,7 @@ function Admin() {
                   <div key={note.id} className={`rounded-2xl p-4 flex justify-between items-start border ${note.read ? 'border-white/10 bg-background/70' : 'border-accent/50 bg-accent/900'}`}>
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <div className="text-xl">{note.type_detail === 'visitor' ? '👤' : '📥'}</div>
+                        <div className="text-xl">{note.type_detail === "visitor" || note.type === "visitor_arrival" || note.type === "visitor_left" ? "👤" : "📥"}</div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <div className="font-medium text-white">{note.title}</div>
@@ -388,11 +426,11 @@ function Admin() {
                         </div>
                         <div>
                           <span className="text-white/50">IP:</span>
-                          <div className="font-mono text-white">{note.ip_address || '—'}</div>
+                          <div className="font-mono text-white">{note.ip_address || note.payload?.ip_address || "—"}</div>
                         </div>
                         <div>
                           <span className="text-white/50">Country:</span>
-                          <div className="text-white">{note.country || '—'}</div>
+                          <div className="text-white">{note.country || note.payload?.country || "—"}</div>
                         </div>
                         <div>
                           <span className="text-white/50">Device:</span>

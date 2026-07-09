@@ -2,7 +2,7 @@ import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow } from "./fx-DmVqfUhc.mjs";
 import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-cwxFIM0o.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-BpRBzv-V.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function useAdminNotifications(initial = []) {
@@ -120,38 +120,6 @@ function useDesktopNotifications() {
 					session_id: sessionData.session_id,
 					ip: sessionData.ip
 				});
-			}
-			try {
-				const storeRes = await fetch("/api/admin/log-notification", {
-					method: "POST",
-					credentials: "include",
-					headers: { "content-type": "application/json" },
-					body: JSON.stringify({
-						type,
-						session_id: sessionData.session_id,
-						ip_address: sessionData.ip,
-						country: sessionData.country,
-						device: sessionData.device,
-						browser: sessionData.browser,
-						filename: sessionData.file_name,
-						title,
-						body
-					})
-				});
-				if (!storeRes.ok) {
-					const errText = await storeRes.text().catch(() => "");
-					console.error("[Desktop Notifications] Notification insert failed:", storeRes.status, errText);
-					setNotificationState((prev) => ({
-						...prev,
-						lastError: `Failed to store notification: ${storeRes.status}`
-					}));
-				}
-			} catch (err) {
-				console.error("[Desktop Notifications] Notification insert failed:", err);
-				setNotificationState((prev) => ({
-					...prev,
-					lastError: `Failed to store notification: ${String(err)}`
-				}));
 			}
 			if (Notification && Notification.permission === "granted") try {
 				const notif = new Notification(title, {
@@ -287,6 +255,7 @@ function Admin() {
 	const navigate = useNavigate();
 	const [authorized, setAuthorized] = (0, import_react.useState)(void 0);
 	const [sessions, setSessions] = (0, import_react.useState)([]);
+	const [sessionsPage, setSessionsPage] = (0, import_react.useState)(1);
 	const [downloads, setDownloads] = (0, import_react.useState)([]);
 	const { notifications, setNotifications, markRead, remove, clearAll } = useAdminNotifications([]);
 	const desktopNotifState = useDesktopNotifications();
@@ -317,7 +286,7 @@ function Admin() {
 	}, [navigate]);
 	(0, import_react.useEffect)(() => {
 		if (!authorized) return;
-		if (Notification && Notification.permission === "default") Notification.requestPermission().catch(() => {});
+		if (typeof Notification !== "undefined" && Notification.permission === "default") Notification.requestPermission().catch(() => {});
 		let mounted = true;
 		let pollIv = null;
 		async function fetchDashboard() {
@@ -355,7 +324,7 @@ function Admin() {
 					const prevMap = new Map(prev.map((p) => [p.id, p.last_active]));
 					(data.sessions || []).forEach((item) => {
 						const prevVal = prevMap.get(item.session_id);
-						if (prevVal && prevVal !== item.last_active && Notification && Notification.permission === "granted") new Notification("Visitor activity", { body: `${item.ip ?? "unknown"} — ${item.device ?? item.os} — ${item.status}` });
+						if (prevVal && prevVal !== item.last_active && typeof Notification !== "undefined" && Notification.permission === "granted") new Notification("Visitor activity", { body: `${item.ip ?? "unknown"} — ${item.device ?? item.os} — ${item.status}` });
 					});
 				}
 				lastSnapshotRef.current = snap;
@@ -386,6 +355,13 @@ function Admin() {
 			replace: true
 		});
 	};
+	const sessionsPerPage = 10;
+	const totalSessionPages = Math.max(1, Math.ceil(sessions.length / sessionsPerPage));
+	const currentSessionPage = Math.min(sessionsPage, totalSessionPages);
+	const paginatedSessions = sessions.slice((currentSessionPage - 1) * sessionsPerPage, currentSessionPage * sessionsPerPage);
+	(0, import_react.useEffect)(() => {
+		setSessionsPage((page) => Math.min(page, Math.max(1, Math.ceil(sessions.length / sessionsPerPage))));
+	}, [sessions.length]);
 	if (authorized === void 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "grid min-h-dvh place-items-center text-white/60",
 		children: "Loading admin…"
@@ -515,9 +491,34 @@ function Admin() {
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "overflow-x-auto rounded-3xl bg-white/5 p-4",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-											className: "text-lg font-medium",
-											children: "Active visitors"
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+												className: "text-lg font-medium",
+												children: "Active visitors"
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "flex items-center gap-2 text-xs text-white/60",
+												children: [
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+														disabled: currentSessionPage <= 1,
+														onClick: () => setSessionsPage((page) => Math.max(1, page - 1)),
+														className: "rounded-full glass px-3 py-1 disabled:opacity-40",
+														children: "Previous"
+													}),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+														"Page ",
+														currentSessionPage,
+														" of ",
+														totalSessionPages
+													] }),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+														disabled: currentSessionPage >= totalSessionPages,
+														onClick: () => setSessionsPage((page) => Math.min(totalSessionPages, page + 1)),
+														className: "rounded-full glass px-3 py-1 disabled:opacity-40",
+														children: "Next"
+													})
+												]
+											})]
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
 											className: "w-full table-auto text-left text-sm text-white/80",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
@@ -561,7 +562,7 @@ function Admin() {
 													className: "px-2 py-2",
 													children: "Actions"
 												})
-											] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: sessions.map((d) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+											] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: paginatedSessions.map((d) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
 												className: "border-t border-white/5 text-white/70",
 												children: [
 													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
@@ -590,7 +591,10 @@ function Admin() {
 													}),
 													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 														className: "px-2 py-2",
-														children: d.status
+														children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+															className: `rounded-full px-2 py-1 text-xs ${d.status === "online" ? "bg-emerald-500/15 text-emerald-300" : "bg-white/5 text-white/50"}`,
+															children: d.status
+														})
 													}),
 													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 														className: "px-2 py-2",
@@ -827,7 +831,7 @@ function Admin() {
 														className: "flex items-center gap-3",
 														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 															className: "text-xl",
-															children: note.type_detail === "visitor" ? "👤" : "📥"
+															children: note.type_detail === "visitor" || note.type === "visitor_arrival" || note.type === "visitor_left" ? "👤" : "📥"
 														}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 															className: "flex-1",
 															children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -856,14 +860,14 @@ function Admin() {
 																children: "IP:"
 															}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 																className: "font-mono text-white",
-																children: note.ip_address || "—"
+																children: note.ip_address || note.payload?.ip_address || "—"
 															})] }),
 															/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 																className: "text-white/50",
 																children: "Country:"
 															}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 																className: "text-white",
-																children: note.country || "—"
+																children: note.country || note.payload?.country || "—"
 															})] }),
 															/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 																className: "text-white/50",

@@ -1,16 +1,16 @@
 import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react, t as QueryClientProvider } from "../_libs/react+tanstack__react-query.mjs";
 import { A as redirect, _ as useRouter, c as HeadContent, d as Outlet, f as lazyRouteComponent, h as Link, m as createRootRouteWithContext, p as createFileRoute, s as Scripts, u as createRouter } from "../_libs/@tanstack/react-router+[...].mjs";
-import { t as getClientMeta } from "./ua-VZAcffKf.mjs";
+import { n as resolveCountry, t as getClientMeta } from "./ua-CPEkugaV.mjs";
 import { n as supabaseAdmin } from "./client.server-CPH4V7T6.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-Cbmh4ftL.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-KshvtGe2.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-D7UQjLCp.css";
+var styles_default = "/assets/styles-DgVGcvS4.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -233,7 +233,7 @@ var Route$18 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-DTSFY4Pp.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-Dejk17sw.mjs");
 var Route$17 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -256,7 +256,7 @@ var Route$17 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-cwxFIM0o.mjs");
+var $$splitComponentImporter = () => import("./admin-BpRBzv-V.mjs");
 var Route$16 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
@@ -296,6 +296,7 @@ var PUBLIC_ARCHIVE_NAME = "3D Game.rar";
 var PUBLIC_ARCHIVE_PATH = `/${encodeURIComponent(PUBLIC_ARCHIVE_NAME)}`;
 var Route$14 = createFileRoute("/api/public/download")({ server: { handlers: { GET: async ({ request }) => {
 	const meta = getClientMeta(request);
+	const country = meta.country ?? await resolveCountry(request.headers, meta.ip);
 	const url = new URL(request.url);
 	const sid = url.searchParams.get("sid") || null;
 	const requestedFileName = url.searchParams.get("file") || PUBLIC_ARCHIVE_NAME;
@@ -306,7 +307,7 @@ var Route$14 = createFileRoute("/api/public/download")({ server: { handlers: { G
 			file_name: requestedFileName,
 			session_id: sid,
 			ip: meta.ip,
-			country: meta.country,
+			country,
 			browser: meta.browser,
 			os: meta.os,
 			device: meta.device,
@@ -321,7 +322,10 @@ var Route$14 = createFileRoute("/api/public/download")({ server: { handlers: { G
 	}
 	const archiveUrl = new URL(PUBLIC_ARCHIVE_PATH, request.url);
 	try {
-		const assetResponse = await fetch(archiveUrl, { headers: { Accept: "application/octet-stream, */*" } });
+		const assetResponse = await fetch(archiveUrl, { headers: {
+			Accept: "application/octet-stream, */*",
+			"x-internal-download-fetch": "1"
+		} });
 		if (!assetResponse.ok || !assetResponse.body) return new Response(JSON.stringify({
 			success: false,
 			error: "Game file not found."
@@ -341,27 +345,39 @@ var Route$14 = createFileRoute("/api/public/download")({ server: { handlers: { G
 					completed_at: (/* @__PURE__ */ new Date()).toISOString()
 				}).eq("id", downloadId);
 				await supabaseAdmin.from("notifications").insert({
-					type: "download_complete",
+					type: "download",
+					type_detail: "download",
 					title: "Download Complete",
-					body: `${meta.ip ?? "unknown"} — ${requestedFileName}`,
+					body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${requestedFileName}`,
+					session_id: sid,
+					ip_address: meta.ip,
+					country,
+					browser: meta.browser,
+					device: meta.device,
+					filename: requestedFileName,
 					payload: {
 						download_id: downloadId,
-						session_id: sid
-					}
+						session_id: sid,
+						file_name: requestedFileName
+					},
+					read: false,
+					delivered: false
 				});
 			} catch (e) {
 				console.error("post-download update failed", e);
 			}
 		};
 		assetResponse.body.pipeTo(writable).then(() => markCompleted()).catch((e) => console.error("download stream failed", e));
+		const headers = new Headers({
+			"Content-Type": assetResponse.headers.get("content-type") || "application/x-rar-compressed",
+			"Content-Disposition": `attachment; filename="${requestedFileName}"`,
+			"Cache-Control": "no-store"
+		});
+		const contentLength = assetResponse.headers.get("content-length");
+		if (contentLength) headers.set("Content-Length", contentLength);
 		return new Response(readable, {
 			status: 200,
-			headers: {
-				"Content-Type": assetResponse.headers.get("content-type") || "application/x-rar-compressed",
-				"Content-Disposition": `attachment; filename="${requestedFileName}"`,
-				"Content-Length": assetResponse.headers.get("content-length") || "",
-				"Cache-Control": "no-store"
-			}
+			headers
 		});
 	} catch (error) {
 		console.error("[Download] public archive request failed", {
@@ -1241,40 +1257,44 @@ var Route$2 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 			...download,
 			status: download.completed ? "completed" : "in_progress"
 		}));
-		const undeliveredNotifications = notifications.filter((notification) => !notification.delivered);
+		const unreadNotifications = notifications.filter((notification) => !notification.read);
 		try {
 			const pendingOffline = sessions.filter((session) => session.last_active < (/* @__PURE__ */ new Date(Date.now() - 12e4)).toISOString() && !session.notified_left);
 			if (pendingOffline.length > 0) {
 				console.log(`[Dashboard] Creating ${pendingOffline.length} offline notification(s)`);
 				await supabaseAdmin.from("notifications").insert(pendingOffline.map((session) => ({
 					type: "visitor_left",
+					type_detail: "visitor",
 					title: "Visitor Left",
-					body: `${session.ip ?? "unknown"} — ${session.device ?? session.os ?? "Unknown device"}`,
-					payload: { session_id: session.session_id }
+					body: `${session.ip ?? "unknown"} — ${session.country ?? "unknown"} — ${session.device ?? session.os ?? "Unknown device"}`,
+					session_id: session.session_id,
+					ip_address: session.ip,
+					country: session.country,
+					browser: session.browser,
+					device: session.device,
+					payload: {
+						session_id: session.session_id,
+						ip_address: session.ip,
+						country: session.country
+					},
+					read: false,
+					delivered: false
 				})));
 				await supabaseAdmin.from("sessions").update({ notified_left: true }).in("session_id", pendingOffline.map((session) => session.session_id));
 			}
 		} catch (backgroundError) {
 			console.warn("[Dashboard] Background update failed:", backgroundError instanceof Error ? backgroundError.message : String(backgroundError));
 		}
-		try {
-			if (undeliveredNotifications.length > 0) {
-				console.log(`[Dashboard] Marking ${undeliveredNotifications.length} notification(s) as delivered`);
-				await supabaseAdmin.from("notifications").update({ delivered: true }).in("id", undeliveredNotifications.map((notification) => notification.id));
-			}
-		} catch (deliveryError) {
-			console.warn("[Dashboard] Notification delivery update failed:", deliveryError instanceof Error ? deliveryError.message : String(deliveryError));
-		}
 		const response = {
 			success: true,
 			sessions: onlineSessions,
 			downloads: enhancedDownloads,
-			notifications: undeliveredNotifications,
+			notifications,
 			stats: {
 				total_sessions: onlineSessions.length,
 				online_sessions: onlineSessions.filter((s) => s.status === "online").length,
 				total_downloads: enhancedDownloads.length,
-				pending_notifications: undeliveredNotifications.length
+				pending_notifications: unreadNotifications.length
 			}
 		};
 		console.log("[Dashboard] Dashboard handler completed successfully");

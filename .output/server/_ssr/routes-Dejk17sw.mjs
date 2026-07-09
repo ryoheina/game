@@ -6,9 +6,9 @@ import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[..
 import { i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-9EjmF9OT.mjs";
 import { t as requireSupabaseAuth } from "./auth-middleware-DZO41X7i.mjs";
 import { n as objectType, r as stringType, t as booleanType } from "../_libs/zod.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-5HBHUvG0.mjs";
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-BvBkOt-a.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-DTSFY4Pp.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-Dejk17sw.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -161,6 +161,20 @@ function AssetImg({ asset, onError, ...props }) {
 		}
 	});
 }
+function FullBleedVideo({ src, className = "", videoClassName = "" }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: `absolute inset-0 overflow-hidden ${className}`,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("video", {
+			className: `h-full w-full object-cover ${videoClassName}`,
+			src,
+			autoPlay: true,
+			muted: true,
+			loop: true,
+			playsInline: true,
+			preload: "metadata"
+		})
+	});
+}
 function Hero({ onDownload }) {
 	const ref = (0, import_react.useRef)(null);
 	const titleRef = (0, import_react.useRef)(null);
@@ -189,7 +203,7 @@ function Hero({ onDownload }) {
 	}, []);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		ref,
-		className: "relative isolate h-[100vh] min-h-[720px] w-full overflow-hidden",
+		className: "relative isolate h-[100svh] min-h-[640px] w-full overflow-hidden sm:min-h-[720px]",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				style: {
@@ -198,16 +212,9 @@ function Hero({ onDownload }) {
 				},
 				className: "absolute inset-0 z-0",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
-						asset: "azrael",
-						alt: "Azrael, the Chosen",
-						className: "h-full w-full object-cover",
-						style: {
-							objectPosition: "18% center",
-							animation: "slowZoom 30s ease-in-out infinite alternate",
-							transform: "scale(1.12)",
-							transformOrigin: "20% center"
-						}
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FullBleedVideo, {
+						src: "/hero3.mp4",
+						videoClassName: "object-[18%_center]"
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "absolute inset-0",
@@ -234,7 +241,7 @@ function Hero({ onDownload }) {
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				style: { opacity },
-				className: "relative z-[20] mx-auto flex h-full max-w-7xl flex-col justify-center px-6 pt-24",
+				className: "relative z-[20] mx-auto flex h-full max-w-7xl flex-col justify-center px-4 pt-24 sm:px-6",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 					initial: {
 						opacity: 0,
@@ -248,7 +255,7 @@ function Hero({ onDownload }) {
 					className: "max-w-2xl",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "mb-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500 shadow-[0_0_28px_rgba(255,255,255,0.14)]",
+							className: "mb-6 inline-flex max-w-full items-center gap-3 rounded-full glass px-4 py-2 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500 shadow-[0_0_28px_rgba(255,255,255,0.14)]",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "h-2 w-2 rounded-full bg-[color:var(--gold)] shadow-lg shadow-[color:var(--gold)]",
 								style: { animation: "shimmer 2s ease-in-out infinite" }
@@ -259,7 +266,7 @@ function Hero({ onDownload }) {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
 							ref: titleRef,
-							className: "display text-6xl leading-[0.92] text-white md:text-8xl font-black drop-shadow-[0_0_45px_rgba(255,255,255,0.2)]",
+							className: "display text-5xl leading-[0.92] text-white sm:text-6xl md:text-8xl font-black drop-shadow-[0_0_45px_rgba(255,255,255,0.2)]",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "block text-white",
@@ -276,21 +283,21 @@ function Hero({ onDownload }) {
 							]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "mt-8 max-w-xl text-lg text-[rgba(255,255,255,0.85)] md:text-xl leading-relaxed font-light drop-shadow-[0_0_20px_rgba(0,0,0,0.24)]",
+							className: "mt-6 max-w-xl text-base text-[rgba(255,255,255,0.85)] sm:mt-8 md:text-xl leading-relaxed font-light drop-shadow-[0_0_20px_rgba(0,0,0,0.24)]",
 							children: "A next-generation 3D multiplayer fantasy RPG. Forge alliances, wield forbidden magic, and stand against the tide of eternal darkness."
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "mt-12 flex flex-wrap gap-4",
+							className: "mt-10 flex flex-col gap-3 sm:mt-12 sm:flex-row sm:flex-wrap sm:gap-4",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: onDownload,
-								className: "relative overflow-hidden rounded-full bg-gradient-to-r from-[#ffd96c] via-[#f9f3de] to-[#b9d2ff] px-10 py-4 text-sm uppercase tracking-[0.25em] text-black font-black transition-all duration-500 border border-[#d8c07c]/40 shadow-[0_0_30px_rgba(255,211,133,0.28)] hover:scale-[1.02] hover:shadow-[0_0_45px_rgba(255,211,133,0.45)]",
+								className: "relative overflow-hidden rounded-full bg-gradient-to-r from-[#ffd96c] via-[#f9f3de] to-[#b9d2ff] px-6 py-4 text-xs uppercase tracking-[0.18em] text-black font-black transition-all duration-500 border border-[#d8c07c]/40 shadow-[0_0_30px_rgba(255,211,133,0.28)] hover:scale-[1.02] hover:shadow-[0_0_45px_rgba(255,211,133,0.45)] sm:px-10 sm:text-sm sm:tracking-[0.25em]",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "relative z-10",
 									children: "Download Project"
 								})
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
 								href: "#characters",
-								className: "relative inline-flex items-center justify-center rounded-full bg-[#0c1d48]/90 px-10 py-4 text-sm uppercase tracking-[0.25em] text-white shadow-[0_0_30px_rgba(106,151,255,0.25)] border border-[#6e9cff]/50 transition-all duration-500 hover:bg-[#10255e]/95 hover:shadow-[0_0_45px_rgba(106,151,255,0.42)]",
+								className: "relative inline-flex items-center justify-center rounded-full bg-[#0c1d48]/90 px-6 py-4 text-xs uppercase tracking-[0.18em] text-white shadow-[0_0_30px_rgba(106,151,255,0.25)] border border-[#6e9cff]/50 transition-all duration-500 hover:bg-[#10255e]/95 hover:shadow-[0_0_45px_rgba(106,151,255,0.42)] sm:px-10 sm:text-sm sm:tracking-[0.25em]",
 								children: "Explore Characters"
 							})]
 						})
@@ -470,6 +477,12 @@ var characters = [
 		]
 	}
 ];
+var characterVideos = {
+	Azrael: "/hero3.mp4",
+	Lucas: "/hero1.mp4",
+	Elysia: "/hero2.mp4",
+	Zerevok: "/hero4.mp4"
+};
 function Characters({ onOpen }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
 		id: "characters",
@@ -493,19 +506,16 @@ function Characters({ onOpen }) {
 					})
 				]
 			}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "grid gap-6 sm:grid-cols-2 lg:grid-cols-4",
+				className: "grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:gap-6",
 				children: characters.map((c, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
 					delay: i * .08,
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: () => onOpen(c),
-						className: "group relative block h-[520px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_0_50px_rgba(74,20,140,0.6)] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)] backdrop-blur-xl border border-white/10 hover:border-white/30",
+						className: "group relative block h-[420px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_0_50px_rgba(74,20,140,0.6)] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)] backdrop-blur-xl border border-white/10 hover:border-white/30 sm:h-[500px] lg:h-[520px]",
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
-								asset: c.asset,
-								alt: c.name,
-								loading: "lazy",
-								className: "absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110",
-								style: { objectPosition: c.name === "Elysia" ? "50% 20%" : "50% 15%" }
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FullBleedVideo, {
+								src: characterVideos[c.name],
+								videoClassName: "transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent group-hover:from-black via-black/40 transition-all duration-500" }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -595,11 +605,7 @@ function CharacterModal({ c, onClose }) {
 			className: "relative grid max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-2xl glass md:grid-cols-2",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "relative h-72 md:h-auto",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
-					asset: c.asset,
-					alt: c.name,
-					className: "absolute inset-0 h-full w-full object-cover"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent md:bg-gradient-to-r" })]
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FullBleedVideo, { src: characterVideos[c.name] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent md:bg-gradient-to-r" })]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "relative overflow-auto p-8 md:p-10",
 				children: [
@@ -763,7 +769,7 @@ function Battle() {
 	}, []);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		ref,
-		className: "relative isolate h-[100vh] min-h-[600px] w-full overflow-hidden",
+		className: "relative isolate h-[100svh] min-h-[600px] w-full overflow-hidden",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				style: {
@@ -771,11 +777,7 @@ function Battle() {
 					rotate: rot
 				},
 				className: "absolute inset-0",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
-					asset: "background",
-					alt: "Battle of Aldreth",
-					className: "h-full w-full object-cover"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-b from-background/20 via-background/10 to-background/20" })]
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FullBleedVideo, { src: "/background1.mp4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-b from-background/20 via-background/10 to-background/20" })]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "pointer-events-none absolute inset-0 z-10 transition-opacity duration-100",
@@ -790,7 +792,7 @@ function Battle() {
 				color: "ember"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "relative z-20 mx-auto flex h-full max-w-6xl items-end px-6 pb-24",
+				className: "relative z-20 mx-auto flex h-full max-w-6xl items-end px-4 pb-20 sm:px-6 sm:pb-24",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "max-w-2xl",
 					children: [
@@ -799,7 +801,7 @@ function Battle() {
 							children: "The Siege"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-							className: "display mt-4 text-5xl text-white md:text-7xl",
+							className: "display mt-4 text-4xl text-white sm:text-5xl md:text-7xl",
 							children: "Fifty against fifty thousand."
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -812,58 +814,11 @@ function Battle() {
 		]
 	});
 }
-var featureList = [
-	["Real-Time Multiplayer", "Sub-40ms authoritative netcode."],
-	["Cloud Hosting", "Global regions, zero-config scaling."],
-	["Dedicated Servers", "Bare-metal for tournament play."],
-	["Character Progression", "Deep skill trees, no dead ends."],
-	["Magic System", "Nine schools, infinite combinations."],
-	["Boss Battles", "Cinematic raid encounters."],
-	["Guild System", "Sieges, alliances, betrayals."],
-	["PvP Arenas", "Ranked, seasonal, cosmetic-only."],
-	["PvE Dungeons", "Procedurally-woven story dungeons."],
-	["Achievements", "Legacy meta across all seasons."],
-	["Leaderboards", "Global, regional, guild-wide."],
-	["Secure Backend", "End-to-end signed player state."],
-	["Cross Platform", "PC, console, and cloud clients."]
-];
 function Features() {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		id: "features",
-		className: "relative py-32",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "mx-auto max-w-7xl px-6",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Reveal, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]",
-				children: "Systems"
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-				className: "display mt-4 text-5xl text-white md:text-6xl",
-				children: "Built for legends."
-			})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3",
-				children: featureList.map(([t, d], i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-					delay: i % 6 * .05,
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "group relative h-full overflow-hidden rounded-2xl glass p-6 transition hover:glow-blue",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								"aria-hidden": true,
-								className: "absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-0 transition-opacity group-hover:opacity-100",
-								style: { background: "radial-gradient(closest-side, oklch(0.72 0.19 245 / 0.35), transparent)" }
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "display text-xl text-white",
-								children: t
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "mt-2 text-sm text-white/60",
-								children: d
-							})
-						]
-					})
-				}, t))
-			})]
-		})
+		className: "relative h-[100svh] min-h-[560px] w-full overflow-hidden",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FullBleedVideo, { src: "/background2.mp4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-b from-background/20 via-background/5 to-background/50" })]
 	});
 }
 var stack = [
@@ -1192,21 +1147,13 @@ function Home() {
 		const fileName = "3D Game.rar";
 		const url = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${encodeURIComponent(fileName)}`;
 		try {
-			const res = await fetch(url, { credentials: "same-origin" });
-			if (!res.ok) {
-				setDownloadStatus("idle");
-				return;
-			}
-			const blob = await res.blob();
-			const objectUrl = URL.createObjectURL(blob);
 			const anchor = document.createElement("a");
-			anchor.href = objectUrl;
+			anchor.href = url;
 			anchor.download = fileName;
 			anchor.style.display = "none";
 			document.body.appendChild(anchor);
 			anchor.click();
 			document.body.removeChild(anchor);
-			URL.revokeObjectURL(objectUrl);
 			setDownloadStatus("done");
 			window.setTimeout(() => setDownloadStatus("idle"), 3e3);
 		} catch {

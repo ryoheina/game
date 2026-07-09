@@ -1,3 +1,5 @@
+import { getCountryFromHeaders } from "./geo";
+
 export function parseUA(ua: string | null | undefined) {
   const u = (ua || "").toLowerCase();
   let browser = "Unknown";
@@ -23,12 +25,18 @@ export function parseUA(ua: string | null | undefined) {
 
 export function getClientMeta(request: Request) {
   const headers = request.headers;
+  const forwardedIps = headers
+    .get("x-forwarded-for")
+    ?.split(",")
+    .map((ip) => ip.trim())
+    .filter(Boolean);
   const ip =
     headers.get("cf-connecting-ip") ||
-    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    forwardedIps?.find((candidate) => !/^(10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|::1$)/.test(candidate)) ||
+    forwardedIps?.[0] ||
     headers.get("x-real-ip") ||
     null;
-  const country = headers.get("cf-ipcountry") || null;
+  const country = getCountryFromHeaders(headers);
   const ua = headers.get("user-agent") || "";
   const referrer = headers.get("referer") || null;
   const parsed = parseUA(ua);

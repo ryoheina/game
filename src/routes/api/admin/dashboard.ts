@@ -289,7 +289,7 @@ export const Route = createFileRoute("/api/admin/dashboard")({
             ...download,
             status: download.completed ? "completed" : "in_progress",
           }));
-          const undeliveredNotifications = notifications.filter((notification: any) => !notification.delivered);
+          const unreadNotifications = notifications.filter((notification: any) => !notification.read);
 
           // ===== STEP 7: OPTIONAL BACKGROUND UPDATES =====
           try {
@@ -299,9 +299,17 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               await supabaseAdmin.from("notifications").insert(
                 pendingOffline.map((session: any) => ({
                   type: "visitor_left",
+                  type_detail: "visitor",
                   title: "Visitor Left",
-                  body: `${session.ip ?? "unknown"} — ${session.device ?? session.os ?? "Unknown device"}`,
-                  payload: { session_id: session.session_id },
+                  body: `${session.ip ?? "unknown"} — ${session.country ?? "unknown"} — ${session.device ?? session.os ?? "Unknown device"}`,
+                  session_id: session.session_id,
+                  ip_address: session.ip,
+                  country: session.country,
+                  browser: session.browser,
+                  device: session.device,
+                  payload: { session_id: session.session_id, ip_address: session.ip, country: session.country },
+                  read: false,
+                  delivered: false,
                 })),
               );
               await supabaseAdmin.from("sessions").update({ notified_left: true }).in("session_id", pendingOffline.map((session: any) => session.session_id));
@@ -310,25 +318,16 @@ export const Route = createFileRoute("/api/admin/dashboard")({
             console.warn("[Dashboard] Background update failed:", backgroundError instanceof Error ? backgroundError.message : String(backgroundError));
           }
 
-          try {
-            if (undeliveredNotifications.length > 0) {
-              console.log(`[Dashboard] Marking ${undeliveredNotifications.length} notification(s) as delivered`);
-              await supabaseAdmin.from("notifications").update({ delivered: true }).in("id", undeliveredNotifications.map((notification: any) => notification.id));
-            }
-          } catch (deliveryError) {
-            console.warn("[Dashboard] Notification delivery update failed:", deliveryError instanceof Error ? deliveryError.message : String(deliveryError));
-          }
-
           const response: DashboardSuccessResponse = {
             success: true,
             sessions: onlineSessions,
             downloads: enhancedDownloads,
-            notifications: undeliveredNotifications,
+            notifications,
             stats: {
               total_sessions: onlineSessions.length,
               online_sessions: onlineSessions.filter((s: any) => s.status === "online").length,
               total_downloads: enhancedDownloads.length,
-              pending_notifications: undeliveredNotifications.length,
+              pending_notifications: unreadNotifications.length,
             },
           };
 

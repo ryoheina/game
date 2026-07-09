@@ -1,8 +1,8 @@
 import { f as getRequest, i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-9EjmF9OT.mjs";
 import { t as requireSupabaseAuth } from "./auth-middleware-DZO41X7i.mjs";
-import { t as getClientMeta } from "./ua-VZAcffKf.mjs";
+import { n as resolveCountry, t as getClientMeta } from "./ua-CPEkugaV.mjs";
 import { n as objectType, r as stringType, t as booleanType } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-BFlC_J1J.js
+//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-CzS4ARna.js
 var createServerRpc = (serverFnMeta, splitImportFn) => {
 	const url = "/_serverFn/" + serverFnMeta.id;
 	return Object.assign(splitImportFn, {
@@ -31,26 +31,53 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 		os: "Unknown",
 		device: "Desktop"
 	};
+	const country = meta.country ?? (req ? await resolveCountry(req.headers, meta.ip) : null);
 	const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
 	const now = (/* @__PURE__ */ new Date()).toISOString();
-	const { data: existing } = await supabaseAdmin.from("sessions").select("session_id").eq("session_id", data.sessionId).maybeSingle();
+	const { data: existing } = await supabaseAdmin.from("sessions").select("session_id,last_active").eq("session_id", data.sessionId).maybeSingle();
 	if (existing) {
+		const wasOffline = Date.now() - new Date(existing.last_active).getTime() > 12e4;
 		await supabaseAdmin.from("sessions").update({
 			last_active: now,
 			ip: meta.ip,
-			country: meta.country,
+			country,
 			browser: meta.browser,
 			os: meta.os,
 			device: meta.device,
-			user_agent: meta.ua
+			user_agent: meta.ua,
+			notified_left: false
 		}).eq("session_id", data.sessionId);
 		if (data.heartbeat) return { ok: true };
+		if (wasOffline) try {
+			await supabaseAdmin.from("notifications").insert({
+				type: "visitor",
+				type_detail: "visitor",
+				title: "Visitor Arrived",
+				body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
+				session_id: data.sessionId,
+				ip_address: meta.ip,
+				country,
+				browser: meta.browser,
+				device: meta.device,
+				payload: {
+					session_id: data.sessionId,
+					ip_address: meta.ip,
+					country,
+					browser: meta.browser,
+					device: meta.device
+				},
+				read: false,
+				delivered: false
+			});
+		} catch (e) {
+			console.error("notify failed", e);
+		}
 	} else if (data.heartbeat) return { ok: true };
 	await supabaseAdmin.from("visits").insert({
 		session_id: data.sessionId,
 		path: data.path,
 		ip: meta.ip,
-		country: meta.country,
+		country,
 		browser: meta.browser,
 		os: meta.os,
 		device: meta.device,
@@ -61,7 +88,7 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 		await supabaseAdmin.from("sessions").insert({
 			session_id: data.sessionId,
 			ip: meta.ip,
-			country: meta.country,
+			country,
 			browser: meta.browser,
 			os: meta.os,
 			device: meta.device,
@@ -71,10 +98,24 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 		});
 		try {
 			await supabaseAdmin.from("notifications").insert({
-				type: "visitor_arrival",
+				type: "visitor",
+				type_detail: "visitor",
 				title: "Visitor Arrived",
-				body: `${meta.ip ?? "unknown"} — ${meta.device} — ${meta.browser}`,
-				payload: { session_id: data.sessionId }
+				body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
+				session_id: data.sessionId,
+				ip_address: meta.ip,
+				country,
+				browser: meta.browser,
+				device: meta.device,
+				payload: {
+					session_id: data.sessionId,
+					ip_address: meta.ip,
+					country,
+					browser: meta.browser,
+					device: meta.device
+				},
+				read: false,
+				delivered: false
 			});
 		} catch (e) {
 			console.error("notify failed", e);
