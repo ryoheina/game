@@ -307,23 +307,16 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               .filter(Boolean),
             ...extractions.map((extraction: any) => extraction.session_id).filter(Boolean),
           ]);
-          const installedIps = new Set([
-            ...downloads
-              .filter((download: any) => download.extracted === true)
-              .map((download: any) => download.ip)
-              .filter(Boolean),
-            ...extractions.map((extraction: any) => extraction.ip).filter(Boolean),
-          ]);
           const onlineSessions = sessions.map((session: any) => ({
             ...session,
-            installed: installedSessionIds.has(session.session_id) || (session.ip ? installedIps.has(session.ip) : false),
+            installed: installedSessionIds.has(session.session_id),
             status: computeStatus(session.last_active),
             last_active_time: session.last_active,
             first_visit_time: session.first_visit,
           }));
           const enhancedDownloads = downloads.map((download: any) => ({
             ...download,
-            installed: download.extracted === true || (download.ip ? installedIps.has(download.ip) : false),
+            installed: download.extracted === true,
             status: download.completed ? "completed" : "in_progress",
           }));
           const downloadUsers = new Set(

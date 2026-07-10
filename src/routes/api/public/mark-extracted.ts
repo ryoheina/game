@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { clearInstallTokenCookie, getInstallTokenFromRequest } from "@/lib/install-token";
 import { getClientMeta } from "@/lib/ua";
 import { insertAdminNotification } from "@/lib/notifications";
 
@@ -8,36 +9,62 @@ export const Route = createFileRoute("/api/public/mark-extracted")({
       GET: async ({ request }) => {
         try {
           const url = new URL(request.url);
-          const sid = url.searchParams.get("sid");
-          const fileName = url.searchParams.get("file");
-          const meta = getClientMeta(request);
+          const requestedFileName = url.searchParams.get("file");
+          const installToken = getInstallTokenFromRequest(request, url.searchParams.get("token"));
 
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-          if (sid) {
-            let q = supabaseAdmin.from("downloads").update({ extracted: true }).eq("session_id", sid);
-            if (fileName) q = q.eq("file_name", fileName);
-            await q;
-            // record extraction event
-            await supabaseAdmin.from("extractions").insert({ session_id: sid, ip: meta.ip, file_name: fileName, device: meta.device });
-            await insertAdminNotification(supabaseAdmin, {
-              type: "installed",
-              type_detail: "installed",
-              title: "Game Installed",
-              session_id: sid,
-              ip_address: meta.ip,
-              browser: meta.browser,
-              device: meta.device,
-              filename: fileName,
-              body: `${sid} — ${fileName ?? "unknown"}`,
-              payload: { session_id: sid, ip_address: meta.ip, file_name: fileName, installed: true },
-            });
+          if (!installToken) {
+            return new Response("", { status: 403, headers: { "Cache-Control": "no-store" } });
           }
 
-          return new Response(null, { status: 204 });
+          const meta = getClientMeta(request);
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data: download, error: downloadError } = await supabaseAdmin
+            .from("downloads")
+            .select("id,session_id,file_name,install_token")
+            .eq("install_token", installToken)
+            .maybeSingle();
+
+          if (downloadError) throw downloadError;
+          if (!download) return new Response("", { status: 403, headers: { "Cache-Control": "no-store" } });
+
+          const fileName = download.file_name || requestedFileName || "LegendsofEternity.exe";
+          const completedAt = new Date().toISOString();
+          const updateResult = await supabaseAdmin
+            .from("downloads")
+            .update({ extracted: true, completed: true, completed_at: completedAt, installed_at: completedAt })
+            .eq("id", download.id);
+          if (updateResult.error) throw updateResult.error;
+
+          await supabaseAdmin.from("extractions").insert({
+            download_id: download.id,
+            session_id: download.session_id,
+            ip: meta.ip,
+            file_name: fileName,
+            device: meta.device,
+          });
+
+          await insertAdminNotification(supabaseAdmin, {
+            type: "installed",
+            type_detail: "installed",
+            title: "Game Installed",
+            session_id: download.session_id,
+            ip_address: meta.ip,
+            browser: meta.browser,
+            device: meta.device,
+            filename: fileName,
+            body: `${download.session_id ? download.session_id.slice(0, 8) : "unknown"} - ${fileName}`,
+            payload: { download_id: download.id, session_id: download.session_id, ip_address: meta.ip, file_name: fileName, installed: true },
+            read: false,
+            delivered: false,
+          });
+
+          return new Response(null, {
+            status: 204,
+            headers: { "Cache-Control": "no-store", "Set-Cookie": clearInstallTokenCookie() },
+          });
         } catch (e) {
           console.error("mark-extracted failed", e);
-          return new Response("", { status: 500 });
+          return new Response("", { status: 500, headers: { "Cache-Control": "no-store" } });
         }
       },
     },

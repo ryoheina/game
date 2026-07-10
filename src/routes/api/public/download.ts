@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getClientMeta } from "@/lib/ua";
 import { resolveCountry } from "@/lib/geo";
+import { createInstallToken, createInstallTokenCookie } from "@/lib/install-token";
 import { insertAdminNotification } from "@/lib/notifications";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
@@ -19,6 +20,8 @@ export const Route = createFileRoute("/api/public/download")({
         const url = new URL(request.url);
         const sid = url.searchParams.get("sid") || null;
         const downloadFileName = PUBLIC_ARCHIVE_NAME;
+        const installToken = createInstallToken();
+        const installTokenCookie = createInstallTokenCookie(installToken);
 
         let downloadId: string | null = null;
         try {
@@ -69,6 +72,7 @@ export const Route = createFileRoute("/api/public/download")({
               device: meta.device,
               user_agent: meta.ua,
               extracted: false,
+              install_token: installToken,
               started_at: now,
             })
             .select("id")
@@ -95,6 +99,7 @@ export const Route = createFileRoute("/api/public/download")({
               headers: {
                 "content-type": "application/json",
                 "Cache-Control": "no-store",
+                "Set-Cookie": installTokenCookie,
               },
             });
           }
@@ -129,7 +134,14 @@ export const Route = createFileRoute("/api/public/download")({
           const contentLength = Number(assetResponse.headers.get("content-length") || "0");
           if (contentLength > 0 && contentLength < PUBLIC_ARCHIVE_SIZE) {
             void markCompleted();
-            return Response.redirect(GITHUB_LFS_ARCHIVE_URL, 302);
+            return new Response(null, {
+              status: 302,
+              headers: {
+                Location: GITHUB_LFS_ARCHIVE_URL,
+                "Cache-Control": "no-store",
+                "Set-Cookie": installTokenCookie,
+              },
+            });
           }
 
           const { readable, writable } = new TransformStream();
@@ -142,6 +154,7 @@ export const Route = createFileRoute("/api/public/download")({
             "Content-Type": assetResponse.headers.get("content-type") || "application/vnd.microsoft.portable-executable",
             "Content-Disposition": `attachment; filename="${downloadFileName}"`,
             "Cache-Control": "no-store",
+            "Set-Cookie": installTokenCookie,
           });
           const contentLengthHeader = assetResponse.headers.get("content-length");
           if (contentLengthHeader) headers.set("Content-Length", contentLengthHeader);

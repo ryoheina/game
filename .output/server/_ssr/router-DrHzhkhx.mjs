@@ -8,8 +8,8 @@ import { r as trackVisit, t as recordVisit } from "./analytics.functions-Dowzlkr
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
-import crypto from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-DubsVa78.js
+import crypto$1 from "node:crypto";
+//#region node_modules/.nitro/vite/services/ssr/assets/router-DrHzhkhx.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-B1HouSQd.css";
@@ -270,7 +270,7 @@ function RootComponent() {
 }
 var $$splitComponentImporter$5 = () => import("./me-fuu5GXiX.mjs");
 var Route$24 = createFileRoute("/me")({ component: lazyRouteComponent($$splitComponentImporter$5, "component") });
-var $$splitComponentImporter$4 = () => import("./installed-BBzOgoWJ.mjs");
+var $$splitComponentImporter$4 = () => import("./installed-D1cUGyIs.mjs");
 var Route$23 = createFileRoute("/installed")({
 	head: () => ({ meta: [{ title: "Legends of Eternity" }, {
 		name: "robots",
@@ -364,107 +364,165 @@ var Route$18 = createFileRoute("/api/public/visit")({ server: { handlers: { POST
 		});
 	}
 } } } });
+var INSTALL_TOKEN_COOKIE = "loe_install_token";
+function createInstallToken() {
+	return crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+}
+function parseCookies(cookieHeader) {
+	const cookies = /* @__PURE__ */ new Map();
+	if (!cookieHeader) return cookies;
+	cookieHeader.split(";").forEach((part) => {
+		const [rawKey, ...rawValue] = part.trim().split("=");
+		if (!rawKey) return;
+		cookies.set(rawKey, decodeURIComponent(rawValue.join("=")));
+	});
+	return cookies;
+}
+function getInstallTokenFromRequest(request, bodyToken) {
+	if (typeof bodyToken === "string" && bodyToken.length >= 32 && bodyToken.length <= 160) return bodyToken;
+	const queryToken = new URL(request.url).searchParams.get("token");
+	if (queryToken && queryToken.length >= 32 && queryToken.length <= 160) return queryToken;
+	return parseCookies(request.headers.get("cookie")).get(INSTALL_TOKEN_COOKIE) || null;
+}
+function createInstallTokenCookie(token) {
+	return `${INSTALL_TOKEN_COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=${3600 * 24 * 30}; SameSite=Lax; Secure; HttpOnly`;
+}
+function clearInstallTokenCookie() {
+	return `${INSTALL_TOKEN_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax; Secure; HttpOnly`;
+}
 var Route$17 = createFileRoute("/api/public/mark-extracted")({ server: { handlers: { GET: async ({ request }) => {
 	try {
 		const url = new URL(request.url);
-		const sid = url.searchParams.get("sid");
-		const fileName = url.searchParams.get("file");
+		const requestedFileName = url.searchParams.get("file");
+		const installToken = getInstallTokenFromRequest(request, url.searchParams.get("token"));
+		if (!installToken) return new Response("", {
+			status: 403,
+			headers: { "Cache-Control": "no-store" }
+		});
 		const meta = getClientMeta(request);
 		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
-		if (sid) {
-			let q = supabaseAdmin.from("downloads").update({ extracted: true }).eq("session_id", sid);
-			if (fileName) q = q.eq("file_name", fileName);
-			await q;
-			await supabaseAdmin.from("extractions").insert({
-				session_id: sid,
-				ip: meta.ip,
-				file_name: fileName,
-				device: meta.device
-			});
-			await insertAdminNotification(supabaseAdmin, {
-				type: "installed",
-				type_detail: "installed",
-				title: "Game Installed",
-				session_id: sid,
-				ip_address: meta.ip,
-				browser: meta.browser,
-				device: meta.device,
-				filename: fileName,
-				body: `${sid} — ${fileName ?? "unknown"}`,
-				payload: {
-					session_id: sid,
-					ip_address: meta.ip,
-					file_name: fileName,
-					installed: true
-				}
-			});
-		}
-		return new Response(null, { status: 204 });
-	} catch (e) {
-		console.error("mark-extracted failed", e);
-		return new Response("", { status: 500 });
-	}
-} } } });
-var Route$16 = createFileRoute("/api/public/installed")({ server: { handlers: { POST: async ({ request }) => {
-	try {
-		const body = await request.json().catch(() => null);
-		const sessionId = typeof body?.sessionId === "string" ? body.sessionId : "";
-		const fileName = typeof body?.file === "string" ? body.file.slice(0, 200) : "LegendsofEternity.exe";
-		const meta = getClientMeta(request);
-		if (sessionId.length < 8 || sessionId.length > 64) return new Response(JSON.stringify({
-			success: false,
-			error: "Invalid session"
-		}), {
-			status: 400,
-			headers: {
-				"content-type": "application/json",
-				"Cache-Control": "no-store"
-			}
+		const { data: download, error: downloadError } = await supabaseAdmin.from("downloads").select("id,session_id,file_name,install_token").eq("install_token", installToken).maybeSingle();
+		if (downloadError) throw downloadError;
+		if (!download) return new Response("", {
+			status: 403,
+			headers: { "Cache-Control": "no-store" }
 		});
-		await recordVisit(request, {
-			sessionId,
-			path: "/installed"
-		});
-		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
-		let updateQuery = supabaseAdmin.from("downloads").update({
+		const fileName = download.file_name || requestedFileName || "LegendsofEternity.exe";
+		const completedAt = (/* @__PURE__ */ new Date()).toISOString();
+		const updateResult = await supabaseAdmin.from("downloads").update({
 			extracted: true,
 			completed: true,
-			completed_at: (/* @__PURE__ */ new Date()).toISOString()
-		}).eq("session_id", sessionId);
-		if (fileName) updateQuery = updateQuery.eq("file_name", fileName);
-		const updateBySession = await updateQuery;
-		if (updateBySession.error) console.warn("[Installed] session download update failed", updateBySession.error.message);
-		if (meta.ip) {
-			let updateByIpQuery = supabaseAdmin.from("downloads").update({
-				extracted: true,
-				completed: true,
-				completed_at: (/* @__PURE__ */ new Date()).toISOString()
-			}).eq("ip", meta.ip);
-			if (fileName) updateByIpQuery = updateByIpQuery.eq("file_name", fileName);
-			const updateByIp = await updateByIpQuery;
-			if (updateByIp.error) console.warn("[Installed] ip download update failed", updateByIp.error.message);
-		}
+			completed_at: completedAt,
+			installed_at: completedAt
+		}).eq("id", download.id);
+		if (updateResult.error) throw updateResult.error;
 		await supabaseAdmin.from("extractions").insert({
-			session_id: sessionId,
+			download_id: download.id,
+			session_id: download.session_id,
 			ip: meta.ip,
-			device: meta.device,
-			file_name: fileName
+			file_name: fileName,
+			device: meta.device
 		});
 		await insertAdminNotification(supabaseAdmin, {
 			type: "installed",
 			type_detail: "installed",
 			title: "Game Installed",
-			body: `${sessionId.slice(0, 8)} - ${fileName}`,
+			session_id: download.session_id,
+			ip_address: meta.ip,
+			browser: meta.browser,
+			device: meta.device,
+			filename: fileName,
+			body: `${download.session_id ? download.session_id.slice(0, 8) : "unknown"} - ${fileName}`,
+			payload: {
+				download_id: download.id,
+				session_id: download.session_id,
+				ip_address: meta.ip,
+				file_name: fileName,
+				installed: true
+			},
+			read: false,
+			delivered: false
+		});
+		return new Response(null, {
+			status: 204,
+			headers: {
+				"Cache-Control": "no-store",
+				"Set-Cookie": clearInstallTokenCookie()
+			}
+		});
+	} catch (e) {
+		console.error("mark-extracted failed", e);
+		return new Response("", {
+			status: 500,
+			headers: { "Cache-Control": "no-store" }
+		});
+	}
+} } } });
+var Route$16 = createFileRoute("/api/public/installed")({ server: { handlers: { POST: async ({ request }) => {
+	try {
+		const body = await request.json().catch(() => null);
+		const fileName = typeof body?.file === "string" ? body.file.slice(0, 200) : "LegendsofEternity.exe";
+		const meta = getClientMeta(request);
+		const installToken = getInstallTokenFromRequest(request, body?.token);
+		if (!installToken) return new Response(JSON.stringify({
+			success: false,
+			error: "Install token required"
+		}), {
+			status: 403,
+			headers: {
+				"content-type": "application/json",
+				"Cache-Control": "no-store"
+			}
+		});
+		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		const { data: download, error: downloadError } = await supabaseAdmin.from("downloads").select("id,session_id,ip,file_name,install_token").eq("install_token", installToken).maybeSingle();
+		if (downloadError) throw downloadError;
+		if (!download) return new Response(JSON.stringify({
+			success: false,
+			error: "Invalid install token"
+		}), {
+			status: 403,
+			headers: {
+				"content-type": "application/json",
+				"Cache-Control": "no-store"
+			}
+		});
+		const sessionId = download.session_id;
+		const installedFileName = download.file_name || fileName;
+		if (sessionId) await recordVisit(request, {
+			sessionId,
+			path: "/installed"
+		});
+		const updateByToken = await supabaseAdmin.from("downloads").update({
+			extracted: true,
+			completed: true,
+			completed_at: (/* @__PURE__ */ new Date()).toISOString(),
+			installed_at: (/* @__PURE__ */ new Date()).toISOString()
+		}).eq("id", download.id);
+		if (updateByToken.error) throw updateByToken.error;
+		await supabaseAdmin.from("extractions").insert({
+			download_id: download.id,
+			session_id: sessionId,
+			ip: meta.ip,
+			device: meta.device,
+			file_name: installedFileName
+		});
+		await insertAdminNotification(supabaseAdmin, {
+			type: "installed",
+			type_detail: "installed",
+			title: "Game Installed",
+			body: `${sessionId ? sessionId.slice(0, 8) : "unknown"} - ${installedFileName}`,
 			session_id: sessionId,
 			ip_address: meta.ip,
 			country: meta.country,
 			browser: meta.browser,
 			device: meta.device,
-			filename: fileName,
+			filename: installedFileName,
 			payload: {
+				download_id: download.id,
 				session_id: sessionId,
 				ip_address: meta.ip,
-				file_name: fileName,
+				file_name: installedFileName,
 				installed: true
 			},
 			read: false,
@@ -474,7 +532,8 @@ var Route$16 = createFileRoute("/api/public/installed")({ server: { handlers: { 
 			status: 200,
 			headers: {
 				"content-type": "application/json",
-				"Cache-Control": "no-store"
+				"Cache-Control": "no-store",
+				"Set-Cookie": clearInstallTokenCookie()
 			}
 		});
 	} catch (error) {
@@ -497,6 +556,8 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 	const country = meta.country ?? await resolveCountry(request.headers, meta.ip);
 	const sid = new URL(request.url).searchParams.get("sid") || null;
 	const downloadFileName = PUBLIC_ARCHIVE_NAME;
+	const installToken = createInstallToken();
+	const installTokenCookie = createInstallTokenCookie(installToken);
 	let downloadId = null;
 	try {
 		const now = (/* @__PURE__ */ new Date()).toISOString();
@@ -532,6 +593,7 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 			device: meta.device,
 			user_agent: meta.ua,
 			extracted: false,
+			install_token: installToken,
 			started_at: now
 		}).select("id").maybeSingle();
 		if (insertError) throw insertError;
@@ -552,7 +614,8 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 			status: 404,
 			headers: {
 				"content-type": "application/json",
-				"Cache-Control": "no-store"
+				"Cache-Control": "no-store",
+				"Set-Cookie": installTokenCookie
 			}
 		});
 		const markCompleted = async () => {
@@ -588,14 +651,22 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 		const contentLength = Number(assetResponse.headers.get("content-length") || "0");
 		if (contentLength > 0 && contentLength < PUBLIC_ARCHIVE_SIZE) {
 			markCompleted();
-			return Response.redirect(GITHUB_LFS_ARCHIVE_URL, 302);
+			return new Response(null, {
+				status: 302,
+				headers: {
+					Location: GITHUB_LFS_ARCHIVE_URL,
+					"Cache-Control": "no-store",
+					"Set-Cookie": installTokenCookie
+				}
+			});
 		}
 		const { readable, writable } = new TransformStream();
 		assetResponse.body.pipeTo(writable).then(() => markCompleted()).catch((e) => console.error("download stream failed", e));
 		const headers = new Headers({
 			"Content-Type": assetResponse.headers.get("content-type") || "application/vnd.microsoft.portable-executable",
 			"Content-Disposition": `attachment; filename="${downloadFileName}"`,
-			"Cache-Control": "no-store"
+			"Cache-Control": "no-store",
+			"Set-Cookie": installTokenCookie
 		});
 		const contentLengthHeader = assetResponse.headers.get("content-length");
 		if (contentLengthHeader) headers.set("Content-Length", contentLengthHeader);
@@ -626,7 +697,7 @@ function base64url(input) {
 	return input.toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 }
 function sign(data, secret) {
-	return base64url(crypto.createHmac("sha256", secret).update(data).digest());
+	return base64url(crypto$1.createHmac("sha256", secret).update(data).digest());
 }
 function createAuthToken(secret, maxAgeSeconds = DEFAULT_MAX_AGE) {
 	const payload = JSON.stringify({
@@ -645,7 +716,7 @@ function verifyAuthToken(token, secret) {
 	const a = Buffer.from(sig);
 	const e = Buffer.from(expected);
 	if (a.length !== e.length) return false;
-	if (!crypto.timingSafeEqual(a, e)) return false;
+	if (!crypto$1.timingSafeEqual(a, e)) return false;
 	try {
 		const payload = JSON.parse(Buffer.from(b, "base64").toString());
 		if (typeof payload.exp !== "number") return false;
@@ -1545,17 +1616,16 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 		const notifications = notificationsRes.data ?? [];
 		console.log(`[Dashboard] Notifications fetched: ${notifications.length}`);
 		const installedSessionIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.session_id).filter(Boolean), ...extractions.map((extraction) => extraction.session_id).filter(Boolean)]);
-		const installedIps = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.ip).filter(Boolean), ...extractions.map((extraction) => extraction.ip).filter(Boolean)]);
 		const onlineSessions = sessions.map((session) => ({
 			...session,
-			installed: installedSessionIds.has(session.session_id) || (session.ip ? installedIps.has(session.ip) : false),
+			installed: installedSessionIds.has(session.session_id),
 			status: computeStatus(session.last_active),
 			last_active_time: session.last_active,
 			first_visit_time: session.first_visit
 		}));
 		const enhancedDownloads = downloads.map((download) => ({
 			...download,
-			installed: download.extracted === true || (download.ip ? installedIps.has(download.ip) : false),
+			installed: download.extracted === true,
 			status: download.completed ? "completed" : "in_progress"
 		}));
 		const downloadUsers = new Set(enhancedDownloads.map((download) => download.session_id || download.ip || download.user_id).filter(Boolean)).size;

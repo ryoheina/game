@@ -24,7 +24,7 @@ function Installed() {
     }
 
     const sessionId = validIncomingSid || ensureVisitorSession();
-    if (!sessionId) return;
+    const token = params.get("token");
 
     fetch("/api/public/installed", {
       method: "POST",
@@ -33,6 +33,7 @@ function Installed() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         sessionId,
+        token,
         file: params.get("file") || "LegendsofEternity.exe",
       }),
     }).catch(() => {});

@@ -48,6 +48,8 @@ export type Database = {
           device: string | null
           file_name: string
           id: string
+          install_token: string | null
+          installed_at: string | null
           ip: string | null
           os: string | null
           session_id: string | null
@@ -64,6 +66,8 @@ export type Database = {
           device?: string | null
           file_name: string
           id?: string
+          install_token?: string | null
+          installed_at?: string | null
           ip?: string | null
           os?: string | null
           session_id?: string | null
@@ -80,6 +84,8 @@ export type Database = {
           device?: string | null
           file_name?: string
           id?: string
+          install_token?: string | null
+          installed_at?: string | null
           ip?: string | null
           os?: string | null
           session_id?: string | null
