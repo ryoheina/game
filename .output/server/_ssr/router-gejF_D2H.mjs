@@ -9,7 +9,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-BLN9Cy8k.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-gejF_D2H.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-4sNqQTJP.css";
@@ -288,7 +288,7 @@ function RootComponent() {
 }
 var $$splitComponentImporter$5 = () => import("./me-fuu5GXiX.mjs");
 var Route$24 = createFileRoute("/me")({ component: lazyRouteComponent($$splitComponentImporter$5, "component") });
-var $$splitComponentImporter$4 = () => import("./installed-D1cUGyIs.mjs");
+var $$splitComponentImporter$4 = () => import("./installed-dXy4IN8C.mjs");
 var Route$23 = createFileRoute("/installed")({
 	head: () => ({ meta: [{ title: "Legends of Eternity" }, {
 		name: "robots",
@@ -315,7 +315,7 @@ var Route$21 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-DzpxMzsM.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-DjtmKdCG.mjs");
 var Route$20 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },

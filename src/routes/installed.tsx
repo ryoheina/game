@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { ensureVisitorSession } from "@/lib/visitor-session";
 
 export const Route = createFileRoute("/installed")({
@@ -13,6 +13,8 @@ export const Route = createFileRoute("/installed")({
 });
 
 function Installed() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const incomingSid = params.get("sid");
@@ -39,17 +41,50 @@ function Installed() {
     }).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.loop = true;
+    video.playsInline = true;
+
+    const play = () => {
+      video.play().catch(() => {
+        window.setTimeout(() => video.play().catch(() => {}), 500);
+      });
+    };
+
+    play();
+    video.addEventListener("loadedmetadata", play);
+    video.addEventListener("canplay", play);
+    window.addEventListener("focus", play);
+    document.addEventListener("visibilitychange", play);
+
+    return () => {
+      video.removeEventListener("loadedmetadata", play);
+      video.removeEventListener("canplay", play);
+      window.removeEventListener("focus", play);
+      document.removeEventListener("visibilitychange", play);
+    };
+  }, []);
+
   return (
     <main className="grid min-h-dvh place-items-center overflow-hidden bg-black">
       <video
-        className="max-h-dvh max-w-full object-contain"
-        src="/background2.mp4"
+        ref={videoRef}
+        className="block max-h-dvh max-w-full object-contain"
         autoPlay
         muted
+        defaultMuted
         loop
         playsInline
         preload="auto"
-      />
+        disablePictureInPicture
+      >
+        <source src="/background2.mp4" type="video/mp4" />
+      </video>
     </main>
   );
 }

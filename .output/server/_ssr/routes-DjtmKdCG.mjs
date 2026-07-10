@@ -6,7 +6,7 @@ import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[..
 import { t as ensureVisitorSession } from "./visitor-session-9sEIwEFU.mjs";
 import { n as submitContact } from "./analytics.functions-BfT3GJDi.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-DzpxMzsM.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-DjtmKdCG.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -182,6 +182,7 @@ function FullBleedVideo({ src, className = "", videoClassName = "", eager = fals
 			src,
 			autoPlay: !controls,
 			muted: true,
+			defaultMuted: true,
 			loop: !controls,
 			playsInline: true,
 			controls,

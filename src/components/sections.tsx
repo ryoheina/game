@@ -46,6 +46,7 @@ function FullBleedVideo({
           src={src}
           autoPlay={!controls}
           muted
+          defaultMuted
           loop={!controls}
           playsInline
           controls={controls}
