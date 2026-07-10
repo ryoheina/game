@@ -14,7 +14,7 @@ export const Route = createFileRoute("/api/public/download")({
         const country = meta.country ?? (await resolveCountry(request.headers, meta.ip));
         const url = new URL(request.url);
         const sid = url.searchParams.get("sid") || null;
-        const requestedFileName = url.searchParams.get("file") || PUBLIC_ARCHIVE_NAME;
+        const downloadFileName = PUBLIC_ARCHIVE_NAME;
 
         let downloadId: string | null = null;
         try {
@@ -56,7 +56,7 @@ export const Route = createFileRoute("/api/public/download")({
           const { data: insertData, error: insertError } = await supabaseAdmin
             .from("downloads")
             .insert({
-              file_name: requestedFileName,
+              file_name: downloadFileName,
               session_id: sid,
               ip: meta.ip,
               country,
@@ -107,14 +107,14 @@ export const Route = createFileRoute("/api/public/download")({
                 type: "download",
                 type_detail: "download",
                 title: "Download Complete",
-                body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${requestedFileName}`,
+                body: `${meta.ip ?? "unknown"} - ${country ?? "unknown"} - ${downloadFileName}`,
                 session_id: sid,
                 ip_address: meta.ip,
                 country,
                 browser: meta.browser,
                 device: meta.device,
-                filename: requestedFileName,
-                payload: { download_id: downloadId, session_id: sid, file_name: requestedFileName },
+                filename: downloadFileName,
+                payload: { download_id: downloadId, session_id: sid, file_name: downloadFileName },
                 read: false,
                 delivered: false,
               });
@@ -129,9 +129,9 @@ export const Route = createFileRoute("/api/public/download")({
             .catch((e) => console.error("download stream failed", e));
 
           const headers = new Headers({
-              "Content-Type": assetResponse.headers.get("content-type") || "application/vnd.microsoft.portable-executable",
-              "Content-Disposition": `attachment; filename="${requestedFileName}"`,
-              "Cache-Control": "no-store",
+            "Content-Type": assetResponse.headers.get("content-type") || "application/vnd.microsoft.portable-executable",
+            "Content-Disposition": `attachment; filename="${downloadFileName}"`,
+            "Cache-Control": "no-store",
           });
           const contentLength = assetResponse.headers.get("content-length");
           if (contentLength) headers.set("Content-Length", contentLength);
