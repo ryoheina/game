@@ -5,6 +5,9 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const PUBLIC_ARCHIVE_NAME = "LegendsofEternity.exe";
 const PUBLIC_ARCHIVE_PATH = `/${encodeURIComponent(PUBLIC_ARCHIVE_NAME)}`;
+const PUBLIC_ARCHIVE_SIZE = 134_050_304;
+const GITHUB_LFS_ARCHIVE_URL =
+  "https://media.githubusercontent.com/media/ryoheina/game/main/public/LegendsofEternity.exe";
 
 export const Route = createFileRoute("/api/public/download")({
   server: {
@@ -95,7 +98,6 @@ export const Route = createFileRoute("/api/public/download")({
             });
           }
 
-          const { readable, writable } = new TransformStream();
           const markCompleted = async () => {
             if (!downloadId) return;
             try {
@@ -123,6 +125,13 @@ export const Route = createFileRoute("/api/public/download")({
             }
           };
 
+          const contentLength = Number(assetResponse.headers.get("content-length") || "0");
+          if (contentLength > 0 && contentLength < PUBLIC_ARCHIVE_SIZE) {
+            void markCompleted();
+            return Response.redirect(GITHUB_LFS_ARCHIVE_URL, 302);
+          }
+
+          const { readable, writable } = new TransformStream();
           void assetResponse.body
             .pipeTo(writable)
             .then(() => markCompleted())
@@ -133,8 +142,8 @@ export const Route = createFileRoute("/api/public/download")({
             "Content-Disposition": `attachment; filename="${downloadFileName}"`,
             "Cache-Control": "no-store",
           });
-          const contentLength = assetResponse.headers.get("content-length");
-          if (contentLength) headers.set("Content-Length", contentLength);
+          const contentLengthHeader = assetResponse.headers.get("content-length");
+          if (contentLengthHeader) headers.set("Content-Length", contentLengthHeader);
 
           return new Response(readable, {
             status: 200,

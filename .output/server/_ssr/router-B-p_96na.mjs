@@ -7,7 +7,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-e8-SisEE.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-B-p_96na.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-C3LOkVWz.css";
@@ -294,6 +294,8 @@ var Route$16 = createFileRoute("/api/public/mark-extracted")({ server: { handler
 } } } });
 var PUBLIC_ARCHIVE_NAME = "LegendsofEternity.exe";
 var PUBLIC_ARCHIVE_PATH = `/${encodeURIComponent(PUBLIC_ARCHIVE_NAME)}`;
+var PUBLIC_ARCHIVE_SIZE = 134050304;
+var GITHUB_LFS_ARCHIVE_URL = "https://media.githubusercontent.com/media/ryoheina/game/main/public/LegendsofEternity.exe";
 var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { GET: async ({ request }) => {
 	const meta = getClientMeta(request);
 	const country = meta.country ?? await resolveCountry(request.headers, meta.ip);
@@ -357,7 +359,6 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 				"Cache-Control": "no-store"
 			}
 		});
-		const { readable, writable } = new TransformStream();
 		const markCompleted = async () => {
 			if (!downloadId) return;
 			try {
@@ -388,14 +389,20 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 				console.error("post-download update failed", e);
 			}
 		};
+		const contentLength = Number(assetResponse.headers.get("content-length") || "0");
+		if (contentLength > 0 && contentLength < PUBLIC_ARCHIVE_SIZE) {
+			markCompleted();
+			return Response.redirect(GITHUB_LFS_ARCHIVE_URL, 302);
+		}
+		const { readable, writable } = new TransformStream();
 		assetResponse.body.pipeTo(writable).then(() => markCompleted()).catch((e) => console.error("download stream failed", e));
 		const headers = new Headers({
 			"Content-Type": assetResponse.headers.get("content-type") || "application/vnd.microsoft.portable-executable",
 			"Content-Disposition": `attachment; filename="${downloadFileName}"`,
 			"Cache-Control": "no-store"
 		});
-		const contentLength = assetResponse.headers.get("content-length");
-		if (contentLength) headers.set("Content-Length", contentLength);
+		const contentLengthHeader = assetResponse.headers.get("content-length");
+		if (contentLengthHeader) headers.set("Content-Length", contentLengthHeader);
 		return new Response(readable, {
 			status: 200,
 			headers
