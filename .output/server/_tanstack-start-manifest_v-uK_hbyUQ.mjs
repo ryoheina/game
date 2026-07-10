@@ -1,4 +1,4 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-BCG3NQmd.js
+//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-uK_hbyUQ.js
 var tsrStartManifest = () => ({ routes: {
 	__root__: {
 		filePath: "E:/game/src/routes/__root.tsx",
@@ -25,27 +25,27 @@ var tsrStartManifest = () => ({ routes: {
 			"/api/public/download",
 			"/api/public/mark-extracted"
 		],
-		preloads: ["/assets/index-aiCHaPH4.js", "/assets/jsx-runtime-D8nDyRPw.js"],
+		preloads: ["/assets/index-CSdfkxsp.js", "/assets/jsx-runtime-D8nDyRPw.js"],
 		scripts: [{ attrs: {
 			type: "module",
 			async: !0,
-			src: "/assets/index-aiCHaPH4.js"
+			src: "/assets/index-CSdfkxsp.js"
 		} }]
 	},
 	"/": {
 		filePath: "E:/game/src/routes/index.tsx",
 		children: void 0,
-		preloads: ["/assets/routes-DdzlTzRW.js", "/assets/fx-CGwUS9qe.js"]
+		preloads: ["/assets/routes-DgfKfFMM.js", "/assets/fx-CGwUS9qe.js"]
 	},
 	"/_authenticated": {
 		filePath: "E:/game/src/routes/_authenticated/route.tsx",
 		children: ["/_authenticated/admin"],
-		preloads: ["/assets/route-BRIZU7TV.js"]
+		preloads: ["/assets/route-DWIvxV3U.js"]
 	},
 	"/auth": {
 		filePath: "E:/game/src/routes/auth.tsx",
 		children: void 0,
-		preloads: ["/assets/auth-DU12RByG.js", "/assets/fx-CGwUS9qe.js"]
+		preloads: ["/assets/auth-B5thMTpH.js", "/assets/fx-CGwUS9qe.js"]
 	},
 	"/me": {
 		filePath: "E:/game/src/routes/me.tsx",
@@ -55,7 +55,7 @@ var tsrStartManifest = () => ({ routes: {
 	"/_authenticated/admin": {
 		filePath: "E:/game/src/routes/_authenticated/admin.tsx",
 		children: void 0,
-		preloads: ["/assets/admin-yigJZrT5.js", "/assets/fx-CGwUS9qe.js"]
+		preloads: ["/assets/admin-cVaipcrE.js", "/assets/fx-CGwUS9qe.js"]
 	}
 } });
 //#endregion

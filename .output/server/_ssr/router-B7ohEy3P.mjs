@@ -7,10 +7,10 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-B-p_96na.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-B7ohEy3P.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-C3LOkVWz.css";
+var styles_default = "/assets/styles-CujO4acJ.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -233,7 +233,7 @@ var Route$19 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-BHGcz7q9.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-Chjqb-vX.mjs");
 var Route$18 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -256,7 +256,7 @@ var Route$18 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-DvKyc6HC.mjs");
+var $$splitComponentImporter = () => import("./admin-BBtSRfSY.mjs");
 var Route$17 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
@@ -610,33 +610,48 @@ var Route$12 = createFileRoute("/api/me/login")({ server: { handlers: { POST: as
 } } } });
 var ADMIN_PASSWORD$1 = processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD;
 var ADMIN_COOKIE_NAME = "admin-auth-token";
+var ADMIN_SESSION_MAX_AGE_SECONDS = 3600 * 8;
 function getAdminPassword() {
 	return ADMIN_PASSWORD$1 || "";
 }
-async function getAdminCookieValue(secret) {
+async function signAdminPayload(secret, payload) {
 	if (!secret) throw new Error("ADMIN_PASSWORD is not configured");
 	const encoder = new TextEncoder();
 	const key = await globalThis.crypto.subtle.importKey("raw", encoder.encode(secret), {
 		name: "HMAC",
 		hash: "SHA-256"
 	}, false, ["sign"]);
-	const signature = await globalThis.crypto.subtle.sign("HMAC", key, encoder.encode("studio-admin-auth"));
+	const signature = await globalThis.crypto.subtle.sign("HMAC", key, encoder.encode(payload));
 	return Array.from(new Uint8Array(signature), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+function constantTimeEqual(a, b) {
+	if (a.length !== b.length) return false;
+	let result = 0;
+	for (let i = 0; i < a.length; i++) result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+	return result === 0;
 }
 async function isAdminAuthorized(request) {
 	const password = getAdminPassword();
 	if (!password) return false;
 	const cookieHeader = request.headers.get("cookie") || "";
-	return Object.fromEntries(cookieHeader.split(";").map((chunk) => {
+	const cookieValue = Object.fromEntries(cookieHeader.split(";").map((chunk) => {
 		const [name, ...rest] = chunk.trim().split("=");
 		return [name, rest.join("=")];
-	}))[ADMIN_COOKIE_NAME] === await getAdminCookieValue(password);
+	}))[ADMIN_COOKIE_NAME];
+	if (!cookieValue) return false;
+	const [issuedAtRaw, signature] = cookieValue.split(".");
+	const issuedAt = Number(issuedAtRaw);
+	if (!Number.isFinite(issuedAt) || !signature) return false;
+	if (Date.now() - issuedAt > ADMIN_SESSION_MAX_AGE_SECONDS * 1e3) return false;
+	return constantTimeEqual(signature, await signAdminPayload(password, `studio-admin-auth.${issuedAtRaw}`));
 }
 async function createAdminAuthCookie() {
-	return `${ADMIN_COOKIE_NAME}=${await getAdminCookieValue(getAdminPassword())}; Path=/; HttpOnly; SameSite=Lax; Secure`;
+	const password = getAdminPassword();
+	const issuedAt = String(Date.now());
+	return `${ADMIN_COOKIE_NAME}=${`${issuedAt}.${await signAdminPayload(password, `studio-admin-auth.${issuedAt}`)}`}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${ADMIN_SESSION_MAX_AGE_SECONDS}; Secure`;
 }
 async function clearAdminAuthCookie() {
-	return `${ADMIN_COOKIE_NAME}=deleted; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Secure`;
+	return `${ADMIN_COOKIE_NAME}=deleted; Path=/; HttpOnly; SameSite=Strict; Max-Age=0; Secure`;
 }
 function createErrorPayload$8(error) {
 	return {
@@ -690,6 +705,9 @@ var Route$10 = createFileRoute("/api/admin/logout")({ server: { handlers: { POST
 	});
 } } } });
 var ADMIN_PASSWORD = processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD;
+var loginAttempts = /* @__PURE__ */ new Map();
+var MAX_LOGIN_ATTEMPTS = 6;
+var LOGIN_WINDOW_MS = 600 * 1e3;
 function getEnvPresence$1() {
 	return {
 		ADMIN_PASSWORD: Boolean(processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD),
@@ -727,7 +745,27 @@ function createErrorPayload$7(error) {
 		error: error instanceof Error ? error.message : String(error)
 	};
 }
+function getClientKey(request) {
+	return request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
+}
+function isRateLimited(key) {
+	const now = Date.now();
+	const record = loginAttempts.get(key);
+	if (!record || record.resetAt <= now) {
+		loginAttempts.set(key, {
+			count: 1,
+			resetAt: now + LOGIN_WINDOW_MS
+		});
+		return false;
+	}
+	record.count += 1;
+	return record.count > MAX_LOGIN_ATTEMPTS;
+}
+function clearRateLimit(key) {
+	loginAttempts.delete(key);
+}
 var Route$9 = createFileRoute("/api/admin/login")({ server: { handlers: { POST: async ({ request }) => {
+	const clientKey = getClientKey(request);
 	console.error("[Admin login] Request started", {
 		route: "/api/admin/login",
 		env: getEnvPresence$1(),
@@ -736,13 +774,27 @@ var Route$9 = createFileRoute("/api/admin/login")({ server: { handlers: { POST: 
 	});
 	try {
 		const password = (await request.json().catch(() => null))?.password;
+		if (isRateLimited(clientKey)) return new Response(JSON.stringify({
+			success: false,
+			error: "Too many login attempts. Try again later."
+		}), {
+			status: 429,
+			headers: {
+				"content-type": "application/json",
+				"Cache-Control": "no-store"
+			}
+		});
 		if (!ADMIN_PASSWORD || password !== ADMIN_PASSWORD) return new Response(JSON.stringify({
 			success: false,
 			error: "Invalid password."
 		}), {
 			status: 401,
-			headers: { "content-type": "application/json" }
+			headers: {
+				"content-type": "application/json",
+				"Cache-Control": "no-store"
+			}
 		});
+		clearRateLimit(clientKey);
 		const cookie = await createAdminAuthCookie();
 		return new Response(JSON.stringify({
 			success: true,
@@ -751,6 +803,7 @@ var Route$9 = createFileRoute("/api/admin/login")({ server: { handlers: { POST: 
 			status: 200,
 			headers: {
 				"content-type": "application/json",
+				"Cache-Control": "no-store",
 				"set-cookie": cookie
 			}
 		});
@@ -1146,7 +1199,10 @@ async function verifyDatabaseConnectivity(supabaseAdmin) {
 	return { ok: true };
 }
 var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GET: async ({ request }) => {
-	const responseHeaders = { "content-type": "application/json" };
+	const responseHeaders = {
+		"content-type": "application/json",
+		"Cache-Control": "no-store"
+	};
 	logEnvStatus();
 	console.error("[Admin dashboard] Request started", {
 		route: "/api/admin/dashboard",
@@ -1288,6 +1344,8 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 			...download,
 			status: download.completed ? "completed" : "in_progress"
 		}));
+		const downloadUsers = new Set(enhancedDownloads.map((download) => download.session_id || download.ip || download.user_id).filter(Boolean)).size;
+		const completedDownloads = enhancedDownloads.filter((download) => download.completed).length;
 		const unreadNotifications = notifications.filter(notificationIsUnread);
 		try {
 			const pendingOffline = sessions.filter((session) => session.last_active < (/* @__PURE__ */ new Date(Date.now() - 12e4)).toISOString() && !session.notified_left);
@@ -1325,6 +1383,8 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 				total_sessions: onlineSessions.length,
 				online_sessions: onlineSessions.filter((s) => s.status === "online").length,
 				total_downloads: enhancedDownloads.length,
+				download_users: downloadUsers,
+				completed_downloads: completedDownloads,
 				pending_notifications: unreadNotifications.length
 			}
 		};

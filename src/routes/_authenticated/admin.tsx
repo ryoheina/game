@@ -15,6 +15,7 @@ function Admin() {
   const [sessions, setSessions] = useState<any[]>([]);
   const [sessionsPage, setSessionsPage] = useState(1);
   const [downloads, setDownloads] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
   const { notifications, setNotifications, markRead, remove, clearAll } = useAdminNotifications([]);
   const desktopNotifState = useDesktopNotifications();
   const lastSnapshotRef = useRef<string | null>(null);
@@ -64,6 +65,7 @@ function Admin() {
           if (!mounted) return true;
           setSessions([]);
           setDownloads([]);
+          setStats(null);
           setNotifications([]);
           return true;
         }
@@ -72,6 +74,7 @@ function Admin() {
         if (!mounted) return true;
         setSessions(data.sessions || []);
         setDownloads(data.downloads || []);
+        setStats(data.stats || null);
         setNotifications(data.notifications || []);
 
         const snap = JSON.stringify((data.sessions || []).map((item: any) => ({ id: item.session_id, last_active: item.last_active })));
@@ -94,6 +97,7 @@ function Admin() {
         if (!mounted) return false;
         setSessions([]);
         setDownloads([]);
+        setStats(null);
         setNotifications([]);
         return false;
       }
@@ -127,6 +131,7 @@ function Admin() {
 
       setSessions([]);
       setDownloads([]);
+      setStats(null);
       setNotifications([]);
       setSessionsPage(1);
       window.alert("All history cleared");
@@ -217,8 +222,22 @@ function Admin() {
         <section className="rounded-3xl glass p-8 text-white">
           <h1 className="display text-3xl">Studio Admin Dashboard</h1>
           <p className="mt-3 text-sm text-white/70">
-            You are signed in using the signed admin cookie. This dashboard is protected by cookie-based admin auth only.
+            You are signed in using a signed, expiring admin cookie. All admin data APIs require that cookie.
           </p>
+        </section>
+
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["Visitors", stats?.total_sessions ?? sessions.length],
+            ["Online", stats?.online_sessions ?? sessions.filter((s: any) => s.status === "online").length],
+            ["Download users", stats?.download_users ?? new Set(downloads.map((d: any) => d.session_id || d.ip || d.user_id).filter(Boolean)).size],
+            ["Downloads", stats?.total_downloads ?? downloads.length],
+          ].map(([label, value]) => (
+            <div key={label} className="rounded-2xl glass p-5 text-white">
+              <div className="text-[10px] uppercase tracking-[0.3em] text-white/40">{label}</div>
+              <div className="mt-2 text-3xl font-semibold">{value}</div>
+            </div>
+          ))}
         </section>
 
         <section className="rounded-3xl glass p-8 text-white">

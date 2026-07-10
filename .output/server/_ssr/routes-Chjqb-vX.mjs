@@ -8,7 +8,7 @@ import { t as requireSupabaseAuth } from "./auth-middleware-DZO41X7i.mjs";
 import { n as objectType, r as stringType, t as booleanType } from "../_libs/zod.mjs";
 import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-Bhk6PKUx.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-BHGcz7q9.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-Chjqb-vX.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -191,7 +191,7 @@ function FullBleedVideo({ src, className = "", videoClassName = "", eager = fals
 		})
 	});
 }
-function Hero({ onDownload }) {
+function Hero() {
 	const ref = (0, import_react.useRef)(null);
 	const titleRef = (0, import_react.useRef)(null);
 	const { scrollYProgress } = useScroll({
@@ -303,20 +303,13 @@ function Hero({ onDownload }) {
 							className: "mt-6 max-w-xl text-base text-[rgba(255,255,255,0.85)] sm:mt-8 md:text-xl leading-relaxed font-light drop-shadow-[0_0_20px_rgba(0,0,0,0.24)]",
 							children: "A next-generation 3D multiplayer fantasy RPG. Forge alliances, wield forbidden magic, and stand against the tide of eternal darkness."
 						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "mt-10 flex flex-col gap-3 sm:mt-12 sm:flex-row sm:flex-wrap sm:gap-4",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: onDownload,
-								className: "relative overflow-hidden rounded-full bg-gradient-to-r from-[#ffd96c] via-[#f9f3de] to-[#b9d2ff] px-6 py-4 text-xs uppercase tracking-[0.18em] text-black font-black transition-all duration-500 border border-[#d8c07c]/40 shadow-[0_0_30px_rgba(255,211,133,0.28)] hover:scale-[1.02] hover:shadow-[0_0_45px_rgba(255,211,133,0.45)] sm:px-10 sm:text-sm sm:tracking-[0.25em]",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "relative z-10",
-									children: "Download Project"
-								})
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
 								href: "#characters",
 								className: "relative inline-flex items-center justify-center rounded-full bg-[#0c1d48]/90 px-6 py-4 text-xs uppercase tracking-[0.18em] text-white shadow-[0_0_30px_rgba(106,151,255,0.25)] border border-[#6e9cff]/50 transition-all duration-500 hover:bg-[#10255e]/95 hover:shadow-[0_0_45px_rgba(106,151,255,0.42)] sm:px-10 sm:text-sm sm:tracking-[0.25em]",
 								children: "Explore Characters"
-							})]
+							})
 						})
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -895,11 +888,16 @@ function Technology() {
 	});
 }
 function Download({ onDownload, status }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
+	const started = status === "done";
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		id: "download",
-		className: "relative overflow-hidden py-32",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "mx-auto max-w-4xl px-6 text-center",
+		className: "relative isolate overflow-hidden py-32",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			"aria-hidden": true,
+			className: "absolute inset-0",
+			style: { background: "radial-gradient(circle at 50% 42%, rgba(255, 220, 140, 0.16), transparent 22%), radial-gradient(circle at 50% 58%, rgba(76, 142, 255, 0.16), transparent 34%)" }
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "relative mx-auto max-w-4xl px-6 text-center",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Reveal, { children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 					className: "text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]",
@@ -907,16 +905,16 @@ function Download({ onDownload, status }) {
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 					className: "display mt-4 text-5xl text-white md:text-6xl",
-					children: "Download the project"
+					children: "Download the game"
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "mt-4 text-white/60",
-					children: "Delivered by our secure edge. Every download is logged for the studio."
+					children: "Click the sword to begin your Legends of Eternity download."
 				})
 			] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
 				delay: .1,
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "mt-14 rounded-3xl glass p-10",
+					className: "mt-14",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "grid gap-6 sm:grid-cols-4",
@@ -933,28 +931,120 @@ function Download({ onDownload, status }) {
 								children: v
 							})] }, k))
 						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: onDownload,
-							disabled: status === "loading",
-							className: "mt-10 inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-[color:var(--arcane)] to-[color:var(--gold)] px-10 py-5 text-sm font-semibold uppercase tracking-[0.25em] text-black transition hover:scale-[1.02] glow-blue disabled:opacity-70",
-							children: status === "loading" ? "Preparing…" : status === "done" ? "✓ Started" : "Download Project"
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative mx-auto mt-12 grid h-64 w-64 place-items-center sm:h-80 sm:w-80",
+							children: [[
+								0,
+								1,
+								2
+							].map((ring) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+								"aria-hidden": true,
+								className: "absolute inset-0 rounded-full border border-[color:var(--gold)]/30",
+								animate: started ? {
+									scale: [.72, 1.28],
+									opacity: [.75, 0]
+								} : {
+									scale: [.88, 1],
+									opacity: [
+										.25,
+										.5,
+										.25
+									]
+								},
+								transition: {
+									duration: started ? 1.1 : 3.2,
+									repeat: Infinity,
+									delay: ring * .22,
+									ease: "easeOut"
+								}
+							}, ring)), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+								onClick: onDownload,
+								disabled: status === "loading",
+								"aria-label": "Download Legends of Eternity",
+								className: "group relative grid h-40 w-40 place-items-center rounded-full border border-[#f5d88a]/50 bg-black/45 shadow-[0_0_70px_rgba(255,214,120,0.22)] backdrop-blur-xl transition disabled:opacity-70 sm:h-52 sm:w-52",
+								whileHover: {
+									scale: 1.06,
+									rotate: -2
+								},
+								whileTap: {
+									scale: .94,
+									rotate: 6
+								},
+								animate: started ? {
+									scale: [
+										1,
+										1.18,
+										1
+									],
+									boxShadow: [
+										"0 0 50px rgba(255,214,120,0.28)",
+										"0 0 120px rgba(255,214,120,0.72)",
+										"0 0 60px rgba(120,170,255,0.44)"
+									]
+								} : { y: [
+									0,
+									-8,
+									0
+								] },
+								transition: {
+									duration: started ? .9 : 3,
+									repeat: started ? 0 : Infinity,
+									ease: "easeInOut"
+								},
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "absolute inset-3 rounded-full bg-gradient-to-b from-white/10 to-transparent" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.img, {
+									src: "/favicon.ico",
+									alt: "",
+									className: "relative h-24 w-24 object-contain drop-shadow-[0_0_28px_rgba(255,226,150,0.75)] sm:h-32 sm:w-32",
+									draggable: false,
+									animate: started ? {
+										rotate: [
+											0,
+											-12,
+											12,
+											0
+										],
+										scale: [
+											1,
+											1.18,
+											1
+										]
+									} : { rotate: [
+										0,
+										-4,
+										0,
+										4,
+										0
+									] },
+									transition: {
+										duration: started ? .85 : 4,
+										repeat: started ? 0 : Infinity,
+										ease: "easeInOut"
+									}
+								})]
+							})]
 						}),
-						status === "done" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.p, {
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "mt-8 text-xs uppercase tracking-[0.32em] text-white/50",
+							children: status === "loading" ? "Preparing..." : "Legends of Eternity"
+						}),
+						started && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.p, {
 							initial: {
 								opacity: 0,
-								y: 6
+								y: 12,
+								scale: .96
 							},
 							animate: {
 								opacity: 1,
-								y: 0
+								y: 0,
+								scale: 1
 							},
-							className: "mt-4 text-sm text-white/60",
-							children: "Your download will begin momentarily. Thank you for supporting the project."
+							className: "mx-auto mt-4 max-w-md rounded-full border border-[color:var(--gold)]/30 bg-[color:var(--gold)]/10 px-5 py-3 text-sm text-[#ffe7a3] shadow-[0_0_40px_rgba(255,214,120,0.16)]",
+							children: "You have already started."
 						})
 					]
 				})
 			})]
-		})
+		})]
 	});
 }
 function FinalVideo() {
@@ -1228,7 +1318,6 @@ function Home() {
 			anchor.click();
 			document.body.removeChild(anchor);
 			setDownloadStatus("done");
-			window.setTimeout(() => setDownloadStatus("idle"), 3e3);
 		} catch {
 			setDownloadStatus("idle");
 		}
@@ -1281,7 +1370,7 @@ function Home() {
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MouseGlow, {}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Nav, {}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", { children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Hero, { onDownload: handleDownload }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Hero, {}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Story, {}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Characters, { onOpen: setOpenChar }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(World, {}),
@@ -1289,12 +1378,12 @@ function Home() {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BattleToFeaturesBreak, {}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Features, {}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Technology, {}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Contact, { onSubmit: handleContact }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FinalVideo, {}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, {
 							onDownload: handleDownload,
 							status: downloadStatus
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Contact, { onSubmit: handleContact }),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FinalVideo, {})
+						})
 					] }),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Footer, {})
 				]

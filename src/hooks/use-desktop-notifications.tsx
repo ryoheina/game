@@ -21,7 +21,6 @@ export function useDesktopNotifications() {
   });
 
   const shownNotificationIdsRef = useRef<Set<string>>(new Set());
-  const mountedAtRef = useRef(Date.now());
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
 
@@ -153,13 +152,9 @@ export function useDesktopNotifications() {
         const data = await res.json();
         if (!mountedRef.current) return;
 
-        const recentUnreadNotifications = (data.notifications || []).filter((note: any) => {
-          if (note.read) return false;
-          const createdAt = new Date(note.created_at || 0).getTime();
-          return Number.isFinite(createdAt) && createdAt >= mountedAtRef.current - 5000;
-        });
+        const unreadNotifications = (data.notifications || []).filter((note: any) => note.read !== true);
 
-        recentUnreadNotifications
+        unreadNotifications
           .slice()
           .reverse()
           .forEach((note: any) => {

@@ -87,7 +87,6 @@ function Home() {
       document.body.removeChild(anchor);
 
       setDownloadStatus("done");
-      window.setTimeout(() => setDownloadStatus("idle"), 3000);
     } catch {
       setDownloadStatus("idle");
     }
@@ -121,7 +120,7 @@ function Home() {
         <MouseGlow />
         <Nav />
         <main>
-          <Hero onDownload={handleDownload} />
+          <Hero />
           <Story />
           <Characters onOpen={setOpenChar} />
           <World />
@@ -129,9 +128,9 @@ function Home() {
           <BattleToFeaturesBreak />
           <Features />
           <Technology />
-          <Download onDownload={handleDownload} status={downloadStatus} />
           <Contact onSubmit={handleContact} />
           <FinalVideo />
+          <Download onDownload={handleDownload} status={downloadStatus} />
         </main>
         <Footer />
       </motion.div>

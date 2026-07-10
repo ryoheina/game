@@ -2,7 +2,7 @@ import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow } from "./fx-CW4x6DdP.mjs";
 import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-DvKyc6HC.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-BBtSRfSY.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function useAdminNotifications(initial = []) {
@@ -79,7 +79,6 @@ function useDesktopNotifications() {
 		lastError: null
 	});
 	const shownNotificationIdsRef = (0, import_react.useRef)(/* @__PURE__ */ new Set());
-	const mountedAtRef = (0, import_react.useRef)(Date.now());
 	const pollingIntervalRef = (0, import_react.useRef)(null);
 	const mountedRef = (0, import_react.useRef)(true);
 	async function showStoredNotification(note) {
@@ -188,11 +187,7 @@ function useDesktopNotifications() {
 				if (!res.ok || res.status === 401) return;
 				const data = await res.json();
 				if (!mountedRef.current) return;
-				(data.notifications || []).filter((note) => {
-					if (note.read) return false;
-					const createdAt = new Date(note.created_at || 0).getTime();
-					return Number.isFinite(createdAt) && createdAt >= mountedAtRef.current - 5e3;
-				}).slice().reverse().forEach((note) => {
+				(data.notifications || []).filter((note) => note.read !== true).slice().reverse().forEach((note) => {
 					showStoredNotification(note);
 				});
 			} catch (err) {
@@ -213,6 +208,7 @@ function Admin() {
 	const [sessions, setSessions] = (0, import_react.useState)([]);
 	const [sessionsPage, setSessionsPage] = (0, import_react.useState)(1);
 	const [downloads, setDownloads] = (0, import_react.useState)([]);
+	const [stats, setStats] = (0, import_react.useState)(null);
 	const { notifications, setNotifications, markRead, remove, clearAll } = useAdminNotifications([]);
 	const desktopNotifState = useDesktopNotifications();
 	const lastSnapshotRef = (0, import_react.useRef)(null);
@@ -263,6 +259,7 @@ function Admin() {
 					if (!mounted) return true;
 					setSessions([]);
 					setDownloads([]);
+					setStats(null);
 					setNotifications([]);
 					return true;
 				}
@@ -270,6 +267,7 @@ function Admin() {
 				if (!mounted) return true;
 				setSessions(data.sessions || []);
 				setDownloads(data.downloads || []);
+				setStats(data.stats || null);
 				setNotifications(data.notifications || []);
 				const snap = JSON.stringify((data.sessions || []).map((item) => ({
 					id: item.session_id,
@@ -290,6 +288,7 @@ function Admin() {
 				if (!mounted) return false;
 				setSessions([]);
 				setDownloads([]);
+				setStats(null);
 				setNotifications([]);
 				return false;
 			}
@@ -325,6 +324,7 @@ function Admin() {
 			}
 			setSessions([]);
 			setDownloads([]);
+			setStats(null);
 			setNotifications([]);
 			setSessionsPage(1);
 			window.alert("All history cleared");
@@ -438,8 +438,26 @@ function Admin() {
 							children: "Studio Admin Dashboard"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "mt-3 text-sm text-white/70",
-							children: "You are signed in using the signed admin cookie. This dashboard is protected by cookie-based admin auth only."
+							children: "You are signed in using a signed, expiring admin cookie. All admin data APIs require that cookie."
 						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
+						className: "grid gap-4 sm:grid-cols-2 lg:grid-cols-4",
+						children: [
+							["Visitors", stats?.total_sessions ?? sessions.length],
+							["Online", stats?.online_sessions ?? sessions.filter((s) => s.status === "online").length],
+							["Download users", stats?.download_users ?? new Set(downloads.map((d) => d.session_id || d.ip || d.user_id).filter(Boolean)).size],
+							["Downloads", stats?.total_downloads ?? downloads.length]
+						].map(([label, value]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "rounded-2xl glass p-5 text-white",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "text-[10px] uppercase tracking-[0.3em] text-white/40",
+								children: label
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "mt-2 text-3xl font-semibold",
+								children: value
+							})]
+						}, label))
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 						className: "rounded-3xl glass p-8 text-white",

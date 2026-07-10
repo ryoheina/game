@@ -57,6 +57,8 @@ type DashboardSuccessResponse = {
     total_sessions: number;
     online_sessions: number;
     total_downloads: number;
+    download_users: number;
+    completed_downloads: number;
     pending_notifications: number;
   };
 };
@@ -165,7 +167,7 @@ export const Route = createFileRoute("/api/admin/dashboard")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const responseHeaders = { "content-type": "application/json" };
+        const responseHeaders = { "content-type": "application/json", "Cache-Control": "no-store" };
         logEnvStatus();
         console.error("[Admin dashboard] Request started", {
           route: "/api/admin/dashboard",
@@ -293,6 +295,12 @@ export const Route = createFileRoute("/api/admin/dashboard")({
             ...download,
             status: download.completed ? "completed" : "in_progress",
           }));
+          const downloadUsers = new Set(
+            enhancedDownloads
+              .map((download: any) => download.session_id || download.ip || download.user_id)
+              .filter(Boolean),
+          ).size;
+          const completedDownloads = enhancedDownloads.filter((download: any) => download.completed).length;
           const unreadNotifications = notifications.filter(notificationIsUnread);
 
           // ===== STEP 7: OPTIONAL BACKGROUND UPDATES =====
@@ -331,6 +339,8 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               total_sessions: onlineSessions.length,
               online_sessions: onlineSessions.filter((s: any) => s.status === "online").length,
               total_downloads: enhancedDownloads.length,
+              download_users: downloadUsers,
+              completed_downloads: completedDownloads,
               pending_notifications: unreadNotifications.length,
             },
           };

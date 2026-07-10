@@ -4,6 +4,9 @@ import { createAdminAuthCookie } from "@/lib/admin-auth";
 export const runtime = "nodejs";
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.STUDIO_ADMIN_PASSWORD;
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+const MAX_LOGIN_ATTEMPTS = 6;
+const LOGIN_WINDOW_MS = 10 * 60 * 1000;
 
 function getEnvPresence() {
   return {
@@ -49,10 +52,35 @@ function createErrorPayload(error: unknown) {
   return payload;
 }
 
+function getClientKey(request: Request) {
+  return (
+    request.headers.get("cf-connecting-ip") ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown"
+  );
+}
+
+function isRateLimited(key: string) {
+  const now = Date.now();
+  const record = loginAttempts.get(key);
+  if (!record || record.resetAt <= now) {
+    loginAttempts.set(key, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
+    return false;
+  }
+  record.count += 1;
+  return record.count > MAX_LOGIN_ATTEMPTS;
+}
+
+function clearRateLimit(key: string) {
+  loginAttempts.delete(key);
+}
+
 export const Route = createFileRoute("/api/admin/login")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const clientKey = getClientKey(request);
         console.error("[Admin login] Request started", {
           route: "/api/admin/login",
           env: getEnvPresence(),
@@ -64,19 +92,28 @@ export const Route = createFileRoute("/api/admin/login")({
           const body = await request.json().catch(() => null);
           const password = body?.password;
 
-          if (!ADMIN_PASSWORD || password !== ADMIN_PASSWORD) {
-            return new Response(JSON.stringify({ success: false, error: "Invalid password." }), {
-              status: 401,
-              headers: { "content-type": "application/json" },
+          if (isRateLimited(clientKey)) {
+            return new Response(JSON.stringify({ success: false, error: "Too many login attempts. Try again later." }), {
+              status: 429,
+              headers: { "content-type": "application/json", "Cache-Control": "no-store" },
             });
           }
 
+          if (!ADMIN_PASSWORD || password !== ADMIN_PASSWORD) {
+            return new Response(JSON.stringify({ success: false, error: "Invalid password." }), {
+              status: 401,
+              headers: { "content-type": "application/json", "Cache-Control": "no-store" },
+            });
+          }
+
+          clearRateLimit(clientKey);
           const cookie = await createAdminAuthCookie();
 
           return new Response(JSON.stringify({ success: true, ok: true }), {
             status: 200,
             headers: {
               "content-type": "application/json",
+              "Cache-Control": "no-store",
               "set-cookie": cookie,
             },
           });

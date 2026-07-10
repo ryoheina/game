@@ -56,7 +56,7 @@ function FullBleedVideo({
   );
 }
 
-export function Hero({ onDownload }: { onDownload: () => void }) {
+export function Hero() {
   const ref = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
@@ -133,12 +133,6 @@ export function Hero({ onDownload }: { onDownload: () => void }) {
             A next-generation 3D multiplayer fantasy RPG. Forge alliances, wield forbidden magic, and stand against the tide of eternal darkness.
           </p>
           <div className="mt-10 flex flex-col gap-3 sm:mt-12 sm:flex-row sm:flex-wrap sm:gap-4">
-            <button
-              onClick={onDownload}
-              className="relative overflow-hidden rounded-full bg-gradient-to-r from-[#ffd96c] via-[#f9f3de] to-[#b9d2ff] px-6 py-4 text-xs uppercase tracking-[0.18em] text-black font-black transition-all duration-500 border border-[#d8c07c]/40 shadow-[0_0_30px_rgba(255,211,133,0.28)] hover:scale-[1.02] hover:shadow-[0_0_45px_rgba(255,211,133,0.45)] sm:px-10 sm:text-sm sm:tracking-[0.25em]"
-            >
-              <span className="relative z-10">Download Project</span>
-            </button>
             <a
               href="#characters"
               className="relative inline-flex items-center justify-center rounded-full bg-[#0c1d48]/90 px-6 py-4 text-xs uppercase tracking-[0.18em] text-white shadow-[0_0_30px_rgba(106,151,255,0.25)] border border-[#6e9cff]/50 transition-all duration-500 hover:bg-[#10255e]/95 hover:shadow-[0_0_45px_rgba(106,151,255,0.42)] sm:px-10 sm:text-sm sm:tracking-[0.25em]"
@@ -572,19 +566,29 @@ export function Technology() {
 }
 
 export function Download({ onDownload, status }: { onDownload: () => void; status: "idle" | "loading" | "done" }) {
+  const started = status === "done";
+
   return (
-    <section id="download" className="relative overflow-hidden py-32">
-      <div className="mx-auto max-w-4xl px-6 text-center">
+    <section id="download" className="relative isolate overflow-hidden py-32">
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 42%, rgba(255, 220, 140, 0.16), transparent 22%), radial-gradient(circle at 50% 58%, rgba(76, 142, 255, 0.16), transparent 34%)",
+        }}
+      />
+      <div className="relative mx-auto max-w-4xl px-6 text-center">
         <Reveal>
           <span className="text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]">Get the build</span>
-          <h2 className="display mt-4 text-5xl text-white md:text-6xl">Download the project</h2>
+          <h2 className="display mt-4 text-5xl text-white md:text-6xl">Download the game</h2>
           <p className="mt-4 text-white/60">
-            Delivered by our secure edge. Every download is logged for the studio.
+            Click the sword to begin your Legends of Eternity download.
           </p>
         </Reveal>
 
         <Reveal delay={0.1}>
-          <div className="mt-14 rounded-3xl glass p-10">
+          <div className="mt-14">
             <div className="grid gap-6 sm:grid-cols-4">
               {[
                 ["Version", "v0.1.0-alpha"],
@@ -598,20 +602,69 @@ export function Download({ onDownload, status }: { onDownload: () => void; statu
                 </div>
               ))}
             </div>
-            <button
-              onClick={onDownload}
-              disabled={status === "loading"}
-              className="mt-10 inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-[color:var(--arcane)] to-[color:var(--gold)] px-10 py-5 text-sm font-semibold uppercase tracking-[0.25em] text-black transition hover:scale-[1.02] glow-blue disabled:opacity-70"
-            >
-              {status === "loading" ? "Preparing…" : status === "done" ? "✓ Started" : "Download Project"}
-            </button>
-            {status === "done" && (
-              <motion.p
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-4 text-sm text-white/60"
+
+            <div className="relative mx-auto mt-12 grid h-64 w-64 place-items-center sm:h-80 sm:w-80">
+              {[0, 1, 2].map((ring) => (
+                <motion.div
+                  key={ring}
+                  aria-hidden
+                  className="absolute inset-0 rounded-full border border-[color:var(--gold)]/30"
+                  animate={
+                    started
+                      ? { scale: [0.72, 1.28], opacity: [0.75, 0] }
+                      : { scale: [0.88, 1], opacity: [0.25, 0.5, 0.25] }
+                  }
+                  transition={{
+                    duration: started ? 1.1 : 3.2,
+                    repeat: Infinity,
+                    delay: ring * 0.22,
+                    ease: "easeOut",
+                  }}
+                />
+              ))}
+              <motion.button
+                onClick={onDownload}
+                disabled={status === "loading"}
+                aria-label="Download Legends of Eternity"
+                className="group relative grid h-40 w-40 place-items-center rounded-full border border-[#f5d88a]/50 bg-black/45 shadow-[0_0_70px_rgba(255,214,120,0.22)] backdrop-blur-xl transition disabled:opacity-70 sm:h-52 sm:w-52"
+                whileHover={{ scale: 1.06, rotate: -2 }}
+                whileTap={{ scale: 0.94, rotate: 6 }}
+                animate={
+                  started
+                    ? {
+                        scale: [1, 1.18, 1],
+                        boxShadow: [
+                          "0 0 50px rgba(255,214,120,0.28)",
+                          "0 0 120px rgba(255,214,120,0.72)",
+                          "0 0 60px rgba(120,170,255,0.44)",
+                        ],
+                      }
+                    : { y: [0, -8, 0] }
+                }
+                transition={{ duration: started ? 0.9 : 3, repeat: started ? 0 : Infinity, ease: "easeInOut" }}
               >
-                Your download will begin momentarily. Thank you for supporting the project.
+                <span className="absolute inset-3 rounded-full bg-gradient-to-b from-white/10 to-transparent" />
+                <motion.img
+                  src="/favicon.ico"
+                  alt=""
+                  className="relative h-24 w-24 object-contain drop-shadow-[0_0_28px_rgba(255,226,150,0.75)] sm:h-32 sm:w-32"
+                  draggable={false}
+                  animate={started ? { rotate: [0, -12, 12, 0], scale: [1, 1.18, 1] } : { rotate: [0, -4, 0, 4, 0] }}
+                  transition={{ duration: started ? 0.85 : 4, repeat: started ? 0 : Infinity, ease: "easeInOut" }}
+                />
+              </motion.button>
+            </div>
+
+            <div className="mt-8 text-xs uppercase tracking-[0.32em] text-white/50">
+              {status === "loading" ? "Preparing..." : "Legends of Eternity"}
+            </div>
+            {started && (
+              <motion.p
+                initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                className="mx-auto mt-4 max-w-md rounded-full border border-[color:var(--gold)]/30 bg-[color:var(--gold)]/10 px-5 py-3 text-sm text-[#ffe7a3] shadow-[0_0_40px_rgba(255,214,120,0.16)]"
+              >
+                You have already started.
               </motion.p>
             )}
           </div>
