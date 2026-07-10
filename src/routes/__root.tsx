@@ -123,6 +123,7 @@ function RootShell({ children }: { children: ReactNode }) {
       sid = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + "-" + Math.random().toString(16).slice(2);
       localStorage.setItem(key, sid);
     }
+    if (location.pathname === "/installed") return;
     fetch("/api/public/visit", {
       method: "POST",
       headers: { "content-type": "application/json" },

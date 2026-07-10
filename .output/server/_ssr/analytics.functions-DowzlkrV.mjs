@@ -2,7 +2,7 @@ import { i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-9EjmF9OT.mj
 import { i as resolveCountry, n as insertAdminNotification, r as requireSupabaseAuth, t as getClientMeta } from "./notifications-Dg5sYI5P.mjs";
 import { n as objectType, r as stringType, t as booleanType } from "../_libs/zod.mjs";
 import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-CwlUqXDq.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/visitor-session-DF57_1GO.js
+//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-DowzlkrV.js
 var createSsrRpc = (functionId) => {
 	const url = "/_serverFn/" + functionId;
 	const serverFnMeta = { id: functionId };
@@ -130,19 +130,5 @@ var submitContact = createServerFn({ method: "POST" }).validator((d) => objectTy
 createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(createSsrRpc("6d92e280c68cd3c11aac298fc57f9269dca8d85ae15c9747e0c8a8d46051fccf"));
 createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).handler(createSsrRpc("abd124c618fd11979349d78fa7b5705a4311550c5a02f311710e53685f427a7f"));
 createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(createSsrRpc("5058339e4274bf852ada72847e61fa713d72a2a54e6e0f6d25efda66bc028b9f"));
-function ensureVisitorSession() {
-	if (typeof window === "undefined") return "";
-	const key = "loe_sid";
-	try {
-		let sid = window.localStorage.getItem(key);
-		if (!sid) {
-			sid = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-			window.localStorage.setItem(key, sid);
-		}
-		return sid;
-	} catch {
-		return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-	}
-}
 //#endregion
-export { trackVisit as i, recordVisit as n, submitContact as r, ensureVisitorSession as t };
+export { submitContact as n, trackVisit as r, recordVisit as t };

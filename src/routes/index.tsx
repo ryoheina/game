@@ -5,7 +5,7 @@ import { Nav } from "@/components/nav";
 import { MouseGlow, Particles } from "@/components/fx";
 import {
   Hero, Story, Characters, CharacterModal, World, Battle,
-  BattleToFeaturesBreak, Features, Technology, Download, Contact, FinalVideo, Footer,
+  BattleToFeaturesBreak, Technology, Download, Contact, FinalVideo, Footer,
 } from "@/components/sections";
 import { submitContact } from "@/lib/analytics.functions";
 import { ensureVisitorSession } from "@/lib/visitor-session";
@@ -106,7 +106,6 @@ function Home() {
           <World />
           <Battle />
           <BattleToFeaturesBreak />
-          <Features />
           <Technology />
           <Contact onSubmit={handleContact} />
           <FinalVideo />

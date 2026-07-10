@@ -271,6 +271,20 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           const downloads: any[] = downloadsRes.data ?? [];
           console.log(`[Dashboard] Downloads fetched: ${downloads.length}`);
 
+          console.log("[Dashboard] Executing extractions query");
+          const extractionsRes = await supabaseAdmin.from("extractions").select("*").order("created_at", { ascending: false }).limit(200);
+          if (extractionsRes.error) {
+            const parsed = parsePostgresError(extractionsRes.error.message);
+            console.error("[Dashboard] Extractions query failed:", extractionsRes.error.message);
+            logAdminRouteFailure(extractionsRes.error, { stage: "query_extractions", table: parsed.table, column: parsed.column, message: extractionsRes.error.message });
+            return new Response(JSON.stringify(createFailureResponse("Extractions query failed", "query_extractions", extractionsRes.error, extractionsRes.error.message, parsed.table, parsed.column)), {
+              status: 500,
+              headers: responseHeaders,
+            });
+          }
+          const extractions: any[] = extractionsRes.data ?? [];
+          console.log(`[Dashboard] Extractions fetched: ${extractions.length}`);
+
           console.log("[Dashboard] Executing notifications query");
           const notificationsRes = await supabaseAdmin.from("notifications").select("*").order("created_at", { ascending: false }).limit(50);
           if (notificationsRes.error) {
@@ -286,14 +300,30 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           console.log(`[Dashboard] Notifications fetched: ${notifications.length}`);
 
           // ===== STEP 6: PROCESS RESULTS =====
+          const installedSessionIds = new Set([
+            ...downloads
+              .filter((download: any) => download.extracted === true)
+              .map((download: any) => download.session_id)
+              .filter(Boolean),
+            ...extractions.map((extraction: any) => extraction.session_id).filter(Boolean),
+          ]);
+          const installedIps = new Set([
+            ...downloads
+              .filter((download: any) => download.extracted === true)
+              .map((download: any) => download.ip)
+              .filter(Boolean),
+            ...extractions.map((extraction: any) => extraction.ip).filter(Boolean),
+          ]);
           const onlineSessions = sessions.map((session: any) => ({
             ...session,
+            installed: installedSessionIds.has(session.session_id) || (session.ip ? installedIps.has(session.ip) : false),
             status: computeStatus(session.last_active),
             last_active_time: session.last_active,
             first_visit_time: session.first_visit,
           }));
           const enhancedDownloads = downloads.map((download: any) => ({
             ...download,
+            installed: download.extracted === true || (download.ip ? installedIps.has(download.ip) : false),
             status: download.completed ? "completed" : "in_progress",
           }));
           const downloadUsers = new Set(

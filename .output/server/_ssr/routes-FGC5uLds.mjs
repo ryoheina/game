@@ -3,9 +3,10 @@ import { i as AnimatePresence, n as useScroll, r as motion, t as useTransform } 
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow, r as Particles, t as Fog } from "./fx-CW4x6DdP.mjs";
 import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-import { r as submitContact, t as ensureVisitorSession } from "./visitor-session-DF57_1GO.mjs";
+import { t as ensureVisitorSession } from "./visitor-session-9sEIwEFU.mjs";
+import { n as submitContact } from "./analytics.functions-DowzlkrV.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-CAAyHtLa.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-FGC5uLds.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -839,13 +840,6 @@ function BattleToFeaturesBreak() {
 		]
 	});
 }
-function Features() {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-		id: "features",
-		className: "relative h-[100svh] min-h-[560px] w-full overflow-hidden",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FullBleedVideo, { src: "/background2.mp4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-b from-background/35 via-background/5 to-background/50" })]
-	});
-}
 var stack = [
 	"Unity",
 	"Unreal Engine",
@@ -1322,7 +1316,6 @@ function Home() {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(World, {}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Battle, {}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BattleToFeaturesBreak, {}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Features, {}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Technology, {}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Contact, { onSubmit: handleContact }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FinalVideo, {}),

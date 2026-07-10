@@ -2,7 +2,7 @@ import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow } from "./fx-CW4x6DdP.mjs";
 import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-BVGUgTnq.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-DHKD0WnM.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function useAdminNotifications(initial = []) {
@@ -584,6 +584,10 @@ function Admin() {
 												}),
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 													className: "px-2 py-2",
+													children: "Install"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+													className: "px-2 py-2",
 													children: "Status"
 												}),
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
@@ -624,6 +628,13 @@ function Admin() {
 													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 														className: "px-2 py-2",
 														children: d.os ?? "—"
+													}),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+														className: "px-2 py-2",
+														children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+															className: `rounded-full px-2 py-1 text-xs font-semibold ${d.installed ? "bg-blue-500/15 text-blue-300" : "bg-red-500/15 text-red-300"}`,
+															children: d.installed ? "installed" : "non"
+														})
 													}),
 													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 														className: "px-2 py-2",
@@ -752,6 +763,10 @@ function Admin() {
 													}),
 													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 														className: "px-2 py-2",
+														children: "Install"
+													}),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+														className: "px-2 py-2",
 														children: "Completed"
 													})
 												] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: downloads.map((d) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
@@ -776,6 +791,13 @@ function Admin() {
 														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 															className: "px-2 py-2",
 															children: d.status
+														}),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+															className: "px-2 py-2",
+															children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+																className: `rounded-full px-2 py-1 text-xs font-semibold ${d.installed ? "bg-blue-500/15 text-blue-300" : "bg-red-500/15 text-red-300"}`,
+																children: d.installed ? "installed" : "non"
+															})
 														}),
 														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 															className: "px-2 py-2",

@@ -531,7 +531,7 @@ export function BattleToFeaturesBreak() {
 export function Features() {
   return (
     <section id="features" className="relative h-[100svh] min-h-[560px] w-full overflow-hidden">
-      <FullBleedVideo src="/background2.mp4" />
+      <FullBleedVideo src="/background1.mp4" />
       <div className="absolute inset-0 bg-gradient-to-b from-background/35 via-background/5 to-background/50" />
     </section>
   );

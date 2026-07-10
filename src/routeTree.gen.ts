@@ -10,12 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MeRouteImport } from './routes/me'
+import { Route as InstalledRouteImport } from './routes/installed'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ApiPublicVisitRouteImport } from './routes/api/public/visit'
 import { Route as ApiPublicMarkExtractedRouteImport } from './routes/api/public/mark-extracted'
+import { Route as ApiPublicInstalledRouteImport } from './routes/api/public/installed'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
 import { Route as ApiMeStatsRouteImport } from './routes/api/me/stats'
 import { Route as ApiMeLogoutRouteImport } from './routes/api/me/logout'
@@ -36,6 +38,11 @@ import { Route as ApiAdminClearDownloadsRouteImport } from './routes/api/admin/c
 const MeRoute = MeRouteImport.update({
   id: '/me',
   path: '/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstalledRoute = InstalledRouteImport.update({
+  id: '/installed',
+  path: '/installed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -65,6 +72,11 @@ const ApiPublicVisitRoute = ApiPublicVisitRouteImport.update({
 const ApiPublicMarkExtractedRoute = ApiPublicMarkExtractedRouteImport.update({
   id: '/api/public/mark-extracted',
   path: '/api/public/mark-extracted',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicInstalledRoute = ApiPublicInstalledRouteImport.update({
+  id: '/api/public/installed',
+  path: '/api/public/installed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicDownloadRoute = ApiPublicDownloadRouteImport.update({
@@ -154,6 +166,7 @@ const ApiAdminClearDownloadsRoute = ApiAdminClearDownloadsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/installed': typeof InstalledRoute
   '/me': typeof MeRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/api/admin/clear-downloads': typeof ApiAdminClearDownloadsRoute
@@ -172,12 +185,14 @@ export interface FileRoutesByFullPath {
   '/api/me/logout': typeof ApiMeLogoutRoute
   '/api/me/stats': typeof ApiMeStatsRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/installed': typeof ApiPublicInstalledRoute
   '/api/public/mark-extracted': typeof ApiPublicMarkExtractedRoute
   '/api/public/visit': typeof ApiPublicVisitRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/installed': typeof InstalledRoute
   '/me': typeof MeRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/api/admin/clear-downloads': typeof ApiAdminClearDownloadsRoute
@@ -196,6 +211,7 @@ export interface FileRoutesByTo {
   '/api/me/logout': typeof ApiMeLogoutRoute
   '/api/me/stats': typeof ApiMeStatsRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/installed': typeof ApiPublicInstalledRoute
   '/api/public/mark-extracted': typeof ApiPublicMarkExtractedRoute
   '/api/public/visit': typeof ApiPublicVisitRoute
 }
@@ -204,6 +220,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/installed': typeof InstalledRoute
   '/me': typeof MeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/api/admin/clear-downloads': typeof ApiAdminClearDownloadsRoute
@@ -222,6 +239,7 @@ export interface FileRoutesById {
   '/api/me/logout': typeof ApiMeLogoutRoute
   '/api/me/stats': typeof ApiMeStatsRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/installed': typeof ApiPublicInstalledRoute
   '/api/public/mark-extracted': typeof ApiPublicMarkExtractedRoute
   '/api/public/visit': typeof ApiPublicVisitRoute
 }
@@ -230,6 +248,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/installed'
     | '/me'
     | '/admin'
     | '/api/admin/clear-downloads'
@@ -248,12 +267,14 @@ export interface FileRouteTypes {
     | '/api/me/logout'
     | '/api/me/stats'
     | '/api/public/download'
+    | '/api/public/installed'
     | '/api/public/mark-extracted'
     | '/api/public/visit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/installed'
     | '/me'
     | '/admin'
     | '/api/admin/clear-downloads'
@@ -272,6 +293,7 @@ export interface FileRouteTypes {
     | '/api/me/logout'
     | '/api/me/stats'
     | '/api/public/download'
+    | '/api/public/installed'
     | '/api/public/mark-extracted'
     | '/api/public/visit'
   id:
@@ -279,6 +301,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/installed'
     | '/me'
     | '/_authenticated/admin'
     | '/api/admin/clear-downloads'
@@ -297,6 +320,7 @@ export interface FileRouteTypes {
     | '/api/me/logout'
     | '/api/me/stats'
     | '/api/public/download'
+    | '/api/public/installed'
     | '/api/public/mark-extracted'
     | '/api/public/visit'
   fileRoutesById: FileRoutesById
@@ -305,6 +329,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  InstalledRoute: typeof InstalledRoute
   MeRoute: typeof MeRoute
   ApiAdminClearDownloadsRoute: typeof ApiAdminClearDownloadsRoute
   ApiAdminClearHistoryRoute: typeof ApiAdminClearHistoryRoute
@@ -322,6 +347,7 @@ export interface RootRouteChildren {
   ApiMeLogoutRoute: typeof ApiMeLogoutRoute
   ApiMeStatsRoute: typeof ApiMeStatsRoute
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
+  ApiPublicInstalledRoute: typeof ApiPublicInstalledRoute
   ApiPublicMarkExtractedRoute: typeof ApiPublicMarkExtractedRoute
   ApiPublicVisitRoute: typeof ApiPublicVisitRoute
 }
@@ -333,6 +359,13 @@ declare module '@tanstack/react-router' {
       path: '/me'
       fullPath: '/me'
       preLoaderRoute: typeof MeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/installed': {
+      id: '/installed'
+      path: '/installed'
+      fullPath: '/installed'
+      preLoaderRoute: typeof InstalledRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -375,6 +408,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/mark-extracted'
       fullPath: '/api/public/mark-extracted'
       preLoaderRoute: typeof ApiPublicMarkExtractedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/installed': {
+      id: '/api/public/installed'
+      path: '/api/public/installed'
+      fullPath: '/api/public/installed'
+      preLoaderRoute: typeof ApiPublicInstalledRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/download': {
@@ -507,6 +547,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  InstalledRoute: InstalledRoute,
   MeRoute: MeRoute,
   ApiAdminClearDownloadsRoute: ApiAdminClearDownloadsRoute,
   ApiAdminClearHistoryRoute: ApiAdminClearHistoryRoute,
@@ -524,6 +565,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMeLogoutRoute: ApiMeLogoutRoute,
   ApiMeStatsRoute: ApiMeStatsRoute,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
+  ApiPublicInstalledRoute: ApiPublicInstalledRoute,
   ApiPublicMarkExtractedRoute: ApiPublicMarkExtractedRoute,
   ApiPublicVisitRoute: ApiPublicVisitRoute,
 }

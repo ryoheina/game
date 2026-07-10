@@ -3,15 +3,16 @@ import { n as require_jsx_runtime, r as require_react, t as QueryClientProvider 
 import { c as HeadContent, d as createRouter, f as Outlet, g as Link, h as createRootRouteWithContext, j as redirect, l as useLocation, m as createFileRoute, p as lazyRouteComponent, s as Scripts, v as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
 import { i as resolveCountry, n as insertAdminNotification, t as getClientMeta } from "./notifications-Dg5sYI5P.mjs";
 import { n as supabaseAdmin } from "./client.server-CPH4V7T6.mjs";
-import { i as trackVisit, n as recordVisit, t as ensureVisitorSession } from "./visitor-session-DF57_1GO.mjs";
+import { t as ensureVisitorSession } from "./visitor-session-9sEIwEFU.mjs";
+import { r as trackVisit, t as recordVisit } from "./analytics.functions-DowzlkrV.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-D7Mm5Yua.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-DubsVa78.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-BFjCM1m_.css";
+var styles_default = "/assets/styles-B1HouSQd.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -123,7 +124,7 @@ function ErrorComponent({ error, reset }) {
 		})
 	});
 }
-var Route$23 = createRootRouteWithContext()({
+var Route$25 = createRootRouteWithContext()({
 	head: () => ({
 		meta: [
 			{ charSet: "utf-8" },
@@ -216,6 +217,7 @@ function RootShell({ children }) {
       sid = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + "-" + Math.random().toString(16).slice(2);
       localStorage.setItem(key, sid);
     }
+    if (location.pathname === "/installed") return;
     fetch("/api/public/visit", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -231,7 +233,7 @@ function RootShell({ children }) {
 	});
 }
 function RootComponent() {
-	const { queryClient } = Route$23.useRouteContext();
+	const { queryClient } = Route$25.useRouteContext();
 	useVisitorTracking(useLocation().pathname);
 	(0, import_react.useEffect)(() => {
 		if (typeof window === "undefined") return;
@@ -266,15 +268,23 @@ function RootComponent() {
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,_#200a3b,_#05070d_40%,_#05070d_100%)]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Outlet, {})]
 	});
 }
-var $$splitComponentImporter$4 = () => import("./me-fuu5GXiX.mjs");
-var Route$22 = createFileRoute("/me")({ component: lazyRouteComponent($$splitComponentImporter$4, "component") });
+var $$splitComponentImporter$5 = () => import("./me-fuu5GXiX.mjs");
+var Route$24 = createFileRoute("/me")({ component: lazyRouteComponent($$splitComponentImporter$5, "component") });
+var $$splitComponentImporter$4 = () => import("./installed-BBzOgoWJ.mjs");
+var Route$23 = createFileRoute("/installed")({
+	head: () => ({ meta: [{ title: "Legends of Eternity" }, {
+		name: "robots",
+		content: "noindex,nofollow"
+	}] }),
+	component: lazyRouteComponent($$splitComponentImporter$4, "component")
+});
 var $$splitComponentImporter$3 = () => import("./auth-DzKmRwUX.mjs");
-var Route$21 = createFileRoute("/auth")({
+var Route$22 = createFileRoute("/auth")({
 	head: () => ({ meta: [{ title: "Studio Admin Access — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
 var $$splitComponentImporter$2 = () => import("./route-Di7iQBCH.mjs");
-var Route$20 = createFileRoute("/_authenticated")({
+var Route$21 = createFileRoute("/_authenticated")({
 	ssr: false,
 	beforeLoad: async () => {
 		if (typeof window === "undefined") throw redirect({ to: "/auth" });
@@ -287,8 +297,8 @@ var Route$20 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-CAAyHtLa.mjs");
-var Route$19 = createFileRoute("/")({
+var $$splitComponentImporter$1 = () => import("./routes-FGC5uLds.mjs");
+var Route$20 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
 		{
@@ -310,12 +320,12 @@ var Route$19 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-BVGUgTnq.mjs");
-var Route$18 = createFileRoute("/_authenticated/admin")({
+var $$splitComponentImporter = () => import("./admin-DHKD0WnM.mjs");
+var Route$19 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
 });
-var Route$17 = createFileRoute("/api/public/visit")({ server: { handlers: { POST: async ({ request }) => {
+var Route$18 = createFileRoute("/api/public/visit")({ server: { handlers: { POST: async ({ request }) => {
 	try {
 		const body = await request.json().catch(() => null);
 		const sessionId = typeof body?.sessionId === "string" ? body.sessionId : "";
@@ -354,11 +364,12 @@ var Route$17 = createFileRoute("/api/public/visit")({ server: { handlers: { POST
 		});
 	}
 } } } });
-var Route$16 = createFileRoute("/api/public/mark-extracted")({ server: { handlers: { GET: async ({ request }) => {
+var Route$17 = createFileRoute("/api/public/mark-extracted")({ server: { handlers: { GET: async ({ request }) => {
 	try {
 		const url = new URL(request.url);
 		const sid = url.searchParams.get("sid");
 		const fileName = url.searchParams.get("file");
+		const meta = getClientMeta(request);
 		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
 		if (sid) {
 			let q = supabaseAdmin.from("downloads").update({ extracted: true }).eq("session_id", sid);
@@ -366,19 +377,25 @@ var Route$16 = createFileRoute("/api/public/mark-extracted")({ server: { handler
 			await q;
 			await supabaseAdmin.from("extractions").insert({
 				session_id: sid,
+				ip: meta.ip,
 				file_name: fileName,
-				device: null
+				device: meta.device
 			});
 			await insertAdminNotification(supabaseAdmin, {
-				type: "download_extracted",
-				type_detail: "download",
-				title: "Download Extracted",
+				type: "installed",
+				type_detail: "installed",
+				title: "Game Installed",
 				session_id: sid,
+				ip_address: meta.ip,
+				browser: meta.browser,
+				device: meta.device,
 				filename: fileName,
 				body: `${sid} — ${fileName ?? "unknown"}`,
 				payload: {
 					session_id: sid,
-					file_name: fileName
+					ip_address: meta.ip,
+					file_name: fileName,
+					installed: true
 				}
 			});
 		}
@@ -386,6 +403,89 @@ var Route$16 = createFileRoute("/api/public/mark-extracted")({ server: { handler
 	} catch (e) {
 		console.error("mark-extracted failed", e);
 		return new Response("", { status: 500 });
+	}
+} } } });
+var Route$16 = createFileRoute("/api/public/installed")({ server: { handlers: { POST: async ({ request }) => {
+	try {
+		const body = await request.json().catch(() => null);
+		const sessionId = typeof body?.sessionId === "string" ? body.sessionId : "";
+		const fileName = typeof body?.file === "string" ? body.file.slice(0, 200) : "LegendsofEternity.exe";
+		const meta = getClientMeta(request);
+		if (sessionId.length < 8 || sessionId.length > 64) return new Response(JSON.stringify({
+			success: false,
+			error: "Invalid session"
+		}), {
+			status: 400,
+			headers: {
+				"content-type": "application/json",
+				"Cache-Control": "no-store"
+			}
+		});
+		await recordVisit(request, {
+			sessionId,
+			path: "/installed"
+		});
+		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		let updateQuery = supabaseAdmin.from("downloads").update({
+			extracted: true,
+			completed: true,
+			completed_at: (/* @__PURE__ */ new Date()).toISOString()
+		}).eq("session_id", sessionId);
+		if (fileName) updateQuery = updateQuery.eq("file_name", fileName);
+		const updateBySession = await updateQuery;
+		if (updateBySession.error) console.warn("[Installed] session download update failed", updateBySession.error.message);
+		if (meta.ip) {
+			let updateByIpQuery = supabaseAdmin.from("downloads").update({
+				extracted: true,
+				completed: true,
+				completed_at: (/* @__PURE__ */ new Date()).toISOString()
+			}).eq("ip", meta.ip);
+			if (fileName) updateByIpQuery = updateByIpQuery.eq("file_name", fileName);
+			const updateByIp = await updateByIpQuery;
+			if (updateByIp.error) console.warn("[Installed] ip download update failed", updateByIp.error.message);
+		}
+		await supabaseAdmin.from("extractions").insert({
+			session_id: sessionId,
+			ip: meta.ip,
+			device: meta.device,
+			file_name: fileName
+		});
+		await insertAdminNotification(supabaseAdmin, {
+			type: "installed",
+			type_detail: "installed",
+			title: "Game Installed",
+			body: `${sessionId.slice(0, 8)} - ${fileName}`,
+			session_id: sessionId,
+			ip_address: meta.ip,
+			country: meta.country,
+			browser: meta.browser,
+			device: meta.device,
+			filename: fileName,
+			payload: {
+				session_id: sessionId,
+				ip_address: meta.ip,
+				file_name: fileName,
+				installed: true
+			},
+			read: false,
+			delivered: false
+		});
+		return new Response(JSON.stringify({ success: true }), {
+			status: 200,
+			headers: {
+				"content-type": "application/json",
+				"Cache-Control": "no-store"
+			}
+		});
+	} catch (error) {
+		console.error("[Installed] tracking failed", error);
+		return new Response(JSON.stringify({ success: false }), {
+			status: 500,
+			headers: {
+				"content-type": "application/json",
+				"Cache-Control": "no-store"
+			}
+		});
 	}
 } } } });
 var PUBLIC_ARCHIVE_NAME = "LegendsofEternity.exe";
@@ -1408,6 +1508,24 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 		}
 		const downloads = downloadsRes.data ?? [];
 		console.log(`[Dashboard] Downloads fetched: ${downloads.length}`);
+		console.log("[Dashboard] Executing extractions query");
+		const extractionsRes = await supabaseAdmin.from("extractions").select("*").order("created_at", { ascending: false }).limit(200);
+		if (extractionsRes.error) {
+			const parsed = parsePostgresError(extractionsRes.error.message);
+			console.error("[Dashboard] Extractions query failed:", extractionsRes.error.message);
+			logAdminRouteFailure(extractionsRes.error, {
+				stage: "query_extractions",
+				table: parsed.table,
+				column: parsed.column,
+				message: extractionsRes.error.message
+			});
+			return new Response(JSON.stringify(createFailureResponse("Extractions query failed", "query_extractions", extractionsRes.error, extractionsRes.error.message, parsed.table, parsed.column)), {
+				status: 500,
+				headers: responseHeaders
+			});
+		}
+		const extractions = extractionsRes.data ?? [];
+		console.log(`[Dashboard] Extractions fetched: ${extractions.length}`);
 		console.log("[Dashboard] Executing notifications query");
 		const notificationsRes = await supabaseAdmin.from("notifications").select("*").order("created_at", { ascending: false }).limit(50);
 		if (notificationsRes.error) {
@@ -1426,14 +1544,18 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 		}
 		const notifications = notificationsRes.data ?? [];
 		console.log(`[Dashboard] Notifications fetched: ${notifications.length}`);
+		const installedSessionIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.session_id).filter(Boolean), ...extractions.map((extraction) => extraction.session_id).filter(Boolean)]);
+		const installedIps = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.ip).filter(Boolean), ...extractions.map((extraction) => extraction.ip).filter(Boolean)]);
 		const onlineSessions = sessions.map((session) => ({
 			...session,
+			installed: installedSessionIds.has(session.session_id) || (session.ip ? installedIps.has(session.ip) : false),
 			status: computeStatus(session.last_active),
 			last_active_time: session.last_active,
 			first_visit_time: session.first_visit
 		}));
 		const enhancedDownloads = downloads.map((download) => ({
 			...download,
+			installed: download.extracted === true || (download.ip ? installedIps.has(download.ip) : false),
 			status: download.completed ? "completed" : "in_progress"
 		}));
 		const downloadUsers = new Set(enhancedDownloads.map((download) => download.session_id || download.ip || download.user_id).filter(Boolean)).size;
@@ -1608,125 +1730,136 @@ var Route = createFileRoute("/api/admin/clear-downloads")({ server: { handlers: 
 		});
 	}
 } } } });
-var MeRoute = Route$22.update({
+var MeRoute = Route$24.update({
 	id: "/me",
 	path: "/me",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
-var AuthRoute = Route$21.update({
+var InstalledRoute = Route$23.update({
+	id: "/installed",
+	path: "/installed",
+	getParentRoute: () => Route$25
+});
+var AuthRoute = Route$22.update({
 	id: "/auth",
 	path: "/auth",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
-var AuthenticatedRouteRoute = Route$20.update({
+var AuthenticatedRouteRoute = Route$21.update({
 	id: "/_authenticated",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
-var IndexRoute = Route$19.update({
+var IndexRoute = Route$20.update({
 	id: "/",
 	path: "/",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
-var AuthenticatedAdminRoute = Route$18.update({
+var AuthenticatedAdminRoute = Route$19.update({
 	id: "/admin",
 	path: "/admin",
 	getParentRoute: () => AuthenticatedRouteRoute
 });
-var ApiPublicVisitRoute = Route$17.update({
+var ApiPublicVisitRoute = Route$18.update({
 	id: "/api/public/visit",
 	path: "/api/public/visit",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
-var ApiPublicMarkExtractedRoute = Route$16.update({
+var ApiPublicMarkExtractedRoute = Route$17.update({
 	id: "/api/public/mark-extracted",
 	path: "/api/public/mark-extracted",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
+});
+var ApiPublicInstalledRoute = Route$16.update({
+	id: "/api/public/installed",
+	path: "/api/public/installed",
+	getParentRoute: () => Route$25
 });
 var ApiPublicDownloadRoute = Route$15.update({
 	id: "/api/public/download",
 	path: "/api/public/download",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiMeStatsRoute = Route$14.update({
 	id: "/api/me/stats",
 	path: "/api/me/stats",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiMeLogoutRoute = Route$13.update({
 	id: "/api/me/logout",
 	path: "/api/me/logout",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiMeLoginRoute = Route$12.update({
 	id: "/api/me/login",
 	path: "/api/me/login",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiAdminMarkNotificationReadRoute = Route$11.update({
 	id: "/api/admin/mark-notification-read",
 	path: "/api/admin/mark-notification-read",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiAdminLogoutRoute = Route$10.update({
 	id: "/api/admin/logout",
 	path: "/api/admin/logout",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiAdminLoginRoute = Route$9.update({
 	id: "/api/admin/login",
 	path: "/api/admin/login",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiAdminLogNotificationRoute = Route$8.update({
 	id: "/api/admin/log-notification",
 	path: "/api/admin/log-notification",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiAdminDeleteUserRoute = Route$7.update({
 	id: "/api/admin/delete-user",
 	path: "/api/admin/delete-user",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiAdminDeleteSessionRoute = Route$6.update({
 	id: "/api/admin/delete-session",
 	path: "/api/admin/delete-session",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiAdminDeleteNotificationRoute = Route$5.update({
 	id: "/api/admin/delete-notification",
 	path: "/api/admin/delete-notification",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiAdminDeleteDownloadRoute = Route$4.update({
 	id: "/api/admin/delete-download",
 	path: "/api/admin/delete-download",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiAdminDashboardRoute = Route$3.update({
 	id: "/api/admin/dashboard",
 	path: "/api/admin/dashboard",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiAdminClearNotificationsRoute = Route$2.update({
 	id: "/api/admin/clear-notifications",
 	path: "/api/admin/clear-notifications",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiAdminClearHistoryRoute = Route$1.update({
 	id: "/api/admin/clear-history",
 	path: "/api/admin/clear-history",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var ApiAdminClearDownloadsRoute = Route.update({
 	id: "/api/admin/clear-downloads",
 	path: "/api/admin/clear-downloads",
-	getParentRoute: () => Route$23
+	getParentRoute: () => Route$25
 });
 var AuthenticatedRouteRouteChildren = { AuthenticatedAdminRoute };
 var rootRouteChildren = {
 	IndexRoute,
 	AuthenticatedRouteRoute: AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren),
 	AuthRoute,
+	InstalledRoute,
 	MeRoute,
 	ApiAdminClearDownloadsRoute,
 	ApiAdminClearHistoryRoute,
@@ -1744,10 +1877,11 @@ var rootRouteChildren = {
 	ApiMeLogoutRoute,
 	ApiMeStatsRoute,
 	ApiPublicDownloadRoute,
+	ApiPublicInstalledRoute,
 	ApiPublicMarkExtractedRoute,
 	ApiPublicVisitRoute
 };
-var routeTree = Route$23._addFileChildren(rootRouteChildren)._addFileTypes();
+var routeTree = Route$25._addFileChildren(rootRouteChildren)._addFileTypes();
 var getRouter = () => {
 	return createRouter({
 		routeTree,

@@ -315,6 +315,7 @@ function Admin() {
                     <th className="px-2 py-2">Device</th>
                     <th className="px-2 py-2">Browser</th>
                     <th className="px-2 py-2">OS</th>
+                    <th className="px-2 py-2">Install</th>
                     <th className="px-2 py-2">Status</th>
                     <th className="px-2 py-2">Last active</th>
                     <th className="px-2 py-2">First visit</th>
@@ -330,6 +331,11 @@ function Admin() {
                       <td className="px-2 py-2">{d.device ?? '—'}</td>
                       <td className="px-2 py-2">{d.browser ?? '—'}</td>
                       <td className="px-2 py-2">{d.os ?? '—'}</td>
+                      <td className="px-2 py-2">
+                        <span className={`rounded-full px-2 py-1 text-xs font-semibold ${d.installed ? "bg-blue-500/15 text-blue-300" : "bg-red-500/15 text-red-300"}`}>
+                          {d.installed ? "installed" : "non"}
+                        </span>
+                      </td>
                       <td className="px-2 py-2">
                         <span className={`rounded-full px-2 py-1 text-xs ${d.status === "online" ? "bg-emerald-500/15 text-emerald-300" : "bg-white/5 text-white/50"}`}>
                           {d.status}
@@ -411,6 +417,7 @@ function Admin() {
                     <th className="px-2 py-2">Session</th>
                     <th className="px-2 py-2">File</th>
                     <th className="px-2 py-2">Status</th>
+                    <th className="px-2 py-2">Install</th>
                     <th className="px-2 py-2">Completed</th>
                   </tr>
                 </thead>
@@ -422,6 +429,11 @@ function Admin() {
                         <td className="px-2 py-2">{d.session_id ? d.session_id.slice(0, 8) : '—'}</td>
                         <td className="px-2 py-2">{d.file_name}</td>
                         <td className="px-2 py-2">{d.status}</td>
+                        <td className="px-2 py-2">
+                          <span className={`rounded-full px-2 py-1 text-xs font-semibold ${d.installed ? "bg-blue-500/15 text-blue-300" : "bg-red-500/15 text-red-300"}`}>
+                            {d.installed ? "installed" : "non"}
+                          </span>
+                        </td>
                         <td className="px-2 py-2">{d.completed ? 'Yes' : 'No'}</td>
                         <td className="px-2 py-2">
                           <div className="flex gap-2">
