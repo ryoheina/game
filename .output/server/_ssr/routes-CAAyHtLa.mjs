@@ -2,13 +2,10 @@ import { a as __toESM } from "../_runtime.mjs";
 import { i as AnimatePresence, n as useScroll, r as motion, t as useTransform } from "../_libs/framer-motion.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow, r as Particles, t as Fog } from "./fx-CW4x6DdP.mjs";
-import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-import { i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-9EjmF9OT.mjs";
-import { t as requireSupabaseAuth } from "./auth-middleware-DZO41X7i.mjs";
-import { n as objectType, r as stringType, t as booleanType } from "../_libs/zod.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-C2fQHW6e.mjs";
+import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
+import { r as submitContact, t as ensureVisitorSession } from "./visitor-session-DF57_1GO.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-CrY2YV_9.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-CAAyHtLa.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -1227,63 +1224,12 @@ function Footer() {
 		})
 	});
 }
-var createSsrRpc = (functionId) => {
-	const url = "/_serverFn/" + functionId;
-	const serverFnMeta = { id: functionId };
-	const fn = async (...args) => {
-		return (await getServerFnById(functionId, { origin: "server" }))(...args);
-	};
-	return Object.assign(fn, {
-		url,
-		serverFnMeta,
-		[TSS_SERVER_FUNCTION]: true
-	});
-};
-var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType({
-	sessionId: stringType().min(8).max(64),
-	path: stringType().max(500),
-	heartbeat: booleanType().optional()
-}).parse(d)).handler(createSsrRpc("5e7bc6b7985a4c5567ec29c826f97eeb7805c320edefacaaf2df3b19b86050da"));
-var submitContact = createServerFn({ method: "POST" }).validator((d) => objectType({
-	name: stringType().trim().min(1).max(120),
-	email: stringType().trim().email().max(200),
-	message: stringType().trim().min(1).max(5e3)
-}).parse(d)).handler(createSsrRpc("8043f9f461a2e106a6aa3ba0474234bd1598036ef6e2dc8a67dea4ff61dab955"));
-createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(createSsrRpc("6d92e280c68cd3c11aac298fc57f9269dca8d85ae15c9747e0c8a8d46051fccf"));
-createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).handler(createSsrRpc("abd124c618fd11979349d78fa7b5705a4311550c5a02f311710e53685f427a7f"));
-createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(createSsrRpc("5058339e4274bf852ada72847e61fa713d72a2a54e6e0f6d25efda66bc028b9f"));
-function ensureSession() {
-	if (typeof window === "undefined") return "";
-	const k = "loe_sid";
-	let sid = localStorage.getItem(k);
-	if (!sid) {
-		sid = crypto.randomUUID();
-		localStorage.setItem(k, sid);
-	}
-	return sid;
-}
 function Home() {
 	useNavigate();
 	const [openChar, setOpenChar] = (0, import_react.useState)(null);
 	const [downloadStatus, setDownloadStatus] = (0, import_react.useState)("idle");
 	const [showIntro, setShowIntro] = (0, import_react.useState)(true);
 	const [siteImpact, setSiteImpact] = (0, import_react.useState)(false);
-	(0, import_react.useEffect)(() => {
-		const sid = ensureSession();
-		if (!sid) return;
-		trackVisit({ data: {
-			sessionId: sid,
-			path: window.location.pathname
-		} }).catch(() => {});
-		const heartbeat = setInterval(() => {
-			trackVisit({ data: {
-				sessionId: sid,
-				path: window.location.pathname,
-				heartbeat: true
-			} }).catch(() => {});
-		}, 6e4);
-		return () => clearInterval(heartbeat);
-	}, []);
 	(0, import_react.useEffect)(() => {
 		const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 		const timeout = window.setTimeout(() => {
@@ -1306,7 +1252,7 @@ function Home() {
 	}, []);
 	const handleDownload = (0, import_react.useCallback)(async () => {
 		setDownloadStatus("loading");
-		const sid = ensureSession();
+		const sid = ensureVisitorSession();
 		const fileName = "LegendsofEternity.exe";
 		const url = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${encodeURIComponent(fileName)}`;
 		try {

@@ -7,7 +7,8 @@ import {
   Hero, Story, Characters, CharacterModal, World, Battle,
   BattleToFeaturesBreak, Features, Technology, Download, Contact, FinalVideo, Footer,
 } from "@/components/sections";
-import { submitContact, trackVisit } from "@/lib/analytics.functions";
+import { submitContact } from "@/lib/analytics.functions";
+import { ensureVisitorSession } from "@/lib/visitor-session";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,33 +23,12 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-function ensureSession() {
-  if (typeof window === "undefined") return "";
-  const k = "loe_sid";
-  let sid = localStorage.getItem(k);
-  if (!sid) {
-    sid = crypto.randomUUID();
-    localStorage.setItem(k, sid);
-  }
-  return sid;
-}
-
 function Home() {
   const navigate = useNavigate();
   const [openChar, setOpenChar] = useState<Parameters<typeof CharacterModal>[0]["c"]>(null);
   const [downloadStatus, setDownloadStatus] = useState<"idle" | "loading" | "done">("idle");
   const [showIntro, setShowIntro] = useState(true);
   const [siteImpact, setSiteImpact] = useState(false);
-
-  useEffect(() => {
-    const sid = ensureSession();
-    if (!sid) return;
-    trackVisit({ data: { sessionId: sid, path: window.location.pathname } }).catch(() => {});
-    const heartbeat = setInterval(() => {
-      trackVisit({ data: { sessionId: sid, path: window.location.pathname, heartbeat: true } }).catch(() => {});
-    }, 60_000);
-    return () => clearInterval(heartbeat);
-  }, []);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -73,7 +53,7 @@ function Home() {
 
   const handleDownload = useCallback(async () => {
     setDownloadStatus("loading");
-    const sid = ensureSession();
+    const sid = ensureVisitorSession();
     const fileName = "LegendsofEternity.exe";
     const url = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${encodeURIComponent(fileName)}`;
 

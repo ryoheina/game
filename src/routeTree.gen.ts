@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ApiPublicVisitRouteImport } from './routes/api/public/visit'
 import { Route as ApiPublicMarkExtractedRouteImport } from './routes/api/public/mark-extracted'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
 import { Route as ApiMeStatsRouteImport } from './routes/api/me/stats'
@@ -55,6 +56,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiPublicVisitRoute = ApiPublicVisitRouteImport.update({
+  id: '/api/public/visit',
+  path: '/api/public/visit',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicMarkExtractedRoute = ApiPublicMarkExtractedRouteImport.update({
   id: '/api/public/mark-extracted',
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/api/me/stats': typeof ApiMeStatsRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/mark-extracted': typeof ApiPublicMarkExtractedRoute
+  '/api/public/visit': typeof ApiPublicVisitRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -190,6 +197,7 @@ export interface FileRoutesByTo {
   '/api/me/stats': typeof ApiMeStatsRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/mark-extracted': typeof ApiPublicMarkExtractedRoute
+  '/api/public/visit': typeof ApiPublicVisitRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/api/me/stats': typeof ApiMeStatsRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/mark-extracted': typeof ApiPublicMarkExtractedRoute
+  '/api/public/visit': typeof ApiPublicVisitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/api/me/stats'
     | '/api/public/download'
     | '/api/public/mark-extracted'
+    | '/api/public/visit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/api/me/stats'
     | '/api/public/download'
     | '/api/public/mark-extracted'
+    | '/api/public/visit'
   id:
     | '__root__'
     | '/'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/api/me/stats'
     | '/api/public/download'
     | '/api/public/mark-extracted'
+    | '/api/public/visit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -311,6 +323,7 @@ export interface RootRouteChildren {
   ApiMeStatsRoute: typeof ApiMeStatsRoute
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
   ApiPublicMarkExtractedRoute: typeof ApiPublicMarkExtractedRoute
+  ApiPublicVisitRoute: typeof ApiPublicVisitRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -349,6 +362,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/visit': {
+      id: '/api/public/visit'
+      path: '/api/public/visit'
+      fullPath: '/api/public/visit'
+      preLoaderRoute: typeof ApiPublicVisitRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/mark-extracted': {
       id: '/api/public/mark-extracted'
@@ -505,6 +525,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMeStatsRoute: ApiMeStatsRoute,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
   ApiPublicMarkExtractedRoute: ApiPublicMarkExtractedRoute,
+  ApiPublicVisitRoute: ApiPublicVisitRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

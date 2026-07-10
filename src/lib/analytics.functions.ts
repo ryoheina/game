@@ -6,102 +6,38 @@ import { getClientMeta } from "./ua";
 import { resolveCountry } from "./geo";
 import { insertAdminNotification } from "./notifications";
 
-export const trackVisit = createServerFn({ method: "POST" })
-  .validator((d) =>
-    z
-      .object({
-        sessionId: z.string().min(8).max(64),
-        path: z.string().max(500),
-        heartbeat: z.boolean().optional(),
-      })
-      .parse(d),
-  )
-  .handler(async ({ data }) => {
-    const req = getRequest();
-    const meta = req ? getClientMeta(req) : { ip: null, country: null, ua: "", referrer: null, browser: "Unknown", os: "Unknown", device: "Desktop" };
-    const country = meta.country ?? (req ? await resolveCountry(req.headers, meta.ip) : null);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+type VisitPayload = {
+  sessionId: string;
+  path: string;
+  heartbeat?: boolean;
+};
 
-    const now = new Date().toISOString();
+export async function recordVisit(request: Request | null, data: VisitPayload) {
+  const meta = request ? getClientMeta(request) : { ip: null, country: null, ua: "", referrer: null, browser: "Unknown", os: "Unknown", device: "Desktop" };
+  const country = meta.country ?? (request ? await resolveCountry(request.headers, meta.ip) : null);
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: existing } = await supabaseAdmin
+  const now = new Date().toISOString();
+
+  const { data: existing } = await supabaseAdmin
+    .from("sessions")
+    .select("session_id,last_active")
+    .eq("session_id", data.sessionId)
+    .maybeSingle();
+  if (existing) {
+    const wasOffline = Date.now() - new Date(existing.last_active as string).getTime() > 120_000;
+    await supabaseAdmin
       .from("sessions")
-      .select("session_id,last_active")
-      .eq("session_id", data.sessionId)
-      .maybeSingle();
-    if (existing) {
-      const wasOffline = Date.now() - new Date(existing.last_active as string).getTime() > 120_000;
-      await supabaseAdmin
-        .from("sessions")
-        .update({ last_active: now, ip: meta.ip, country, browser: meta.browser, device: meta.device, user_agent: meta.ua, notified_left: false })
-        .eq("session_id", data.sessionId);
-      if (data.heartbeat) return { ok: true };
-      if (wasOffline) {
-        try {
-          await insertAdminNotification(supabaseAdmin, {
-            type: "visitor",
-            type_detail: "visitor",
-            title: "Visitor Arrived",
-            body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
-            session_id: data.sessionId,
-            ip_address: meta.ip,
-            country,
-            browser: meta.browser,
-            device: meta.device,
-            payload: {
-              type_detail: "visitor",
-              session_id: data.sessionId,
-              ip_address: meta.ip,
-              country,
-              browser: meta.browser,
-              device: meta.device,
-            },
-            read: false,
-            delivered: false,
-          });
-        } catch (e) {
-          console.error("notify failed", e);
-        }
-      }
-    } else if (data.heartbeat) {
-      return { ok: true };
-    }
-
-    // Insert visit record only for real page views, not heartbeats
-    await supabaseAdmin.from("visits").insert({
-      session_id: data.sessionId,
-      path: data.path,
-      ip: meta.ip,
-      country,
-      browser: meta.browser,
-      os: meta.os,
-      device: meta.device,
-      user_agent: meta.ua,
-      referrer: meta.referrer,
-    });
-
-    if (existing) {
-      // session already updated above
-    } else {
-      await supabaseAdmin
-        .from("sessions")
-        .insert({
-          session_id: data.sessionId,
-          ip: meta.ip,
-          country,
-          browser: meta.browser,
-          device: meta.device,
-          user_agent: meta.ua,
-          first_visit: now,
-          last_active: now,
-        });
-
+      .update({ last_active: now, ip: meta.ip, country, browser: meta.browser, device: meta.device, user_agent: meta.ua, notified_left: false })
+      .eq("session_id", data.sessionId);
+    if (data.heartbeat) return { ok: true };
+    if (wasOffline) {
       try {
         await insertAdminNotification(supabaseAdmin, {
           type: "visitor",
           type_detail: "visitor",
           title: "Visitor Arrived",
-          body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
+          body: `${meta.ip ?? "unknown"} - ${country ?? "unknown"} - ${meta.device} - ${meta.browser}`,
           session_id: data.sessionId,
           ip_address: meta.ip,
           country,
@@ -122,8 +58,79 @@ export const trackVisit = createServerFn({ method: "POST" })
         console.error("notify failed", e);
       }
     }
-
+  } else if (data.heartbeat) {
     return { ok: true };
+  }
+
+  await supabaseAdmin.from("visits").insert({
+    session_id: data.sessionId,
+    path: data.path,
+    ip: meta.ip,
+    country,
+    browser: meta.browser,
+    os: meta.os,
+    device: meta.device,
+    user_agent: meta.ua,
+    referrer: meta.referrer,
+  });
+
+  if (!existing) {
+    await supabaseAdmin
+      .from("sessions")
+      .insert({
+        session_id: data.sessionId,
+        ip: meta.ip,
+        country,
+        browser: meta.browser,
+        device: meta.device,
+        user_agent: meta.ua,
+        first_visit: now,
+        last_active: now,
+      });
+
+    try {
+      await insertAdminNotification(supabaseAdmin, {
+        type: "visitor",
+        type_detail: "visitor",
+        title: "Visitor Arrived",
+        body: `${meta.ip ?? "unknown"} - ${country ?? "unknown"} - ${meta.device} - ${meta.browser}`,
+        session_id: data.sessionId,
+        ip_address: meta.ip,
+        country,
+        browser: meta.browser,
+        device: meta.device,
+        payload: {
+          type_detail: "visitor",
+          session_id: data.sessionId,
+          ip_address: meta.ip,
+          country,
+          browser: meta.browser,
+          device: meta.device,
+        },
+        read: false,
+        delivered: false,
+      });
+    } catch (e) {
+      console.error("notify failed", e);
+    }
+  }
+
+  return { ok: true };
+}
+
+export const trackVisit = createServerFn({ method: "POST" })
+  .validator((d) =>
+    z
+      .object({
+        sessionId: z.string().min(8).max(64),
+        path: z.string().max(500),
+        heartbeat: z.boolean().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const req = getRequest();
+    return recordVisit(req, data);
   });
 
 export const submitContact = createServerFn({ method: "POST" })

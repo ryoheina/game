@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -11,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { useVisitorTracking } from "../hooks/use-visitor-tracking";
 
 function NotFoundComponent() {
   return (
@@ -110,6 +112,28 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+;(function(){
+  try {
+    var key = "loe_sid";
+    var sid = localStorage.getItem(key);
+    if (!sid) {
+      sid = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + "-" + Math.random().toString(16).slice(2);
+      localStorage.setItem(key, sid);
+    }
+    fetch("/api/public/visit", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ sessionId: sid, path: location.pathname + location.search }),
+      credentials: "same-origin",
+      keepalive: true
+    }).catch(function(){});
+  } catch (e) {}
+})();`,
+          }}
+        />
         {children}
         <Scripts />
       </body>
@@ -119,6 +143,8 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+  useVisitorTracking(location.pathname);
 
   useEffect(() => {
     // Smooth scrolling with Lenis - only on client side

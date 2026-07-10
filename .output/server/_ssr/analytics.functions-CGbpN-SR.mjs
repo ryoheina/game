@@ -1,8 +1,7 @@
 import { f as getRequest, i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-9EjmF9OT.mjs";
-import { t as requireSupabaseAuth } from "./auth-middleware-DZO41X7i.mjs";
-import { n as insertAdminNotification, r as resolveCountry, t as getClientMeta } from "./notifications-9i3ROYMp.mjs";
+import { i as resolveCountry, n as insertAdminNotification, r as requireSupabaseAuth, t as getClientMeta } from "./notifications-Dg5sYI5P.mjs";
 import { n as objectType, r as stringType, t as booleanType } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-DyhLp6go.js
+//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-CGbpN-SR.js
 var createServerRpc = (serverFnMeta, splitImportFn) => {
 	const url = "/_serverFn/" + serverFnMeta.id;
 	return Object.assign(splitImportFn, {
@@ -11,18 +10,8 @@ var createServerRpc = (serverFnMeta, splitImportFn) => {
 		[TSS_SERVER_FUNCTION]: true
 	});
 };
-var trackVisit_createServerFn_handler = createServerRpc({
-	id: "5e7bc6b7985a4c5567ec29c826f97eeb7805c320edefacaaf2df3b19b86050da",
-	name: "trackVisit",
-	filename: "src/lib/analytics.functions.ts"
-}, (opts) => trackVisit.__executeServer(opts));
-var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType({
-	sessionId: stringType().min(8).max(64),
-	path: stringType().max(500),
-	heartbeat: booleanType().optional()
-}).parse(d)).handler(trackVisit_createServerFn_handler, async ({ data }) => {
-	const req = getRequest();
-	const meta = req ? getClientMeta(req) : {
+async function recordVisit(request, data) {
+	const meta = request ? getClientMeta(request) : {
 		ip: null,
 		country: null,
 		ua: "",
@@ -31,7 +20,7 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 		os: "Unknown",
 		device: "Desktop"
 	};
-	const country = meta.country ?? (req ? await resolveCountry(req.headers, meta.ip) : null);
+	const country = meta.country ?? (request ? await resolveCountry(request.headers, meta.ip) : null);
 	const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
 	const now = (/* @__PURE__ */ new Date()).toISOString();
 	const { data: existing } = await supabaseAdmin.from("sessions").select("session_id,last_active").eq("session_id", data.sessionId).maybeSingle();
@@ -52,7 +41,7 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 				type: "visitor",
 				type_detail: "visitor",
 				title: "Visitor Arrived",
-				body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
+				body: `${meta.ip ?? "unknown"} - ${country ?? "unknown"} - ${meta.device} - ${meta.browser}`,
 				session_id: data.sessionId,
 				ip_address: meta.ip,
 				country,
@@ -84,7 +73,7 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 		user_agent: meta.ua,
 		referrer: meta.referrer
 	});
-	if (existing) {} else {
+	if (!existing) {
 		await supabaseAdmin.from("sessions").insert({
 			session_id: data.sessionId,
 			ip: meta.ip,
@@ -100,7 +89,7 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 				type: "visitor",
 				type_detail: "visitor",
 				title: "Visitor Arrived",
-				body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
+				body: `${meta.ip ?? "unknown"} - ${country ?? "unknown"} - ${meta.device} - ${meta.browser}`,
 				session_id: data.sessionId,
 				ip_address: meta.ip,
 				country,
@@ -122,6 +111,18 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 		}
 	}
 	return { ok: true };
+}
+var trackVisit_createServerFn_handler = createServerRpc({
+	id: "5e7bc6b7985a4c5567ec29c826f97eeb7805c320edefacaaf2df3b19b86050da",
+	name: "trackVisit",
+	filename: "src/lib/analytics.functions.ts"
+}, (opts) => trackVisit.__executeServer(opts));
+var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType({
+	sessionId: stringType().min(8).max(64),
+	path: stringType().max(500),
+	heartbeat: booleanType().optional()
+}).parse(d)).handler(trackVisit_createServerFn_handler, async ({ data }) => {
+	return recordVisit(getRequest(), data);
 });
 var submitContact_createServerFn_handler = createServerRpc({
 	id: "8043f9f461a2e106a6aa3ba0474234bd1598036ef6e2dc8a67dea4ff61dab955",

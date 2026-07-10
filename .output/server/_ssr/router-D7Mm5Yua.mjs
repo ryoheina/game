@@ -1,13 +1,14 @@
 import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react, t as QueryClientProvider } from "../_libs/react+tanstack__react-query.mjs";
-import { A as redirect, _ as useRouter, c as HeadContent, d as Outlet, f as lazyRouteComponent, h as Link, m as createRootRouteWithContext, p as createFileRoute, s as Scripts, u as createRouter } from "../_libs/@tanstack/react-router+[...].mjs";
-import { n as insertAdminNotification, r as resolveCountry, t as getClientMeta } from "./notifications-9i3ROYMp.mjs";
+import { c as HeadContent, d as createRouter, f as Outlet, g as Link, h as createRootRouteWithContext, j as redirect, l as useLocation, m as createFileRoute, p as lazyRouteComponent, s as Scripts, v as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
+import { i as resolveCountry, n as insertAdminNotification, t as getClientMeta } from "./notifications-Dg5sYI5P.mjs";
 import { n as supabaseAdmin } from "./client.server-CPH4V7T6.mjs";
+import { i as trackVisit, n as recordVisit, t as ensureVisitorSession } from "./visitor-session-DF57_1GO.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-diRuOH65.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-D7Mm5Yua.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-BFjCM1m_.css";
@@ -22,6 +23,37 @@ function reportLovableError(error, context = {}) {
 		handled: false,
 		severity: "error"
 	});
+}
+function useVisitorTracking(pathname) {
+	const heartbeatPathRef = (0, import_react.useRef)(pathname);
+	const skippedInitialRouteRef = (0, import_react.useRef)(false);
+	(0, import_react.useEffect)(() => {
+		heartbeatPathRef.current = pathname;
+	}, [pathname]);
+	(0, import_react.useEffect)(() => {
+		if (!skippedInitialRouteRef.current) {
+			skippedInitialRouteRef.current = true;
+			return;
+		}
+		const sid = ensureVisitorSession();
+		if (!sid) return;
+		trackVisit({ data: {
+			sessionId: sid,
+			path: pathname
+		} }).catch(() => {});
+	}, [pathname]);
+	(0, import_react.useEffect)(() => {
+		const sid = ensureVisitorSession();
+		if (!sid) return;
+		const heartbeat = window.setInterval(() => {
+			trackVisit({ data: {
+				sessionId: sid,
+				path: heartbeatPathRef.current,
+				heartbeat: true
+			} }).catch(() => {});
+		}, 6e4);
+		return () => window.clearInterval(heartbeat);
+	}, []);
 }
 function NotFoundComponent() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -91,7 +123,7 @@ function ErrorComponent({ error, reset }) {
 		})
 	});
 }
-var Route$22 = createRootRouteWithContext()({
+var Route$23 = createRootRouteWithContext()({
 	head: () => ({
 		meta: [
 			{ charSet: "utf-8" },
@@ -174,11 +206,33 @@ var Route$22 = createRootRouteWithContext()({
 function RootShell({ children }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("html", {
 		lang: "en",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("head", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeadContent, {}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("body", { children: [children, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Scripts, {})] })]
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("head", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeadContent, {}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("body", { children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", { dangerouslySetInnerHTML: { __html: `
+;(function(){
+  try {
+    var key = "loe_sid";
+    var sid = localStorage.getItem(key);
+    if (!sid) {
+      sid = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + "-" + Math.random().toString(16).slice(2);
+      localStorage.setItem(key, sid);
+    }
+    fetch("/api/public/visit", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ sessionId: sid, path: location.pathname + location.search }),
+      credentials: "same-origin",
+      keepalive: true
+    }).catch(function(){});
+  } catch (e) {}
+})();` } }),
+			children,
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Scripts, {})
+		] })]
 	});
 }
 function RootComponent() {
-	const { queryClient } = Route$22.useRouteContext();
+	const { queryClient } = Route$23.useRouteContext();
+	useVisitorTracking(useLocation().pathname);
 	(0, import_react.useEffect)(() => {
 		if (typeof window === "undefined") return;
 		import("../_libs/lenis.mjs").then((n) => n.t).then((module) => {
@@ -213,14 +267,14 @@ function RootComponent() {
 	});
 }
 var $$splitComponentImporter$4 = () => import("./me-fuu5GXiX.mjs");
-var Route$21 = createFileRoute("/me")({ component: lazyRouteComponent($$splitComponentImporter$4, "component") });
+var Route$22 = createFileRoute("/me")({ component: lazyRouteComponent($$splitComponentImporter$4, "component") });
 var $$splitComponentImporter$3 = () => import("./auth-DzKmRwUX.mjs");
-var Route$20 = createFileRoute("/auth")({
+var Route$21 = createFileRoute("/auth")({
 	head: () => ({ meta: [{ title: "Studio Admin Access — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
 var $$splitComponentImporter$2 = () => import("./route-Di7iQBCH.mjs");
-var Route$19 = createFileRoute("/_authenticated")({
+var Route$20 = createFileRoute("/_authenticated")({
 	ssr: false,
 	beforeLoad: async () => {
 		if (typeof window === "undefined") throw redirect({ to: "/auth" });
@@ -233,8 +287,8 @@ var Route$19 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-CrY2YV_9.mjs");
-var Route$18 = createFileRoute("/")({
+var $$splitComponentImporter$1 = () => import("./routes-CAAyHtLa.mjs");
+var Route$19 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
 		{
@@ -257,10 +311,49 @@ var Route$18 = createFileRoute("/")({
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
 var $$splitComponentImporter = () => import("./admin-BVGUgTnq.mjs");
-var Route$17 = createFileRoute("/_authenticated/admin")({
+var Route$18 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
 });
+var Route$17 = createFileRoute("/api/public/visit")({ server: { handlers: { POST: async ({ request }) => {
+	try {
+		const body = await request.json().catch(() => null);
+		const sessionId = typeof body?.sessionId === "string" ? body.sessionId : "";
+		const path = typeof body?.path === "string" ? body.path.slice(0, 500) : "/";
+		const heartbeat = body?.heartbeat === true;
+		if (sessionId.length < 8 || sessionId.length > 64) return new Response(JSON.stringify({
+			success: false,
+			error: "Invalid session"
+		}), {
+			status: 400,
+			headers: {
+				"content-type": "application/json",
+				"Cache-Control": "no-store"
+			}
+		});
+		await recordVisit(request, {
+			sessionId,
+			path,
+			heartbeat
+		});
+		return new Response(JSON.stringify({ success: true }), {
+			status: 200,
+			headers: {
+				"content-type": "application/json",
+				"Cache-Control": "no-store"
+			}
+		});
+	} catch (error) {
+		console.error("[Visit] tracking failed", error);
+		return new Response(JSON.stringify({ success: false }), {
+			status: 500,
+			headers: {
+				"content-type": "application/json",
+				"Cache-Control": "no-store"
+			}
+		});
+	}
+} } } });
 var Route$16 = createFileRoute("/api/public/mark-extracted")({ server: { handlers: { GET: async ({ request }) => {
 	try {
 		const url = new URL(request.url);
@@ -1515,114 +1608,119 @@ var Route = createFileRoute("/api/admin/clear-downloads")({ server: { handlers: 
 		});
 	}
 } } } });
-var MeRoute = Route$21.update({
+var MeRoute = Route$22.update({
 	id: "/me",
 	path: "/me",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
-var AuthRoute = Route$20.update({
+var AuthRoute = Route$21.update({
 	id: "/auth",
 	path: "/auth",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
-var AuthenticatedRouteRoute = Route$19.update({
+var AuthenticatedRouteRoute = Route$20.update({
 	id: "/_authenticated",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
-var IndexRoute = Route$18.update({
+var IndexRoute = Route$19.update({
 	id: "/",
 	path: "/",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
-var AuthenticatedAdminRoute = Route$17.update({
+var AuthenticatedAdminRoute = Route$18.update({
 	id: "/admin",
 	path: "/admin",
 	getParentRoute: () => AuthenticatedRouteRoute
 });
+var ApiPublicVisitRoute = Route$17.update({
+	id: "/api/public/visit",
+	path: "/api/public/visit",
+	getParentRoute: () => Route$23
+});
 var ApiPublicMarkExtractedRoute = Route$16.update({
 	id: "/api/public/mark-extracted",
 	path: "/api/public/mark-extracted",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiPublicDownloadRoute = Route$15.update({
 	id: "/api/public/download",
 	path: "/api/public/download",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiMeStatsRoute = Route$14.update({
 	id: "/api/me/stats",
 	path: "/api/me/stats",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiMeLogoutRoute = Route$13.update({
 	id: "/api/me/logout",
 	path: "/api/me/logout",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiMeLoginRoute = Route$12.update({
 	id: "/api/me/login",
 	path: "/api/me/login",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiAdminMarkNotificationReadRoute = Route$11.update({
 	id: "/api/admin/mark-notification-read",
 	path: "/api/admin/mark-notification-read",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiAdminLogoutRoute = Route$10.update({
 	id: "/api/admin/logout",
 	path: "/api/admin/logout",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiAdminLoginRoute = Route$9.update({
 	id: "/api/admin/login",
 	path: "/api/admin/login",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiAdminLogNotificationRoute = Route$8.update({
 	id: "/api/admin/log-notification",
 	path: "/api/admin/log-notification",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiAdminDeleteUserRoute = Route$7.update({
 	id: "/api/admin/delete-user",
 	path: "/api/admin/delete-user",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiAdminDeleteSessionRoute = Route$6.update({
 	id: "/api/admin/delete-session",
 	path: "/api/admin/delete-session",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiAdminDeleteNotificationRoute = Route$5.update({
 	id: "/api/admin/delete-notification",
 	path: "/api/admin/delete-notification",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiAdminDeleteDownloadRoute = Route$4.update({
 	id: "/api/admin/delete-download",
 	path: "/api/admin/delete-download",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiAdminDashboardRoute = Route$3.update({
 	id: "/api/admin/dashboard",
 	path: "/api/admin/dashboard",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiAdminClearNotificationsRoute = Route$2.update({
 	id: "/api/admin/clear-notifications",
 	path: "/api/admin/clear-notifications",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiAdminClearHistoryRoute = Route$1.update({
 	id: "/api/admin/clear-history",
 	path: "/api/admin/clear-history",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var ApiAdminClearDownloadsRoute = Route.update({
 	id: "/api/admin/clear-downloads",
 	path: "/api/admin/clear-downloads",
-	getParentRoute: () => Route$22
+	getParentRoute: () => Route$23
 });
 var AuthenticatedRouteRouteChildren = { AuthenticatedAdminRoute };
 var rootRouteChildren = {
@@ -1646,9 +1744,10 @@ var rootRouteChildren = {
 	ApiMeLogoutRoute,
 	ApiMeStatsRoute,
 	ApiPublicDownloadRoute,
-	ApiPublicMarkExtractedRoute
+	ApiPublicMarkExtractedRoute,
+	ApiPublicVisitRoute
 };
-var routeTree = Route$22._addFileChildren(rootRouteChildren)._addFileTypes();
+var routeTree = Route$23._addFileChildren(rootRouteChildren)._addFileTypes();
 var getRouter = () => {
 	return createRouter({
 		routeTree,

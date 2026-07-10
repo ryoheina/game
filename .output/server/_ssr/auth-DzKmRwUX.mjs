@@ -1,7 +1,7 @@
 import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow, r as Particles } from "./fx-CW4x6DdP.mjs";
-import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
+import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 //#region node_modules/.nitro/vite/services/ssr/assets/auth-DzKmRwUX.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
