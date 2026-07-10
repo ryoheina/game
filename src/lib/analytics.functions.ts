@@ -25,7 +25,7 @@ export async function recordVisit(request: Request | null, data: VisitPayload) {
     .eq("session_id", data.sessionId)
     .maybeSingle();
   if (existing) {
-    const wasOffline = Date.now() - new Date(existing.last_active as string).getTime() > 120_000;
+    const wasOffline = Date.now() - new Date(existing.last_active as string).getTime() > 300_000;
     await supabaseAdmin
       .from("sessions")
       .update({ last_active: now, ip: meta.ip, country, browser: meta.browser, device: meta.device, user_agent: meta.ua, notified_left: false })

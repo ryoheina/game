@@ -1,8 +1,8 @@
 import { i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-9EjmF9OT.mjs";
 import { i as resolveCountry, n as insertAdminNotification, r as requireSupabaseAuth, t as getClientMeta } from "./notifications-Dg5sYI5P.mjs";
 import { n as objectType, r as stringType, t as booleanType } from "../_libs/zod.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-CwlUqXDq.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-DowzlkrV.js
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-DpYTHzca.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-BfT3GJDi.js
 var createSsrRpc = (functionId) => {
 	const url = "/_serverFn/" + functionId;
 	const serverFnMeta = { id: functionId };
@@ -30,7 +30,7 @@ async function recordVisit(request, data) {
 	const now = (/* @__PURE__ */ new Date()).toISOString();
 	const { data: existing } = await supabaseAdmin.from("sessions").select("session_id,last_active").eq("session_id", data.sessionId).maybeSingle();
 	if (existing) {
-		const wasOffline = Date.now() - new Date(existing.last_active).getTime() > 12e4;
+		const wasOffline = Date.now() - new Date(existing.last_active).getTime() > 3e5;
 		await supabaseAdmin.from("sessions").update({
 			last_active: now,
 			ip: meta.ip,
@@ -117,7 +117,7 @@ async function recordVisit(request, data) {
 	}
 	return { ok: true };
 }
-var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType({
+createServerFn({ method: "POST" }).validator((d) => objectType({
 	sessionId: stringType().min(8).max(64),
 	path: stringType().max(500),
 	heartbeat: booleanType().optional()
@@ -131,4 +131,4 @@ createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(crea
 createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).handler(createSsrRpc("abd124c618fd11979349d78fa7b5705a4311550c5a02f311710e53685f427a7f"));
 createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(createSsrRpc("5058339e4274bf852ada72847e61fa713d72a2a54e6e0f6d25efda66bc028b9f"));
 //#endregion
-export { submitContact as n, trackVisit as r, recordVisit as t };
+export { submitContact as n, recordVisit as t };

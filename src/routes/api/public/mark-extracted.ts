@@ -3,6 +3,32 @@ import { clearInstallTokenCookie, getInstallTokenFromRequest } from "@/lib/insta
 import { getClientMeta } from "@/lib/ua";
 import { insertAdminNotification } from "@/lib/notifications";
 
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function isSchemaMismatch(error: any) {
+  return /install_token|installed_at|schema cache|column .* does not exist|Could not find .* column/i.test(error?.message || "");
+}
+
+async function findDownloadByInstallToken(supabaseAdmin: any, token: string) {
+  const byInstallToken = await supabaseAdmin
+    .from("downloads")
+    .select("id,session_id,file_name,install_token")
+    .eq("install_token", token)
+    .maybeSingle();
+
+  if (!byInstallToken.error && byInstallToken.data) return { data: byInstallToken.data, error: null };
+  if (byInstallToken.error && !isSchemaMismatch(byInstallToken.error)) return byInstallToken;
+
+  if (!isUuid(token)) return { data: null, error: byInstallToken.error || null };
+  return supabaseAdmin
+    .from("downloads")
+    .select("id,session_id,file_name")
+    .eq("id", token)
+    .maybeSingle();
+}
+
 export const Route = createFileRoute("/api/public/mark-extracted")({
   server: {
     handlers: {
@@ -18,21 +44,23 @@ export const Route = createFileRoute("/api/public/mark-extracted")({
 
           const meta = getClientMeta(request);
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { data: download, error: downloadError } = await supabaseAdmin
-            .from("downloads")
-            .select("id,session_id,file_name,install_token")
-            .eq("install_token", installToken)
-            .maybeSingle();
+          const { data: download, error: downloadError } = await findDownloadByInstallToken(supabaseAdmin, installToken);
 
           if (downloadError) throw downloadError;
           if (!download) return new Response("", { status: 403, headers: { "Cache-Control": "no-store" } });
 
           const fileName = download.file_name || requestedFileName || "LegendsofEternity.exe";
           const completedAt = new Date().toISOString();
-          const updateResult = await supabaseAdmin
+          let updateResult = await supabaseAdmin
             .from("downloads")
             .update({ extracted: true, completed: true, completed_at: completedAt, installed_at: completedAt })
             .eq("id", download.id);
+          if (updateResult.error && isSchemaMismatch(updateResult.error)) {
+            updateResult = await supabaseAdmin
+              .from("downloads")
+              .update({ extracted: true, completed: true, completed_at: completedAt })
+              .eq("id", download.id);
+          }
           if (updateResult.error) throw updateResult.error;
 
           await supabaseAdmin.from("extractions").insert({

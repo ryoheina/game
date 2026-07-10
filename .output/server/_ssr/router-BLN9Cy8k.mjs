@@ -4,15 +4,15 @@ import { c as HeadContent, d as createRouter, f as Outlet, g as Link, h as creat
 import { i as resolveCountry, n as insertAdminNotification, t as getClientMeta } from "./notifications-Dg5sYI5P.mjs";
 import { n as supabaseAdmin } from "./client.server-CPH4V7T6.mjs";
 import { t as ensureVisitorSession } from "./visitor-session-9sEIwEFU.mjs";
-import { r as trackVisit, t as recordVisit } from "./analytics.functions-DowzlkrV.mjs";
+import { t as recordVisit } from "./analytics.functions-BfT3GJDi.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-DrHzhkhx.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-BLN9Cy8k.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-B1HouSQd.css";
+var styles_default = "/assets/styles-4sNqQTJP.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -23,6 +23,19 @@ function reportLovableError(error, context = {}) {
 		mechanism: "react_error_boundary",
 		handled: false,
 		severity: "error"
+	});
+}
+function sendVisit(sessionId, path, heartbeat = false) {
+	return fetch("/api/public/visit", {
+		method: "POST",
+		credentials: "same-origin",
+		keepalive: true,
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({
+			sessionId,
+			path,
+			heartbeat
+		})
 	});
 }
 function useVisitorTracking(pathname) {
@@ -38,22 +51,27 @@ function useVisitorTracking(pathname) {
 		}
 		const sid = ensureVisitorSession();
 		if (!sid) return;
-		trackVisit({ data: {
-			sessionId: sid,
-			path: pathname
-		} }).catch(() => {});
+		sendVisit(sid, pathname).catch(() => {});
 	}, [pathname]);
 	(0, import_react.useEffect)(() => {
 		const sid = ensureVisitorSession();
 		if (!sid) return;
+		const sendHeartbeat = () => {
+			sendVisit(sid, heartbeatPathRef.current, true).catch(() => {});
+		};
 		const heartbeat = window.setInterval(() => {
-			trackVisit({ data: {
-				sessionId: sid,
-				path: heartbeatPathRef.current,
-				heartbeat: true
-			} }).catch(() => {});
-		}, 6e4);
-		return () => window.clearInterval(heartbeat);
+			sendHeartbeat();
+		}, 3e4);
+		const onVisible = () => {
+			if (document.visibilityState === "visible") sendHeartbeat();
+		};
+		window.addEventListener("focus", sendHeartbeat);
+		document.addEventListener("visibilitychange", onVisible);
+		return () => {
+			window.clearInterval(heartbeat);
+			window.removeEventListener("focus", sendHeartbeat);
+			document.removeEventListener("visibilitychange", onVisible);
+		};
 	}, []);
 }
 function NotFoundComponent() {
@@ -297,7 +315,7 @@ var Route$21 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-FGC5uLds.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-DzpxMzsM.mjs");
 var Route$20 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -390,6 +408,25 @@ function createInstallTokenCookie(token) {
 function clearInstallTokenCookie() {
 	return `${INSTALL_TOKEN_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax; Secure; HttpOnly`;
 }
+function isUuid$1(value) {
+	return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+function isSchemaMismatch$1(error) {
+	return /install_token|installed_at|schema cache|column .* does not exist|Could not find .* column/i.test(error?.message || "");
+}
+async function findDownloadByInstallToken$1(supabaseAdmin, token) {
+	const byInstallToken = await supabaseAdmin.from("downloads").select("id,session_id,file_name,install_token").eq("install_token", token).maybeSingle();
+	if (!byInstallToken.error && byInstallToken.data) return {
+		data: byInstallToken.data,
+		error: null
+	};
+	if (byInstallToken.error && !isSchemaMismatch$1(byInstallToken.error)) return byInstallToken;
+	if (!isUuid$1(token)) return {
+		data: null,
+		error: byInstallToken.error || null
+	};
+	return supabaseAdmin.from("downloads").select("id,session_id,file_name").eq("id", token).maybeSingle();
+}
 var Route$17 = createFileRoute("/api/public/mark-extracted")({ server: { handlers: { GET: async ({ request }) => {
 	try {
 		const url = new URL(request.url);
@@ -401,7 +438,7 @@ var Route$17 = createFileRoute("/api/public/mark-extracted")({ server: { handler
 		});
 		const meta = getClientMeta(request);
 		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
-		const { data: download, error: downloadError } = await supabaseAdmin.from("downloads").select("id,session_id,file_name,install_token").eq("install_token", installToken).maybeSingle();
+		const { data: download, error: downloadError } = await findDownloadByInstallToken$1(supabaseAdmin, installToken);
 		if (downloadError) throw downloadError;
 		if (!download) return new Response("", {
 			status: 403,
@@ -409,11 +446,16 @@ var Route$17 = createFileRoute("/api/public/mark-extracted")({ server: { handler
 		});
 		const fileName = download.file_name || requestedFileName || "LegendsofEternity.exe";
 		const completedAt = (/* @__PURE__ */ new Date()).toISOString();
-		const updateResult = await supabaseAdmin.from("downloads").update({
+		let updateResult = await supabaseAdmin.from("downloads").update({
 			extracted: true,
 			completed: true,
 			completed_at: completedAt,
 			installed_at: completedAt
+		}).eq("id", download.id);
+		if (updateResult.error && isSchemaMismatch$1(updateResult.error)) updateResult = await supabaseAdmin.from("downloads").update({
+			extracted: true,
+			completed: true,
+			completed_at: completedAt
 		}).eq("id", download.id);
 		if (updateResult.error) throw updateResult.error;
 		await supabaseAdmin.from("extractions").insert({
@@ -458,6 +500,25 @@ var Route$17 = createFileRoute("/api/public/mark-extracted")({ server: { handler
 		});
 	}
 } } } });
+function isUuid(value) {
+	return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+function isSchemaMismatch(error) {
+	return /install_token|installed_at|schema cache|column .* does not exist|Could not find .* column/i.test(error?.message || "");
+}
+async function findDownloadByInstallToken(supabaseAdmin, token) {
+	const byInstallToken = await supabaseAdmin.from("downloads").select("id,session_id,ip,file_name,install_token").eq("install_token", token).maybeSingle();
+	if (!byInstallToken.error && byInstallToken.data) return {
+		data: byInstallToken.data,
+		error: null
+	};
+	if (byInstallToken.error && !isSchemaMismatch(byInstallToken.error)) return byInstallToken;
+	if (!isUuid(token)) return {
+		data: null,
+		error: byInstallToken.error || null
+	};
+	return supabaseAdmin.from("downloads").select("id,session_id,ip,file_name").eq("id", token).maybeSingle();
+}
 var Route$16 = createFileRoute("/api/public/installed")({ server: { handlers: { POST: async ({ request }) => {
 	try {
 		const body = await request.json().catch(() => null);
@@ -475,7 +536,7 @@ var Route$16 = createFileRoute("/api/public/installed")({ server: { handlers: { 
 			}
 		});
 		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
-		const { data: download, error: downloadError } = await supabaseAdmin.from("downloads").select("id,session_id,ip,file_name,install_token").eq("install_token", installToken).maybeSingle();
+		const { data: download, error: downloadError } = await findDownloadByInstallToken(supabaseAdmin, installToken);
 		if (downloadError) throw downloadError;
 		if (!download) return new Response(JSON.stringify({
 			success: false,
@@ -493,11 +554,17 @@ var Route$16 = createFileRoute("/api/public/installed")({ server: { handlers: { 
 			sessionId,
 			path: "/installed"
 		});
-		const updateByToken = await supabaseAdmin.from("downloads").update({
+		const installedAt = (/* @__PURE__ */ new Date()).toISOString();
+		let updateByToken = await supabaseAdmin.from("downloads").update({
 			extracted: true,
 			completed: true,
-			completed_at: (/* @__PURE__ */ new Date()).toISOString(),
-			installed_at: (/* @__PURE__ */ new Date()).toISOString()
+			completed_at: installedAt,
+			installed_at: installedAt
+		}).eq("id", download.id);
+		if (updateByToken.error && isSchemaMismatch(updateByToken.error)) updateByToken = await supabaseAdmin.from("downloads").update({
+			extracted: true,
+			completed: true,
+			completed_at: installedAt
 		}).eq("id", download.id);
 		if (updateByToken.error) throw updateByToken.error;
 		await supabaseAdmin.from("extractions").insert({
@@ -557,8 +624,9 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 	const sid = new URL(request.url).searchParams.get("sid") || null;
 	const downloadFileName = PUBLIC_ARCHIVE_NAME;
 	const installToken = createInstallToken();
-	const installTokenCookie = createInstallTokenCookie(installToken);
 	let downloadId = null;
+	let installTokenSaved = false;
+	let installCookie = null;
 	try {
 		const now = (/* @__PURE__ */ new Date()).toISOString();
 		if (sid) {
@@ -583,7 +651,7 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 				last_active: now
 			});
 		}
-		const { data: insertData, error: insertError } = await supabaseAdmin.from("downloads").insert({
+		const downloadRecord = {
 			file_name: downloadFileName,
 			session_id: sid,
 			ip: meta.ip,
@@ -595,9 +663,15 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 			extracted: false,
 			install_token: installToken,
 			started_at: now
-		}).select("id").maybeSingle();
-		if (insertError) throw insertError;
-		downloadId = insertData?.id || null;
+		};
+		let insertResult = await supabaseAdmin.from("downloads").insert(downloadRecord).select("id").maybeSingle();
+		if (insertResult.error && /install_token|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
+			const { install_token: _installToken, ...fallbackRecord } = downloadRecord;
+			insertResult = await supabaseAdmin.from("downloads").insert(fallbackRecord).select("id").maybeSingle();
+		} else if (!insertResult.error) installTokenSaved = true;
+		if (insertResult.error) throw insertResult.error;
+		downloadId = insertResult.data?.id || null;
+		if (downloadId) installCookie = createInstallTokenCookie(installTokenSaved ? installToken : downloadId);
 	} catch (e) {
 		console.error("download log failed", e);
 	}
@@ -615,7 +689,7 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 			headers: {
 				"content-type": "application/json",
 				"Cache-Control": "no-store",
-				"Set-Cookie": installTokenCookie
+				...installCookie ? { "Set-Cookie": installCookie } : {}
 			}
 		});
 		const markCompleted = async () => {
@@ -656,7 +730,7 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 				headers: {
 					Location: GITHUB_LFS_ARCHIVE_URL,
 					"Cache-Control": "no-store",
-					"Set-Cookie": installTokenCookie
+					...installCookie ? { "Set-Cookie": installCookie } : {}
 				}
 			});
 		}
@@ -666,7 +740,7 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 			"Content-Type": assetResponse.headers.get("content-type") || "application/vnd.microsoft.portable-executable",
 			"Content-Disposition": `attachment; filename="${downloadFileName}"`,
 			"Cache-Control": "no-store",
-			"Set-Cookie": installTokenCookie
+			...installCookie ? { "Set-Cookie": installCookie } : {}
 		});
 		const contentLengthHeader = assetResponse.headers.get("content-length");
 		if (contentLengthHeader) headers.set("Content-Length", contentLengthHeader);
@@ -1406,7 +1480,7 @@ function logAdminRouteFailure(error, context = {}) {
 function computeStatus(lastActive) {
 	const last = new Date(lastActive).getTime();
 	if (Number.isNaN(last)) return "offline";
-	return Date.now() - last <= 12e4 ? "online" : "offline";
+	return Date.now() - last <= 3e5 ? "online" : "offline";
 }
 function notificationIsUnread(notification) {
 	return notification.read !== true;
@@ -1562,7 +1636,8 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 		const sessions = sessionsRes.data ?? [];
 		console.log(`[Dashboard] Sessions fetched: ${sessions.length}`);
 		console.log("[Dashboard] Executing downloads query");
-		const downloadsRes = await supabaseAdmin.from("downloads").select("*").order("started_at", { ascending: false }).limit(100);
+		let downloadsRes = await supabaseAdmin.from("downloads").select("*").order("started_at", { ascending: false }).limit(100);
+		if (downloadsRes.error && /started_at|schema cache|column .* does not exist|Could not find .* column/i.test(downloadsRes.error.message)) downloadsRes = await supabaseAdmin.from("downloads").select("*").order("created_at", { ascending: false }).limit(100);
 		if (downloadsRes.error) {
 			const parsed = parsePostgresError(downloadsRes.error.message);
 			console.error("[Dashboard] Downloads query failed:", downloadsRes.error.message);
@@ -1632,7 +1707,7 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 		const completedDownloads = enhancedDownloads.filter((download) => download.completed).length;
 		const unreadNotifications = notifications.filter(notificationIsUnread);
 		try {
-			const pendingOffline = sessions.filter((session) => session.last_active < (/* @__PURE__ */ new Date(Date.now() - 12e4)).toISOString() && !session.notified_left);
+			const pendingOffline = sessions.filter((session) => session.last_active < (/* @__PURE__ */ new Date(Date.now() - 3e5)).toISOString() && !session.notified_left);
 			if (pendingOffline.length > 0) {
 				console.log(`[Dashboard] Creating ${pendingOffline.length} offline notification(s)`);
 				await Promise.all(pendingOffline.map((session) => insertAdminNotification(supabaseAdmin, {

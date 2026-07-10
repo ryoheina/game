@@ -4,9 +4,9 @@ import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tan
 import { n as MouseGlow, r as Particles, t as Fog } from "./fx-CW4x6DdP.mjs";
 import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as ensureVisitorSession } from "./visitor-session-9sEIwEFU.mjs";
-import { n as submitContact } from "./analytics.functions-DowzlkrV.mjs";
+import { n as submitContact } from "./analytics.functions-BfT3GJDi.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-FGC5uLds.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-DzpxMzsM.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -170,7 +170,7 @@ function FullBleedVideo({ src, className = "", videoClassName = "", eager = fals
 			if (!entry?.isIntersecting) return;
 			setShouldLoad(true);
 			observer.disconnect();
-		}, { rootMargin: "700px 0px" });
+		}, { rootMargin: "200px 0px" });
 		observer.observe(node);
 		return () => observer.disconnect();
 	}, [eager, shouldLoad]);
@@ -185,7 +185,7 @@ function FullBleedVideo({ src, className = "", videoClassName = "", eager = fals
 			loop: !controls,
 			playsInline: true,
 			controls,
-			preload: eager ? "auto" : "metadata"
+			preload: eager ? "auto" : "none"
 		})
 	});
 }
@@ -521,9 +521,11 @@ function Characters({ onOpen }) {
 						onClick: () => onOpen(c),
 						className: "group relative block h-[420px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_0_50px_rgba(74,20,140,0.6)] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)] backdrop-blur-xl border border-white/10 hover:border-white/30 sm:h-[500px] lg:h-[520px]",
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FullBleedVideo, {
-								src: characterVideos[c.name],
-								videoClassName: "transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110"
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
+								asset: c.asset,
+								alt: "",
+								"aria-hidden": true,
+								className: "h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent group-hover:from-black via-black/40 transition-all duration-500" }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {

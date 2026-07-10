@@ -1,6 +1,15 @@
 import { useEffect, useRef } from "react";
-import { trackVisit } from "@/lib/analytics.functions";
 import { ensureVisitorSession } from "@/lib/visitor-session";
+
+function sendVisit(sessionId: string, path: string, heartbeat = false) {
+  return fetch("/api/public/visit", {
+    method: "POST",
+    credentials: "same-origin",
+    keepalive: true,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ sessionId, path, heartbeat }),
+  });
+}
 
 export function useVisitorTracking(pathname: string) {
   const heartbeatPathRef = useRef(pathname);
@@ -19,17 +28,30 @@ export function useVisitorTracking(pathname: string) {
     const sid = ensureVisitorSession();
     if (!sid) return;
 
-    trackVisit({ data: { sessionId: sid, path: pathname } }).catch(() => {});
+    sendVisit(sid, pathname).catch(() => {});
   }, [pathname]);
 
   useEffect(() => {
     const sid = ensureVisitorSession();
     if (!sid) return;
 
-    const heartbeat = window.setInterval(() => {
-      trackVisit({ data: { sessionId: sid, path: heartbeatPathRef.current, heartbeat: true } }).catch(() => {});
-    }, 60_000);
+    const sendHeartbeat = () => {
+      sendVisit(sid, heartbeatPathRef.current, true).catch(() => {});
+    };
 
-    return () => window.clearInterval(heartbeat);
+    const heartbeat = window.setInterval(() => {
+      sendHeartbeat();
+    }, 30_000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") sendHeartbeat();
+    };
+    window.addEventListener("focus", sendHeartbeat);
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      window.clearInterval(heartbeat);
+      window.removeEventListener("focus", sendHeartbeat);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 }

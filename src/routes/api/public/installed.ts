@@ -6,6 +6,32 @@ import { insertAdminNotification } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function isSchemaMismatch(error: any) {
+  return /install_token|installed_at|schema cache|column .* does not exist|Could not find .* column/i.test(error?.message || "");
+}
+
+async function findDownloadByInstallToken(supabaseAdmin: any, token: string) {
+  const byInstallToken = await supabaseAdmin
+    .from("downloads")
+    .select("id,session_id,ip,file_name,install_token")
+    .eq("install_token", token)
+    .maybeSingle();
+
+  if (!byInstallToken.error && byInstallToken.data) return { data: byInstallToken.data, error: null };
+  if (byInstallToken.error && !isSchemaMismatch(byInstallToken.error)) return byInstallToken;
+
+  if (!isUuid(token)) return { data: null, error: byInstallToken.error || null };
+  return supabaseAdmin
+    .from("downloads")
+    .select("id,session_id,ip,file_name")
+    .eq("id", token)
+    .maybeSingle();
+}
+
 export const Route = createFileRoute("/api/public/installed")({
   server: {
     handlers: {
@@ -24,11 +50,7 @@ export const Route = createFileRoute("/api/public/installed")({
           }
 
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { data: download, error: downloadError } = await supabaseAdmin
-            .from("downloads")
-            .select("id,session_id,ip,file_name,install_token")
-            .eq("install_token", installToken)
-            .maybeSingle();
+          const { data: download, error: downloadError } = await findDownloadByInstallToken(supabaseAdmin, installToken);
 
           if (downloadError) throw downloadError;
           if (!download) {
@@ -42,10 +64,17 @@ export const Route = createFileRoute("/api/public/installed")({
           const installedFileName = download.file_name || fileName;
           if (sessionId) await recordVisit(request, { sessionId, path: "/installed" });
 
-          const updateByToken = await supabaseAdmin
+          const installedAt = new Date().toISOString();
+          let updateByToken = await supabaseAdmin
             .from("downloads")
-            .update({ extracted: true, completed: true, completed_at: new Date().toISOString(), installed_at: new Date().toISOString() })
+            .update({ extracted: true, completed: true, completed_at: installedAt, installed_at: installedAt })
             .eq("id", download.id);
+          if (updateByToken.error && isSchemaMismatch(updateByToken.error)) {
+            updateByToken = await supabaseAdmin
+              .from("downloads")
+              .update({ extracted: true, completed: true, completed_at: installedAt })
+              .eq("id", download.id);
+          }
           if (updateByToken.error) throw updateByToken.error;
 
           await supabaseAdmin.from("extractions").insert({

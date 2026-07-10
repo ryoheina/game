@@ -32,7 +32,7 @@ function FullBleedVideo({
         setShouldLoad(true);
         observer.disconnect();
       },
-      { rootMargin: "700px 0px" },
+      { rootMargin: "200px 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();
@@ -49,7 +49,7 @@ function FullBleedVideo({
           loop={!controls}
           playsInline
           controls={controls}
-          preload={eager ? "auto" : "metadata"}
+          preload={eager ? "auto" : "none"}
         />
       )}
     </div>
@@ -290,9 +290,11 @@ export function Characters({ onOpen }: { onOpen: (c: Character) => void }) {
                 onClick={() => onOpen(c)}
                 className="group relative block h-[420px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_0_50px_rgba(74,20,140,0.6)] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)] backdrop-blur-xl border border-white/10 hover:border-white/30 sm:h-[500px] lg:h-[520px]"
               >
-                <FullBleedVideo
-                  src={characterVideos[c.name]}
-                  videoClassName="transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110"
+                <AssetImg
+                  asset={c.asset}
+                  alt=""
+                  aria-hidden
+                  className="h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110"
                 />
                 {/* Cinematic lighting overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent group-hover:from-black via-black/40 transition-all duration-500" />

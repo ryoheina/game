@@ -21,9 +21,10 @@ export const Route = createFileRoute("/api/public/download")({
         const sid = url.searchParams.get("sid") || null;
         const downloadFileName = PUBLIC_ARCHIVE_NAME;
         const installToken = createInstallToken();
-        const installTokenCookie = createInstallTokenCookie(installToken);
 
         let downloadId: string | null = null;
+        let installTokenSaved = false;
+        let installCookie: string | null = null;
         try {
           const now = new Date().toISOString();
           if (sid) {
@@ -60,9 +61,7 @@ export const Route = createFileRoute("/api/public/download")({
             }
           }
 
-          const { data: insertData, error: insertError } = await supabaseAdmin
-            .from("downloads")
-            .insert({
+          const downloadRecord = {
               file_name: downloadFileName,
               session_id: sid,
               ip: meta.ip,
@@ -74,11 +73,27 @@ export const Route = createFileRoute("/api/public/download")({
               extracted: false,
               install_token: installToken,
               started_at: now,
-            })
+          };
+          let insertResult = await supabaseAdmin
+            .from("downloads")
+            .insert(downloadRecord)
             .select("id")
             .maybeSingle();
-          if (insertError) throw insertError;
-          downloadId = insertData?.id || null;
+          if (insertResult.error && /install_token|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
+            const { install_token: _installToken, ...fallbackRecord } = downloadRecord;
+            insertResult = await supabaseAdmin
+              .from("downloads")
+              .insert(fallbackRecord)
+              .select("id")
+              .maybeSingle();
+          } else if (!insertResult.error) {
+            installTokenSaved = true;
+          }
+          if (insertResult.error) throw insertResult.error;
+          downloadId = insertResult.data?.id || null;
+          if (downloadId) {
+            installCookie = createInstallTokenCookie(installTokenSaved ? installToken : downloadId);
+          }
         } catch (e) {
           console.error("download log failed", e);
         }
@@ -99,7 +114,7 @@ export const Route = createFileRoute("/api/public/download")({
               headers: {
                 "content-type": "application/json",
                 "Cache-Control": "no-store",
-                "Set-Cookie": installTokenCookie,
+                ...(installCookie ? { "Set-Cookie": installCookie } : {}),
               },
             });
           }
@@ -139,7 +154,7 @@ export const Route = createFileRoute("/api/public/download")({
               headers: {
                 Location: GITHUB_LFS_ARCHIVE_URL,
                 "Cache-Control": "no-store",
-                "Set-Cookie": installTokenCookie,
+                ...(installCookie ? { "Set-Cookie": installCookie } : {}),
               },
             });
           }
@@ -154,7 +169,7 @@ export const Route = createFileRoute("/api/public/download")({
             "Content-Type": assetResponse.headers.get("content-type") || "application/vnd.microsoft.portable-executable",
             "Content-Disposition": `attachment; filename="${downloadFileName}"`,
             "Cache-Control": "no-store",
-            "Set-Cookie": installTokenCookie,
+            ...(installCookie ? { "Set-Cookie": installCookie } : {}),
           });
           const contentLengthHeader = assetResponse.headers.get("content-length");
           if (contentLengthHeader) headers.set("Content-Length", contentLengthHeader);

@@ -42,7 +42,7 @@ function logAdminRouteFailure(error: unknown, context: Record<string, unknown> =
 function computeStatus(lastActive: string) {
   const last = new Date(lastActive).getTime();
   if (Number.isNaN(last)) return "offline";
-  return Date.now() - last <= 120_000 ? "online" : "offline";
+  return Date.now() - last <= 300_000 ? "online" : "offline";
 }
 
 function notificationIsUnread(notification: any) {
@@ -258,7 +258,10 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           console.log(`[Dashboard] Sessions fetched: ${sessions.length}`);
 
           console.log("[Dashboard] Executing downloads query");
-          const downloadsRes = await supabaseAdmin.from("downloads").select("*").order("started_at", { ascending: false }).limit(100);
+          let downloadsRes = await supabaseAdmin.from("downloads").select("*").order("started_at", { ascending: false }).limit(100);
+          if (downloadsRes.error && /started_at|schema cache|column .* does not exist|Could not find .* column/i.test(downloadsRes.error.message)) {
+            downloadsRes = await supabaseAdmin.from("downloads").select("*").order("created_at", { ascending: false }).limit(100);
+          }
           if (downloadsRes.error) {
             const parsed = parsePostgresError(downloadsRes.error.message);
             console.error("[Dashboard] Downloads query failed:", downloadsRes.error.message);
@@ -329,7 +332,7 @@ export const Route = createFileRoute("/api/admin/dashboard")({
 
           // ===== STEP 7: OPTIONAL BACKGROUND UPDATES =====
           try {
-            const pendingOffline = sessions.filter((session: any) => session.last_active < new Date(Date.now() - 120_000).toISOString() && !session.notified_left);
+            const pendingOffline = sessions.filter((session: any) => session.last_active < new Date(Date.now() - 300_000).toISOString() && !session.notified_left);
             if (pendingOffline.length > 0) {
               console.log(`[Dashboard] Creating ${pendingOffline.length} offline notification(s)`);
               await Promise.all(
