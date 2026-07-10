@@ -16,9 +16,11 @@ function Admin() {
   const [sessionsPage, setSessionsPage] = useState(1);
   const [downloads, setDownloads] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
+  const [latestAlert, setLatestAlert] = useState<any>(null);
   const { notifications, setNotifications, markRead, remove, clearAll } = useAdminNotifications([]);
   const desktopNotifState = useDesktopNotifications();
   const lastSnapshotRef = useRef<string | null>(null);
+  const shownInPageNotificationIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     let mounted = true;
@@ -75,7 +77,17 @@ function Admin() {
         setSessions(data.sessions || []);
         setDownloads(data.downloads || []);
         setStats(data.stats || null);
-        setNotifications(data.notifications || []);
+        const nextNotifications = data.notifications || [];
+        setNotifications(nextNotifications);
+
+        const newestUnread = nextNotifications.find((note: any) => note.read !== true && !shownInPageNotificationIdsRef.current.has(String(note.id)));
+        if (newestUnread) {
+          shownInPageNotificationIdsRef.current.add(String(newestUnread.id));
+          setLatestAlert(newestUnread);
+          window.setTimeout(() => {
+            setLatestAlert((current: any) => (current?.id === newestUnread.id ? null : current));
+          }, 8000);
+        }
 
         const snap = JSON.stringify((data.sessions || []).map((item: any) => ({ id: item.session_id, last_active: item.last_active })));
         if (lastSnapshotRef.current && lastSnapshotRef.current !== snap) {
@@ -159,6 +171,19 @@ function Admin() {
   return (
     <div className="relative min-h-dvh bg-background text-foreground">
       <MouseGlow />
+      {latestAlert && (
+        <div className="fixed right-4 top-20 z-50 w-[min(24rem,calc(100vw-2rem))] rounded-2xl border border-[color:var(--gold)]/40 bg-black/85 p-4 text-white shadow-[0_0_50px_rgba(255,214,120,0.22)] backdrop-blur-xl">
+          <div className="text-[10px] uppercase tracking-[0.28em] text-[color:var(--gold)]">New notification</div>
+          <div className="mt-2 font-semibold">{latestAlert.title || "Activity detected"}</div>
+          <div className="mt-1 text-sm text-white/70">{latestAlert.body || latestAlert.filename || latestAlert.type || "New admin event"}</div>
+          <button
+            onClick={() => setLatestAlert(null)}
+            className="mt-3 text-xs uppercase tracking-widest text-white/50 hover:text-white"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       <header className="sticky top-0 z-30 border-b border-white/5 bg-background/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -458,7 +483,7 @@ function Admin() {
                   <div key={note.id} className={`rounded-2xl p-4 flex justify-between items-start border ${note.read ? 'border-white/10 bg-background/70' : 'border-accent/50 bg-accent/900'}`}>
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <div className="text-xl">{note.type_detail === "visitor" || note.type === "visitor_arrival" || note.type === "visitor_left" ? "👤" : "📥"}</div>
+                        <div className="text-xl">{note.type_detail === "visitor" || note.payload?.type_detail === "visitor" || note.type === "visitor_arrival" || note.type === "visitor_left" ? "👤" : "📥"}</div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <div className="font-medium text-white">{note.title}</div>
@@ -471,7 +496,7 @@ function Admin() {
                       <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-white/70 pl-9">
                         <div>
                           <span className="text-white/50">Session:</span>
-                          <div className="font-mono text-white">{note.session_id?.slice(0, 8) || '—'}</div>
+                          <div className="font-mono text-white">{(note.session_id || note.payload?.session_id)?.slice(0, 8) || '—'}</div>
                         </div>
                         <div>
                           <span className="text-white/50">IP:</span>
@@ -483,16 +508,16 @@ function Admin() {
                         </div>
                         <div>
                           <span className="text-white/50">Device:</span>
-                          <div className="text-white">{note.device || '—'}</div>
+                          <div className="text-white">{note.device || note.payload?.device || '—'}</div>
                         </div>
                         <div>
                           <span className="text-white/50">Browser:</span>
-                          <div className="text-white">{note.browser || '—'}</div>
+                          <div className="text-white">{note.browser || note.payload?.browser || '—'}</div>
                         </div>
-                        {note.filename && (
+                        {(note.filename || note.payload?.filename) && (
                           <div>
                             <span className="text-white/50">File:</span>
-                            <div className="text-white">{note.filename}</div>
+                            <div className="text-white">{note.filename || note.payload?.filename}</div>
                           </div>
                         )}
                       </div>

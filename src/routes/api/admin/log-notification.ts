@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { isAdminAuthorized } from "@/lib/admin-auth";
+import { insertAdminNotification } from "@/lib/notifications";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export const runtime = "nodejs";
@@ -14,12 +15,6 @@ type LogNotificationRequest = {
   filename?: string;
   title: string;
   body: string;
-};
-
-type LogNotificationResponse = {
-  success: boolean;
-  notification_id?: string;
-  error?: string;
 };
 
 export const Route = createFileRoute("/api/admin/log-notification")({
@@ -62,45 +57,39 @@ export const Route = createFileRoute("/api/admin/log-notification")({
             );
           }
 
-          // Insert notification
-          const { data, error } = await supabaseAdmin
-            .from("notifications")
-            .insert({
-              type: payload.type,
-              type_detail: payload.type,
-              title: payload.title,
-              body: payload.body || "",
+          const result = await insertAdminNotification(supabaseAdmin, {
+            type: payload.type,
+            type_detail: payload.type,
+            title: payload.title,
+            body: payload.body || "",
+            session_id: payload.session_id,
+            ip_address: payload.ip_address,
+            country: payload.country || null,
+            browser: payload.browser || null,
+            device: payload.device || null,
+            filename: payload.filename || null,
+            payload: {
               session_id: payload.session_id,
               ip_address: payload.ip_address,
-              country: payload.country || null,
-              browser: payload.browser || null,
-              device: payload.device || null,
-              filename: payload.filename || null,
-              payload: {
-                session_id: payload.session_id,
-                ip_address: payload.ip_address,
-                country: payload.country,
-                browser: payload.browser,
-                device: payload.device,
-                filename: payload.filename,
-              },
-              created_at: new Date().toISOString(),
-              read: false,
-            })
-            .select("id")
-            .single();
+              country: payload.country,
+              browser: payload.browser,
+              device: payload.device,
+              filename: payload.filename,
+            },
+            read: false,
+          });
 
-          if (error) {
-            console.error("[Log Notification] Insert failed:", error);
+          if (!result.ok) {
+            console.error("[Log Notification] Insert failed:", result.error);
             return new Response(
-              JSON.stringify({ success: false, error: `Failed to store notification: ${error.message}` }),
+              JSON.stringify({ success: false, error: `Failed to store notification: ${result.error?.message || "Unknown error"}` }),
               { status: 500, headers: { "content-type": "application/json" } }
             );
           }
 
-          console.log(`[Log Notification] Notification stored: ${payload.type} - ${data.id}`);
+          console.log(`[Log Notification] Notification stored: ${payload.type}`);
 
-          return new Response(JSON.stringify({ success: true, notification_id: data.id }), {
+          return new Response(JSON.stringify({ success: true }), {
             status: 200,
             headers: { "content-type": "application/json" },
           });

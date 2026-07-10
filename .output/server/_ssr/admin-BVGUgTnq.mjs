@@ -2,7 +2,7 @@ import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow } from "./fx-CW4x6DdP.mjs";
 import { g as useNavigate, h as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-BBtSRfSY.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-BVGUgTnq.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function useAdminNotifications(initial = []) {
@@ -85,15 +85,15 @@ function useDesktopNotifications() {
 		const notifId = String(note.id || `${note.type}-${note.session_id}-${note.created_at}`);
 		if (shownNotificationIdsRef.current.has(notifId)) return;
 		shownNotificationIdsRef.current.add(notifId);
-		const isVisitor = note.type_detail === "visitor" || note.type === "visitor" || note.type === "visitor_arrival" || note.type === "visitor_left";
+		const isVisitor = note.type_detail === "visitor" || note.payload?.type_detail === "visitor" || note.type === "visitor" || note.type === "visitor_arrival" || note.type === "visitor_left";
 		const title = note.title || (isVisitor ? "Visitor Activity" : "Download Activity");
 		const body = note.body || [
 			note.session_id ? `Session: ${String(note.session_id).slice(0, 8)}` : null,
 			`IP: ${note.ip_address || note.payload?.ip_address || "unknown"}`,
 			`Country: ${note.country || note.payload?.country || "unknown"}`,
-			note.device ? `Device: ${note.device}` : null,
-			note.browser ? `Browser: ${note.browser}` : null,
-			note.filename ? `File: ${note.filename}` : null
+			note.device || note.payload?.device ? `Device: ${note.device || note.payload?.device}` : null,
+			note.browser || note.payload?.browser ? `Browser: ${note.browser || note.payload?.browser}` : null,
+			note.filename || note.payload?.filename ? `File: ${note.filename || note.payload?.filename}` : null
 		].filter(Boolean).join("\n");
 		try {
 			if (typeof Notification !== "undefined" && Notification.permission === "granted") try {
@@ -209,9 +209,11 @@ function Admin() {
 	const [sessionsPage, setSessionsPage] = (0, import_react.useState)(1);
 	const [downloads, setDownloads] = (0, import_react.useState)([]);
 	const [stats, setStats] = (0, import_react.useState)(null);
+	const [latestAlert, setLatestAlert] = (0, import_react.useState)(null);
 	const { notifications, setNotifications, markRead, remove, clearAll } = useAdminNotifications([]);
 	const desktopNotifState = useDesktopNotifications();
 	const lastSnapshotRef = (0, import_react.useRef)(null);
+	const shownInPageNotificationIdsRef = (0, import_react.useRef)(/* @__PURE__ */ new Set());
 	(0, import_react.useEffect)(() => {
 		let mounted = true;
 		(async () => {
@@ -268,7 +270,16 @@ function Admin() {
 				setSessions(data.sessions || []);
 				setDownloads(data.downloads || []);
 				setStats(data.stats || null);
-				setNotifications(data.notifications || []);
+				const nextNotifications = data.notifications || [];
+				setNotifications(nextNotifications);
+				const newestUnread = nextNotifications.find((note) => note.read !== true && !shownInPageNotificationIdsRef.current.has(String(note.id)));
+				if (newestUnread) {
+					shownInPageNotificationIdsRef.current.add(String(newestUnread.id));
+					setLatestAlert(newestUnread);
+					window.setTimeout(() => {
+						setLatestAlert((current) => current?.id === newestUnread.id ? null : current);
+					}, 8e3);
+				}
 				const snap = JSON.stringify((data.sessions || []).map((item) => ({
 					id: item.session_id,
 					last_active: item.last_active
@@ -347,6 +358,28 @@ function Admin() {
 		className: "relative min-h-dvh bg-background text-foreground",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MouseGlow, {}),
+			latestAlert && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "fixed right-4 top-20 z-50 w-[min(24rem,calc(100vw-2rem))] rounded-2xl border border-[color:var(--gold)]/40 bg-black/85 p-4 text-white shadow-[0_0_50px_rgba(255,214,120,0.22)] backdrop-blur-xl",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "text-[10px] uppercase tracking-[0.28em] text-[color:var(--gold)]",
+						children: "New notification"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "mt-2 font-semibold",
+						children: latestAlert.title || "Activity detected"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "mt-1 text-sm text-white/70",
+						children: latestAlert.body || latestAlert.filename || latestAlert.type || "New admin event"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => setLatestAlert(null),
+						className: "mt-3 text-xs uppercase tracking-widest text-white/50 hover:text-white",
+						children: "Dismiss"
+					})
+				]
+			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
 				className: "sticky top-0 z-30 border-b border-white/5 bg-background/70 backdrop-blur-xl",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -834,7 +867,7 @@ function Admin() {
 														className: "flex items-center gap-3",
 														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 															className: "text-xl",
-															children: note.type_detail === "visitor" || note.type === "visitor_arrival" || note.type === "visitor_left" ? "👤" : "📥"
+															children: note.type_detail === "visitor" || note.payload?.type_detail === "visitor" || note.type === "visitor_arrival" || note.type === "visitor_left" ? "👤" : "📥"
 														}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 															className: "flex-1",
 															children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -856,7 +889,7 @@ function Admin() {
 																children: "Session:"
 															}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 																className: "font-mono text-white",
-																children: note.session_id?.slice(0, 8) || "—"
+																children: (note.session_id || note.payload?.session_id)?.slice(0, 8) || "—"
 															})] }),
 															/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 																className: "text-white/50",
@@ -877,21 +910,21 @@ function Admin() {
 																children: "Device:"
 															}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 																className: "text-white",
-																children: note.device || "—"
+																children: note.device || note.payload?.device || "—"
 															})] }),
 															/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 																className: "text-white/50",
 																children: "Browser:"
 															}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 																className: "text-white",
-																children: note.browser || "—"
+																children: note.browser || note.payload?.browser || "—"
 															})] }),
-															note.filename && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+															(note.filename || note.payload?.filename) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 																className: "text-white/50",
 																children: "File:"
 															}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 																className: "text-white",
-																children: note.filename
+																children: note.filename || note.payload?.filename
 															})] })
 														]
 													})]

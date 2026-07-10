@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { insertAdminNotification } from "@/lib/notifications";
 
 export const Route = createFileRoute("/api/public/mark-extracted")({
   server: {
@@ -17,9 +18,12 @@ export const Route = createFileRoute("/api/public/mark-extracted")({
             await q;
             // record extraction event
             await supabaseAdmin.from("extractions").insert({ session_id: sid, file_name: fileName, device: null });
-            await supabaseAdmin.from("notifications").insert({
+            await insertAdminNotification(supabaseAdmin, {
               type: "download_extracted",
+              type_detail: "download",
               title: "Download Extracted",
+              session_id: sid,
+              filename: fileName,
               body: `${sid} — ${fileName ?? "unknown"}`,
               payload: { session_id: sid, file_name: fileName },
             });

@@ -1,16 +1,16 @@
 import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react, t as QueryClientProvider } from "../_libs/react+tanstack__react-query.mjs";
 import { A as redirect, _ as useRouter, c as HeadContent, d as Outlet, f as lazyRouteComponent, h as Link, m as createRootRouteWithContext, p as createFileRoute, s as Scripts, u as createRouter } from "../_libs/@tanstack/react-router+[...].mjs";
-import { n as resolveCountry, t as getClientMeta } from "./ua-CPEkugaV.mjs";
+import { n as insertAdminNotification, r as resolveCountry, t as getClientMeta } from "./notifications-9i3ROYMp.mjs";
 import { n as supabaseAdmin } from "./client.server-CPH4V7T6.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-B7ohEy3P.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-diRuOH65.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-CujO4acJ.css";
+var styles_default = "/assets/styles-BFjCM1m_.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -233,7 +233,7 @@ var Route$19 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-Chjqb-vX.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-CrY2YV_9.mjs");
 var Route$18 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -256,7 +256,7 @@ var Route$18 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-BBtSRfSY.mjs");
+var $$splitComponentImporter = () => import("./admin-BVGUgTnq.mjs");
 var Route$17 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
@@ -276,9 +276,12 @@ var Route$16 = createFileRoute("/api/public/mark-extracted")({ server: { handler
 				file_name: fileName,
 				device: null
 			});
-			await supabaseAdmin.from("notifications").insert({
+			await insertAdminNotification(supabaseAdmin, {
 				type: "download_extracted",
+				type_detail: "download",
 				title: "Download Extracted",
+				session_id: sid,
+				filename: fileName,
 				body: `${sid} — ${fileName ?? "unknown"}`,
 				payload: {
 					session_id: sid,
@@ -366,7 +369,7 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 					completed: true,
 					completed_at: (/* @__PURE__ */ new Date()).toISOString()
 				}).eq("id", downloadId);
-				await supabaseAdmin.from("notifications").insert({
+				await insertAdminNotification(supabaseAdmin, {
 					type: "download",
 					type_detail: "download",
 					title: "Download Complete",
@@ -851,7 +854,7 @@ var Route$8 = createFileRoute("/api/admin/log-notification")({ server: { handler
 			status: 400,
 			headers: { "content-type": "application/json" }
 		});
-		const { data, error } = await supabaseAdmin.from("notifications").insert({
+		const result = await insertAdminNotification(supabaseAdmin, {
 			type: payload.type,
 			type_detail: payload.type,
 			title: payload.title,
@@ -870,24 +873,20 @@ var Route$8 = createFileRoute("/api/admin/log-notification")({ server: { handler
 				device: payload.device,
 				filename: payload.filename
 			},
-			created_at: (/* @__PURE__ */ new Date()).toISOString(),
 			read: false
-		}).select("id").single();
-		if (error) {
-			console.error("[Log Notification] Insert failed:", error);
+		});
+		if (!result.ok) {
+			console.error("[Log Notification] Insert failed:", result.error);
 			return new Response(JSON.stringify({
 				success: false,
-				error: `Failed to store notification: ${error.message}`
+				error: `Failed to store notification: ${result.error?.message || "Unknown error"}`
 			}), {
 				status: 500,
 				headers: { "content-type": "application/json" }
 			});
 		}
-		console.log(`[Log Notification] Notification stored: ${payload.type} - ${data.id}`);
-		return new Response(JSON.stringify({
-			success: true,
-			notification_id: data.id
-		}), {
+		console.log(`[Log Notification] Notification stored: ${payload.type}`);
+		return new Response(JSON.stringify({ success: true }), {
 			status: 200,
 			headers: { "content-type": "application/json" }
 		});
@@ -1351,7 +1350,7 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 			const pendingOffline = sessions.filter((session) => session.last_active < (/* @__PURE__ */ new Date(Date.now() - 12e4)).toISOString() && !session.notified_left);
 			if (pendingOffline.length > 0) {
 				console.log(`[Dashboard] Creating ${pendingOffline.length} offline notification(s)`);
-				await supabaseAdmin.from("notifications").insert(pendingOffline.map((session) => ({
+				await Promise.all(pendingOffline.map((session) => insertAdminNotification(supabaseAdmin, {
 					type: "visitor_left",
 					type_detail: "visitor",
 					title: "Visitor Left",

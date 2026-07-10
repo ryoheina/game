@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { isAdminAuthorized } from "@/lib/admin-auth";
+import { insertAdminNotification } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 
@@ -308,8 +309,8 @@ export const Route = createFileRoute("/api/admin/dashboard")({
             const pendingOffline = sessions.filter((session: any) => session.last_active < new Date(Date.now() - 120_000).toISOString() && !session.notified_left);
             if (pendingOffline.length > 0) {
               console.log(`[Dashboard] Creating ${pendingOffline.length} offline notification(s)`);
-              await supabaseAdmin.from("notifications").insert(
-                pendingOffline.map((session: any) => ({
+              await Promise.all(
+                pendingOffline.map((session: any) => insertAdminNotification(supabaseAdmin, {
                   type: "visitor_left",
                   type_detail: "visitor",
                   title: "Visitor Left",

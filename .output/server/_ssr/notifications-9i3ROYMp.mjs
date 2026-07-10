@@ -1,4 +1,4 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/ua-CPEkugaV.js
+//#region node_modules/.nitro/vite/services/ssr/assets/notifications-9i3ROYMp.js
 var countryCache = /* @__PURE__ */ new Map();
 var UNKNOWN_COUNTRY_CODES = /* @__PURE__ */ new Set([
 	"XX",
@@ -85,5 +85,50 @@ function getClientMeta(request) {
 		...parseUA(ua)
 	};
 }
+function isSchemaMismatch(error) {
+	const message = error && typeof error === "object" && "message" in error ? String(error.message) : String(error);
+	return /column .* does not exist|schema cache|Could not find .* column/i.test(message);
+}
+async function insertAdminNotification(supabaseAdmin, notification) {
+	const fullNotification = {
+		read: false,
+		delivered: false,
+		...notification
+	};
+	const { error } = await supabaseAdmin.from("notifications").insert(fullNotification);
+	if (!error) return { ok: true };
+	if (!isSchemaMismatch(error)) return {
+		ok: false,
+		error
+	};
+	const fallbackPayload = {
+		...notification.payload || {},
+		type_detail: notification.type_detail,
+		session_id: notification.session_id,
+		ip_address: notification.ip_address,
+		country: notification.country,
+		browser: notification.browser,
+		device: notification.device,
+		filename: notification.filename,
+		user_id: notification.user_id,
+		read: notification.read ?? false
+	};
+	const fallback = {
+		type: notification.type_detail || notification.type,
+		title: notification.title,
+		body: notification.body ?? null,
+		payload: fallbackPayload,
+		delivered: notification.delivered ?? false
+	};
+	const fallbackResult = await supabaseAdmin.from("notifications").insert(fallback);
+	if (fallbackResult.error) return {
+		ok: false,
+		error: fallbackResult.error
+	};
+	return {
+		ok: true,
+		fallback: true
+	};
+}
 //#endregion
-export { resolveCountry as n, getClientMeta as t };
+export { insertAdminNotification as n, resolveCountry as r, getClientMeta as t };

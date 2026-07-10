@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getClientMeta } from "@/lib/ua";
 import { resolveCountry } from "@/lib/geo";
+import { insertAdminNotification } from "@/lib/notifications";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const PUBLIC_ARCHIVE_NAME = "LegendsofEternity.exe";
@@ -105,7 +106,7 @@ export const Route = createFileRoute("/api/public/download")({
                 .from("downloads")
                 .update({ completed: true, completed_at: new Date().toISOString() })
                 .eq("id", downloadId);
-              await supabaseAdmin.from("notifications").insert({
+              await insertAdminNotification(supabaseAdmin, {
                 type: "download",
                 type_detail: "download",
                 title: "Download Complete",

@@ -1,8 +1,8 @@
 import { f as getRequest, i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-9EjmF9OT.mjs";
 import { t as requireSupabaseAuth } from "./auth-middleware-DZO41X7i.mjs";
-import { n as resolveCountry, t as getClientMeta } from "./ua-CPEkugaV.mjs";
+import { n as insertAdminNotification, r as resolveCountry, t as getClientMeta } from "./notifications-9i3ROYMp.mjs";
 import { n as objectType, r as stringType, t as booleanType } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-CJJGKG1i.js
+//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-DyhLp6go.js
 var createServerRpc = (serverFnMeta, splitImportFn) => {
 	const url = "/_serverFn/" + serverFnMeta.id;
 	return Object.assign(splitImportFn, {
@@ -48,10 +48,16 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 		}).eq("session_id", data.sessionId);
 		if (data.heartbeat) return { ok: true };
 		if (wasOffline) try {
-			await supabaseAdmin.from("notifications").insert({
+			await insertAdminNotification(supabaseAdmin, {
 				type: "visitor",
+				type_detail: "visitor",
 				title: "Visitor Arrived",
 				body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
+				session_id: data.sessionId,
+				ip_address: meta.ip,
+				country,
+				browser: meta.browser,
+				device: meta.device,
 				payload: {
 					type_detail: "visitor",
 					session_id: data.sessionId,
@@ -60,6 +66,7 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 					browser: meta.browser,
 					device: meta.device
 				},
+				read: false,
 				delivered: false
 			});
 		} catch (e) {
@@ -89,10 +96,16 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 			last_active: now
 		});
 		try {
-			await supabaseAdmin.from("notifications").insert({
+			await insertAdminNotification(supabaseAdmin, {
 				type: "visitor",
+				type_detail: "visitor",
 				title: "Visitor Arrived",
 				body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
+				session_id: data.sessionId,
+				ip_address: meta.ip,
+				country,
+				browser: meta.browser,
+				device: meta.device,
 				payload: {
 					type_detail: "visitor",
 					session_id: data.sessionId,
@@ -101,6 +114,7 @@ var trackVisit = createServerFn({ method: "POST" }).validator((d) => objectType(
 					browser: meta.browser,
 					device: meta.device
 				},
+				read: false,
 				delivered: false
 			});
 		} catch (e) {

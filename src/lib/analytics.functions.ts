@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getClientMeta } from "./ua";
 import { resolveCountry } from "./geo";
+import { insertAdminNotification } from "./notifications";
 
 export const trackVisit = createServerFn({ method: "POST" })
   .validator((d) =>
@@ -37,10 +38,16 @@ export const trackVisit = createServerFn({ method: "POST" })
       if (data.heartbeat) return { ok: true };
       if (wasOffline) {
         try {
-          await supabaseAdmin.from("notifications").insert({
+          await insertAdminNotification(supabaseAdmin, {
             type: "visitor",
+            type_detail: "visitor",
             title: "Visitor Arrived",
             body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
+            session_id: data.sessionId,
+            ip_address: meta.ip,
+            country,
+            browser: meta.browser,
+            device: meta.device,
             payload: {
               type_detail: "visitor",
               session_id: data.sessionId,
@@ -49,6 +56,7 @@ export const trackVisit = createServerFn({ method: "POST" })
               browser: meta.browser,
               device: meta.device,
             },
+            read: false,
             delivered: false,
           });
         } catch (e) {
@@ -89,10 +97,16 @@ export const trackVisit = createServerFn({ method: "POST" })
         });
 
       try {
-        await supabaseAdmin.from("notifications").insert({
+        await insertAdminNotification(supabaseAdmin, {
           type: "visitor",
+          type_detail: "visitor",
           title: "Visitor Arrived",
           body: `${meta.ip ?? "unknown"} — ${country ?? "unknown"} — ${meta.device} — ${meta.browser}`,
+          session_id: data.sessionId,
+          ip_address: meta.ip,
+          country,
+          browser: meta.browser,
+          device: meta.device,
           payload: {
             type_detail: "visitor",
             session_id: data.sessionId,
@@ -101,6 +115,7 @@ export const trackVisit = createServerFn({ method: "POST" })
             browser: meta.browser,
             device: meta.device,
           },
+          read: false,
           delivered: false,
         });
       } catch (e) {

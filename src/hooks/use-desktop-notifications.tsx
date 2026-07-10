@@ -31,6 +31,7 @@ export function useDesktopNotifications() {
 
     const isVisitor =
       note.type_detail === "visitor" ||
+      note.payload?.type_detail === "visitor" ||
       note.type === "visitor" ||
       note.type === "visitor_arrival" ||
       note.type === "visitor_left";
@@ -41,9 +42,9 @@ export function useDesktopNotifications() {
         note.session_id ? `Session: ${String(note.session_id).slice(0, 8)}` : null,
         `IP: ${note.ip_address || note.payload?.ip_address || "unknown"}`,
         `Country: ${note.country || note.payload?.country || "unknown"}`,
-        note.device ? `Device: ${note.device}` : null,
-        note.browser ? `Browser: ${note.browser}` : null,
-        note.filename ? `File: ${note.filename}` : null,
+        note.device || note.payload?.device ? `Device: ${note.device || note.payload?.device}` : null,
+        note.browser || note.payload?.browser ? `Browser: ${note.browser || note.payload?.browser}` : null,
+        note.filename || note.payload?.filename ? `File: ${note.filename || note.payload?.filename}` : null,
       ]
         .filter(Boolean)
         .join("\n");
