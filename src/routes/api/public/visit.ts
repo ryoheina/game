@@ -3,6 +3,15 @@ import { recordVisit } from "@/lib/analytics.functions";
 
 export const runtime = "nodejs";
 
+function isPublicVisitorPath(path: string) {
+  return ![
+    "/admin",
+    "/api",
+    "/auth",
+    "/me",
+  ].some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+}
+
 export const Route = createFileRoute("/api/public/visit")({
   server: {
     handlers: {
@@ -16,6 +25,13 @@ export const Route = createFileRoute("/api/public/visit")({
           if (sessionId.length < 8 || sessionId.length > 64) {
             return new Response(JSON.stringify({ success: false, error: "Invalid session" }), {
               status: 400,
+              headers: { "content-type": "application/json", "Cache-Control": "no-store" },
+            });
+          }
+
+          if (!isPublicVisitorPath(path)) {
+            return new Response(JSON.stringify({ success: true, skipped: true }), {
+              status: 200,
               headers: { "content-type": "application/json", "Cache-Control": "no-store" },
             });
           }

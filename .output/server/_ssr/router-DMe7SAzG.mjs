@@ -9,7 +9,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-De2_UMEN.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-DMe7SAzG.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-CA7UC6Yy.css";
@@ -38,6 +38,14 @@ function sendVisit(sessionId, path, heartbeat = false) {
 		})
 	});
 }
+function shouldTrackVisitorPath(pathname) {
+	return ![
+		"/admin",
+		"/api",
+		"/auth",
+		"/me"
+	].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
 function useVisitorTracking(pathname) {
 	const heartbeatPathRef = (0, import_react.useRef)(pathname);
 	const sentPathsRef = (0, import_react.useRef)(/* @__PURE__ */ new Set());
@@ -45,6 +53,7 @@ function useVisitorTracking(pathname) {
 		heartbeatPathRef.current = pathname;
 	}, [pathname]);
 	(0, import_react.useEffect)(() => {
+		if (!shouldTrackVisitorPath(pathname)) return;
 		const sid = ensureVisitorSession();
 		if (!sid) return;
 		if (sentPathsRef.current.has(pathname)) return;
@@ -52,10 +61,12 @@ function useVisitorTracking(pathname) {
 		sendVisit(sid, pathname).catch(() => {});
 	}, [pathname]);
 	(0, import_react.useEffect)(() => {
-		const sid = ensureVisitorSession();
-		if (!sid) return;
 		const sendHeartbeat = () => {
-			sendVisit(sid, heartbeatPathRef.current, true).catch(() => {});
+			const path = heartbeatPathRef.current;
+			if (!shouldTrackVisitorPath(path)) return;
+			const sid = ensureVisitorSession();
+			if (!sid) return;
+			sendVisit(sid, path, true).catch(() => {});
 		};
 		const heartbeat = window.setInterval(() => {
 			sendHeartbeat();
@@ -291,6 +302,14 @@ var Route$19 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
 });
+function isPublicVisitorPath(path) {
+	return ![
+		"/admin",
+		"/api",
+		"/auth",
+		"/me"
+	].some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+}
 var Route$18 = createFileRoute("/api/public/visit")({ server: { handlers: { POST: async ({ request }) => {
 	try {
 		const body = await request.json().catch(() => null);
@@ -302,6 +321,16 @@ var Route$18 = createFileRoute("/api/public/visit")({ server: { handlers: { POST
 			error: "Invalid session"
 		}), {
 			status: 400,
+			headers: {
+				"content-type": "application/json",
+				"Cache-Control": "no-store"
+			}
+		});
+		if (!isPublicVisitorPath(path)) return new Response(JSON.stringify({
+			success: true,
+			skipped: true
+		}), {
+			status: 200,
 			headers: {
 				"content-type": "application/json",
 				"Cache-Control": "no-store"

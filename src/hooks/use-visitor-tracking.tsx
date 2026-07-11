@@ -11,6 +11,15 @@ function sendVisit(sessionId: string, path: string, heartbeat = false) {
   });
 }
 
+function shouldTrackVisitorPath(pathname: string) {
+  return ![
+    "/admin",
+    "/api",
+    "/auth",
+    "/me",
+  ].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
 export function useVisitorTracking(pathname: string) {
   const heartbeatPathRef = useRef(pathname);
   const sentPathsRef = useRef<Set<string>>(new Set());
@@ -20,6 +29,7 @@ export function useVisitorTracking(pathname: string) {
   }, [pathname]);
 
   useEffect(() => {
+    if (!shouldTrackVisitorPath(pathname)) return;
     const sid = ensureVisitorSession();
     if (!sid) return;
     if (sentPathsRef.current.has(pathname)) return;
@@ -29,11 +39,12 @@ export function useVisitorTracking(pathname: string) {
   }, [pathname]);
 
   useEffect(() => {
-    const sid = ensureVisitorSession();
-    if (!sid) return;
-
     const sendHeartbeat = () => {
-      sendVisit(sid, heartbeatPathRef.current, true).catch(() => {});
+      const path = heartbeatPathRef.current;
+      if (!shouldTrackVisitorPath(path)) return;
+      const sid = ensureVisitorSession();
+      if (!sid) return;
+      sendVisit(sid, path, true).catch(() => {});
     };
 
     const heartbeat = window.setInterval(() => {
