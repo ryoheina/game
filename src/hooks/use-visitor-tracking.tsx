@@ -13,20 +13,17 @@ function sendVisit(sessionId: string, path: string, heartbeat = false) {
 
 export function useVisitorTracking(pathname: string) {
   const heartbeatPathRef = useRef(pathname);
-  const skippedInitialRouteRef = useRef(false);
+  const sentPathsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     heartbeatPathRef.current = pathname;
   }, [pathname]);
 
   useEffect(() => {
-    if (!skippedInitialRouteRef.current) {
-      skippedInitialRouteRef.current = true;
-      return;
-    }
-
     const sid = ensureVisitorSession();
     if (!sid) return;
+    if (sentPathsRef.current.has(pathname)) return;
+    sentPathsRef.current.add(pathname);
 
     sendVisit(sid, pathname).catch(() => {});
   }, [pathname]);

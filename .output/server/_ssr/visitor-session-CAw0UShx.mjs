@@ -1,4 +1,5 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/visitor-session-9sEIwEFU.js
+//#region node_modules/.nitro/vite/services/ssr/assets/visitor-session-CAw0UShx.js
+var fallbackSessionId = "";
 function ensureVisitorSession() {
 	if (typeof window === "undefined") return "";
 	const key = "loe_sid";
@@ -10,7 +11,8 @@ function ensureVisitorSession() {
 		}
 		return sid;
 	} catch {
-		return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+		if (!fallbackSessionId) fallbackSessionId = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+		return fallbackSessionId;
 	}
 }
 //#endregion

@@ -1,3 +1,5 @@
+let fallbackSessionId = "";
+
 export function ensureVisitorSession() {
   if (typeof window === "undefined") return "";
 
@@ -10,6 +12,9 @@ export function ensureVisitorSession() {
     }
     return sid;
   } catch {
-    return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    if (!fallbackSessionId) {
+      fallbackSessionId = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+    return fallbackSessionId;
   }
 }

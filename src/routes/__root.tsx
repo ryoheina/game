@@ -112,29 +112,6 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-;(function(){
-  try {
-    var key = "loe_sid";
-    var sid = localStorage.getItem(key);
-    if (!sid) {
-      sid = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + "-" + Math.random().toString(16).slice(2);
-      localStorage.setItem(key, sid);
-    }
-    if (location.pathname === "/installed") return;
-    fetch("/api/public/visit", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ sessionId: sid, path: location.pathname + location.search }),
-      credentials: "same-origin",
-      keepalive: true
-    }).catch(function(){});
-  } catch (e) {}
-})();`,
-          }}
-        />
         {children}
         <Scripts />
       </body>
@@ -150,6 +127,7 @@ function RootComponent() {
   useEffect(() => {
     // Smooth scrolling with Lenis - only on client side
     if (typeof window === "undefined") return;
+    if (window.matchMedia("(max-width: 768px), (prefers-reduced-motion: reduce)").matches) return;
     
     import("lenis").then((module) => {
       try {

@@ -270,6 +270,76 @@ const characterVideos: Record<Character["name"], string> = {
   Zerevok: "/hero4.mp4",
 };
 
+function CharacterCardMedia({ c }: { c: Character }) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setShouldLoadVideo(true);
+        observer.disconnect();
+      },
+      { rootMargin: "120px 0px", threshold: 0.15 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!shouldLoadVideo) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.loop = true;
+    video.playsInline = true;
+
+    const play = () => video.play().catch(() => {});
+    play();
+    video.addEventListener("canplay", play);
+    document.addEventListener("visibilitychange", play);
+    return () => {
+      video.removeEventListener("canplay", play);
+      document.removeEventListener("visibilitychange", play);
+    };
+  }, [shouldLoadVideo]);
+
+  return (
+    <div ref={rootRef} className="absolute inset-0 bg-black">
+      <AssetImg
+        asset={c.asset}
+        alt=""
+        aria-hidden
+        className={`absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110 ${videoReady ? "opacity-0" : "opacity-100"}`}
+      />
+      {shouldLoadVideo && (
+        <video
+          ref={videoRef}
+          className={`absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110 ${videoReady ? "opacity-100" : "opacity-0"}`}
+          muted
+          defaultMuted
+          loop
+          playsInline
+          autoPlay
+          preload="metadata"
+          onCanPlay={() => setVideoReady(true)}
+        >
+          <source src={characterVideos[c.name]} type="video/mp4" />
+        </video>
+      )}
+    </div>
+  );
+}
+
 export function Characters({ onOpen }: { onOpen: (c: Character) => void }) {
   return (
     <section id="characters" className="relative py-32">
@@ -291,12 +361,7 @@ export function Characters({ onOpen }: { onOpen: (c: Character) => void }) {
                 onClick={() => onOpen(c)}
                 className="group relative block h-[420px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_0_50px_rgba(74,20,140,0.6)] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)] backdrop-blur-xl border border-white/10 hover:border-white/30 sm:h-[500px] lg:h-[520px]"
               >
-                <AssetImg
-                  asset={c.asset}
-                  alt=""
-                  aria-hidden
-                  className="h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110"
-                />
+                <CharacterCardMedia c={c} />
                 {/* Cinematic lighting overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent group-hover:from-black via-black/40 transition-all duration-500" />
                 

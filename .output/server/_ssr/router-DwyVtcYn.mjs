@@ -3,16 +3,16 @@ import { n as require_jsx_runtime, r as require_react, t as QueryClientProvider 
 import { c as HeadContent, d as createRouter, f as Outlet, g as Link, h as createRootRouteWithContext, j as redirect, l as useLocation, m as createFileRoute, p as lazyRouteComponent, s as Scripts, v as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
 import { i as resolveCountry, n as insertAdminNotification, t as getClientMeta } from "./notifications-Dg5sYI5P.mjs";
 import { n as supabaseAdmin } from "./client.server-CPH4V7T6.mjs";
-import { t as ensureVisitorSession } from "./visitor-session-9sEIwEFU.mjs";
+import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
 import { t as recordVisit } from "./analytics.functions-BfT3GJDi.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-gejF_D2H.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-DwyVtcYn.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-4sNqQTJP.css";
+var styles_default = "/assets/styles-CBpgePik.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -40,17 +40,15 @@ function sendVisit(sessionId, path, heartbeat = false) {
 }
 function useVisitorTracking(pathname) {
 	const heartbeatPathRef = (0, import_react.useRef)(pathname);
-	const skippedInitialRouteRef = (0, import_react.useRef)(false);
+	const sentPathsRef = (0, import_react.useRef)(/* @__PURE__ */ new Set());
 	(0, import_react.useEffect)(() => {
 		heartbeatPathRef.current = pathname;
 	}, [pathname]);
 	(0, import_react.useEffect)(() => {
-		if (!skippedInitialRouteRef.current) {
-			skippedInitialRouteRef.current = true;
-			return;
-		}
 		const sid = ensureVisitorSession();
 		if (!sid) return;
+		if (sentPathsRef.current.has(pathname)) return;
+		sentPathsRef.current.add(pathname);
 		sendVisit(sid, pathname).catch(() => {});
 	}, [pathname]);
 	(0, import_react.useEffect)(() => {
@@ -225,29 +223,7 @@ var Route$25 = createRootRouteWithContext()({
 function RootShell({ children }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("html", {
 		lang: "en",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("head", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeadContent, {}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("body", { children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", { dangerouslySetInnerHTML: { __html: `
-;(function(){
-  try {
-    var key = "loe_sid";
-    var sid = localStorage.getItem(key);
-    if (!sid) {
-      sid = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + "-" + Math.random().toString(16).slice(2);
-      localStorage.setItem(key, sid);
-    }
-    if (location.pathname === "/installed") return;
-    fetch("/api/public/visit", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ sessionId: sid, path: location.pathname + location.search }),
-      credentials: "same-origin",
-      keepalive: true
-    }).catch(function(){});
-  } catch (e) {}
-})();` } }),
-			children,
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Scripts, {})
-		] })]
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("head", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeadContent, {}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("body", { children: [children, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Scripts, {})] })]
 	});
 }
 function RootComponent() {
@@ -255,6 +231,7 @@ function RootComponent() {
 	useVisitorTracking(useLocation().pathname);
 	(0, import_react.useEffect)(() => {
 		if (typeof window === "undefined") return;
+		if (window.matchMedia("(max-width: 768px), (prefers-reduced-motion: reduce)").matches) return;
 		import("../_libs/lenis.mjs").then((n) => n.t).then((module) => {
 			try {
 				const Lenis = module.default;
@@ -288,7 +265,7 @@ function RootComponent() {
 }
 var $$splitComponentImporter$5 = () => import("./me-fuu5GXiX.mjs");
 var Route$24 = createFileRoute("/me")({ component: lazyRouteComponent($$splitComponentImporter$5, "component") });
-var $$splitComponentImporter$4 = () => import("./installed-dXy4IN8C.mjs");
+var $$splitComponentImporter$4 = () => import("./installed-EYv55OzD.mjs");
 var Route$23 = createFileRoute("/installed")({
 	head: () => ({ meta: [{ title: "Legends of Eternity" }, {
 		name: "robots",
@@ -315,7 +292,7 @@ var Route$21 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-DjtmKdCG.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-BwykSGfl.mjs");
 var Route$20 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },

@@ -3,10 +3,10 @@ import { i as AnimatePresence, n as useScroll, r as motion, t as useTransform } 
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow, r as Particles, t as Fog } from "./fx-CW4x6DdP.mjs";
 import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-import { t as ensureVisitorSession } from "./visitor-session-9sEIwEFU.mjs";
+import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
 import { n as submitContact } from "./analytics.functions-BfT3GJDi.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-DjtmKdCG.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-BwykSGfl.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -492,6 +492,67 @@ var characterVideos = {
 	Elysia: "/hero2.mp4",
 	Zerevok: "/hero4.mp4"
 };
+function CharacterCardMedia({ c }) {
+	const rootRef = (0, import_react.useRef)(null);
+	const videoRef = (0, import_react.useRef)(null);
+	const [shouldLoadVideo, setShouldLoadVideo] = (0, import_react.useState)(false);
+	const [videoReady, setVideoReady] = (0, import_react.useState)(false);
+	(0, import_react.useEffect)(() => {
+		const node = rootRef.current;
+		if (!node) return;
+		const observer = new IntersectionObserver(([entry]) => {
+			if (!entry?.isIntersecting) return;
+			setShouldLoadVideo(true);
+			observer.disconnect();
+		}, {
+			rootMargin: "120px 0px",
+			threshold: .15
+		});
+		observer.observe(node);
+		return () => observer.disconnect();
+	}, []);
+	(0, import_react.useEffect)(() => {
+		if (!shouldLoadVideo) return;
+		const video = videoRef.current;
+		if (!video) return;
+		video.muted = true;
+		video.defaultMuted = true;
+		video.loop = true;
+		video.playsInline = true;
+		const play = () => video.play().catch(() => {});
+		play();
+		video.addEventListener("canplay", play);
+		document.addEventListener("visibilitychange", play);
+		return () => {
+			video.removeEventListener("canplay", play);
+			document.removeEventListener("visibilitychange", play);
+		};
+	}, [shouldLoadVideo]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		ref: rootRef,
+		className: "absolute inset-0 bg-black",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
+			asset: c.asset,
+			alt: "",
+			"aria-hidden": true,
+			className: `absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110 ${videoReady ? "opacity-0" : "opacity-100"}`
+		}), shouldLoadVideo && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("video", {
+			ref: videoRef,
+			className: `absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110 ${videoReady ? "opacity-100" : "opacity-0"}`,
+			muted: true,
+			defaultMuted: true,
+			loop: true,
+			playsInline: true,
+			autoPlay: true,
+			preload: "metadata",
+			onCanPlay: () => setVideoReady(true),
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("source", {
+				src: characterVideos[c.name],
+				type: "video/mp4"
+			})
+		})]
+	});
+}
 function Characters({ onOpen }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
 		id: "characters",
@@ -522,12 +583,7 @@ function Characters({ onOpen }) {
 						onClick: () => onOpen(c),
 						className: "group relative block h-[420px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_0_50px_rgba(74,20,140,0.6)] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)] backdrop-blur-xl border border-white/10 hover:border-white/30 sm:h-[500px] lg:h-[520px]",
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
-								asset: c.asset,
-								alt: "",
-								"aria-hidden": true,
-								className: "h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110"
-							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CharacterCardMedia, { c }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent group-hover:from-black via-black/40 transition-all duration-500" }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100",
