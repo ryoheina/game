@@ -124,41 +124,6 @@ function RootComponent() {
   const location = useLocation();
   useVisitorTracking(location.pathname);
 
-  useEffect(() => {
-    // Smooth scrolling with Lenis - only on client side
-    if (typeof window === "undefined") return;
-    if (window.matchMedia("(max-width: 768px), (prefers-reduced-motion: reduce)").matches) return;
-    
-    import("lenis").then((module) => {
-      try {
-        const Lenis = module.default;
-        const lenis = new Lenis({
-          duration: 1.2,
-          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-          direction: "vertical",
-          gestureDirection: "vertical",
-          smooth: true,
-          smoothTouch: false,
-        });
-
-        function raf(time: number) {
-          lenis.raf(time);
-          requestAnimationFrame(raf);
-        }
-
-        requestAnimationFrame(raf);
-        
-        return () => {
-          lenis.destroy?.();
-        };
-      } catch (e) {
-        console.warn("Lenis initialization failed", e);
-      }
-    }).catch(() => {
-      console.warn("Lenis package not available");
-    });
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,_#200a3b,_#05070d_40%,_#05070d_100%)]" />

@@ -9,10 +9,10 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-DwyVtcYn.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-De2_UMEN.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-CBpgePik.css";
+var styles_default = "/assets/styles-CA7UC6Yy.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -229,35 +229,6 @@ function RootShell({ children }) {
 function RootComponent() {
 	const { queryClient } = Route$25.useRouteContext();
 	useVisitorTracking(useLocation().pathname);
-	(0, import_react.useEffect)(() => {
-		if (typeof window === "undefined") return;
-		if (window.matchMedia("(max-width: 768px), (prefers-reduced-motion: reduce)").matches) return;
-		import("../_libs/lenis.mjs").then((n) => n.t).then((module) => {
-			try {
-				const Lenis = module.default;
-				const lenis = new Lenis({
-					duration: 1.2,
-					easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-					direction: "vertical",
-					gestureDirection: "vertical",
-					smooth: true,
-					smoothTouch: false
-				});
-				function raf(time) {
-					lenis.raf(time);
-					requestAnimationFrame(raf);
-				}
-				requestAnimationFrame(raf);
-				return () => {
-					lenis.destroy?.();
-				};
-			} catch (e) {
-				console.warn("Lenis initialization failed", e);
-			}
-		}).catch(() => {
-			console.warn("Lenis package not available");
-		});
-	}, []);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(QueryClientProvider, {
 		client: queryClient,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,_#200a3b,_#05070d_40%,_#05070d_100%)]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Outlet, {})]
@@ -292,7 +263,7 @@ var Route$21 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-BwykSGfl.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-C8bsJ-Na.mjs");
 var Route$20 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },

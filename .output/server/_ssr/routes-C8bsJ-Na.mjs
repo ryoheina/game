@@ -6,7 +6,7 @@ import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[..
 import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
 import { n as submitContact } from "./analytics.functions-BfT3GJDi.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-BwykSGfl.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-C8bsJ-Na.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -147,12 +147,14 @@ function assetSources(key) {
 		cdn: CDN[key]
 	};
 }
-function AssetImg({ asset, onError, ...props }) {
+function AssetImg({ asset, onError, loading = "lazy", decoding = "async", ...props }) {
 	const { local, cdn } = assetSources(asset);
 	const [src, setSrc] = (0, import_react.useState)(local);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
 		...props,
 		src,
+		loading,
+		decoding,
 		onError: (e) => {
 			if (src !== cdn) setSrc(cdn);
 			onError?.(e);
@@ -493,24 +495,9 @@ var characterVideos = {
 	Zerevok: "/hero4.mp4"
 };
 function CharacterCardMedia({ c }) {
-	const rootRef = (0, import_react.useRef)(null);
 	const videoRef = (0, import_react.useRef)(null);
 	const [shouldLoadVideo, setShouldLoadVideo] = (0, import_react.useState)(false);
 	const [videoReady, setVideoReady] = (0, import_react.useState)(false);
-	(0, import_react.useEffect)(() => {
-		const node = rootRef.current;
-		if (!node) return;
-		const observer = new IntersectionObserver(([entry]) => {
-			if (!entry?.isIntersecting) return;
-			setShouldLoadVideo(true);
-			observer.disconnect();
-		}, {
-			rootMargin: "120px 0px",
-			threshold: .15
-		});
-		observer.observe(node);
-		return () => observer.disconnect();
-	}, []);
 	(0, import_react.useEffect)(() => {
 		if (!shouldLoadVideo) return;
 		const video = videoRef.current;
@@ -529,28 +516,42 @@ function CharacterCardMedia({ c }) {
 		};
 	}, [shouldLoadVideo]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		ref: rootRef,
 		className: "absolute inset-0 bg-black",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
-			asset: c.asset,
-			alt: "",
-			"aria-hidden": true,
-			className: `absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110 ${videoReady ? "opacity-0" : "opacity-100"}`
-		}), shouldLoadVideo && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("video", {
-			ref: videoRef,
-			className: `absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110 ${videoReady ? "opacity-100" : "opacity-0"}`,
-			muted: true,
-			defaultMuted: true,
-			loop: true,
-			playsInline: true,
-			autoPlay: true,
-			preload: "metadata",
-			onCanPlay: () => setVideoReady(true),
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("source", {
-				src: characterVideos[c.name],
-				type: "video/mp4"
+		onPointerEnter: () => setShouldLoadVideo(true),
+		onFocus: () => setShouldLoadVideo(true),
+		onTouchStart: () => setShouldLoadVideo(true),
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "absolute inset-0 scale-110 opacity-70 blur-xl",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
+					asset: c.asset,
+					alt: "",
+					"aria-hidden": true,
+					className: "h-full w-full object-cover"
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetImg, {
+				asset: c.asset,
+				alt: "",
+				"aria-hidden": true,
+				className: `absolute inset-0 h-full w-full object-contain transition-all duration-[900ms] group-hover:scale-[1.02] group-hover:brightness-110 ${videoReady ? "opacity-0" : "opacity-100"}`
+			}),
+			shouldLoadVideo && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("video", {
+				ref: videoRef,
+				className: `absolute inset-0 h-full w-full object-contain transition-all duration-[900ms] group-hover:scale-[1.02] group-hover:brightness-110 ${videoReady ? "opacity-100" : "opacity-0"}`,
+				muted: true,
+				defaultMuted: true,
+				loop: true,
+				playsInline: true,
+				autoPlay: true,
+				preload: "metadata",
+				onCanPlay: () => setVideoReady(true),
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("source", {
+					src: characterVideos[c.name],
+					type: "video/mp4"
+				})
 			})
-		})]
+		]
 	});
 }
 function Characters({ onOpen }) {

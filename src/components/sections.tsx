@@ -271,27 +271,9 @@ const characterVideos: Record<Character["name"], string> = {
 };
 
 function CharacterCardMedia({ c }: { c: Character }) {
-  const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
-
-  useEffect(() => {
-    const node = rootRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) return;
-        setShouldLoadVideo(true);
-        observer.disconnect();
-      },
-      { rootMargin: "120px 0px", threshold: 0.15 },
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     if (!shouldLoadVideo) return;
@@ -314,17 +296,25 @@ function CharacterCardMedia({ c }: { c: Character }) {
   }, [shouldLoadVideo]);
 
   return (
-    <div ref={rootRef} className="absolute inset-0 bg-black">
+    <div
+      className="absolute inset-0 bg-black"
+      onPointerEnter={() => setShouldLoadVideo(true)}
+      onFocus={() => setShouldLoadVideo(true)}
+      onTouchStart={() => setShouldLoadVideo(true)}
+    >
+      <div className="absolute inset-0 scale-110 opacity-70 blur-xl">
+        <AssetImg asset={c.asset} alt="" aria-hidden className="h-full w-full object-cover" />
+      </div>
       <AssetImg
         asset={c.asset}
         alt=""
         aria-hidden
-        className={`absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110 ${videoReady ? "opacity-0" : "opacity-100"}`}
+        className={`absolute inset-0 h-full w-full object-contain transition-all duration-[900ms] group-hover:scale-[1.02] group-hover:brightness-110 ${videoReady ? "opacity-0" : "opacity-100"}`}
       />
       {shouldLoadVideo && (
         <video
           ref={videoRef}
-          className={`absolute inset-0 h-full w-full object-cover transition-all duration-[1800ms] group-hover:scale-110 group-hover:brightness-110 ${videoReady ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 h-full w-full object-contain transition-all duration-[900ms] group-hover:scale-[1.02] group-hover:brightness-110 ${videoReady ? "opacity-100" : "opacity-0"}`}
           muted
           defaultMuted
           loop
