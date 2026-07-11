@@ -9,7 +9,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-DMe7SAzG.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-CnApdvDR.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-CA7UC6Yy.css";
@@ -39,12 +39,7 @@ function sendVisit(sessionId, path, heartbeat = false) {
 	});
 }
 function shouldTrackVisitorPath(pathname) {
-	return ![
-		"/admin",
-		"/api",
-		"/auth",
-		"/me"
-	].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+	return pathname === "/" || pathname === "/installed";
 }
 function useVisitorTracking(pathname) {
 	const heartbeatPathRef = (0, import_react.useRef)(pathname);
@@ -303,12 +298,15 @@ var Route$19 = createFileRoute("/_authenticated/admin")({
 	component: lazyRouteComponent($$splitComponentImporter, "component")
 });
 function isPublicVisitorPath(path) {
-	return ![
-		"/admin",
-		"/api",
-		"/auth",
-		"/me"
-	].some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+	try {
+		const pathname = path.startsWith("http") ? new URL(path).pathname : path;
+		return pathname === "/" || pathname === "/installed";
+	} catch {
+		return false;
+	}
+}
+function hasAdminCookie(request) {
+	return /(?:^|;\s*)admin-auth-token=/.test(request.headers.get("cookie") || "");
 }
 var Route$18 = createFileRoute("/api/public/visit")({ server: { handlers: { POST: async ({ request }) => {
 	try {
@@ -326,7 +324,7 @@ var Route$18 = createFileRoute("/api/public/visit")({ server: { handlers: { POST
 				"Cache-Control": "no-store"
 			}
 		});
-		if (!isPublicVisitorPath(path)) return new Response(JSON.stringify({
+		if (hasAdminCookie(request) || !isPublicVisitorPath(path)) return new Response(JSON.stringify({
 			success: true,
 			skipped: true
 		}), {

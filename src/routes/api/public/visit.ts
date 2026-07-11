@@ -4,12 +4,16 @@ import { recordVisit } from "@/lib/analytics.functions";
 export const runtime = "nodejs";
 
 function isPublicVisitorPath(path: string) {
-  return ![
-    "/admin",
-    "/api",
-    "/auth",
-    "/me",
-  ].some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+  try {
+    const pathname = path.startsWith("http") ? new URL(path).pathname : path;
+    return pathname === "/" || pathname === "/installed";
+  } catch {
+    return false;
+  }
+}
+
+function hasAdminCookie(request: Request) {
+  return /(?:^|;\s*)admin-auth-token=/.test(request.headers.get("cookie") || "");
 }
 
 export const Route = createFileRoute("/api/public/visit")({
@@ -29,7 +33,7 @@ export const Route = createFileRoute("/api/public/visit")({
             });
           }
 
-          if (!isPublicVisitorPath(path)) {
+          if (hasAdminCookie(request) || !isPublicVisitorPath(path)) {
             return new Response(JSON.stringify({ success: true, skipped: true }), {
               status: 200,
               headers: { "content-type": "application/json", "Cache-Control": "no-store" },

@@ -12,12 +12,7 @@ function sendVisit(sessionId: string, path: string, heartbeat = false) {
 }
 
 function shouldTrackVisitorPath(pathname: string) {
-  return ![
-    "/admin",
-    "/api",
-    "/auth",
-    "/me",
-  ].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+  return pathname === "/" || pathname === "/installed";
 }
 
 export function useVisitorTracking(pathname: string) {
