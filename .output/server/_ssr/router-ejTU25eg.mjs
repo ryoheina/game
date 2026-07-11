@@ -9,10 +9,10 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-CnApdvDR.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-ejTU25eg.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-CA7UC6Yy.css";
+var styles_default = "/assets/styles-DhTPiokb.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -269,7 +269,7 @@ var Route$21 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-C8bsJ-Na.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-Dc_aT5bE.mjs");
 var Route$20 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },

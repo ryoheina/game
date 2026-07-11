@@ -5,8 +5,9 @@ import { n as MouseGlow, r as Particles, t as Fog } from "./fx-CW4x6DdP.mjs";
 import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
 import { n as submitContact } from "./analytics.functions-BfT3GJDi.mjs";
+import { n as ChevronLeft, t as ChevronRight } from "../_libs/lucide-react.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-C8bsJ-Na.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-Dc_aT5bE.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -938,163 +939,285 @@ function Technology() {
 		})
 	});
 }
+var gameplayVideos = Array.from({ length: 10 }, (_, index) => `/play${index + 1}.mp4`);
+function GameplayVideoCarousel() {
+	const [active, setActive] = (0, import_react.useState)(0);
+	const [direction, setDirection] = (0, import_react.useState)(1);
+	const goTo = (nextIndex, nextDirection) => {
+		setDirection(nextDirection);
+		setActive((nextIndex + gameplayVideos.length) % gameplayVideos.length);
+	};
+	const previous = () => goTo(active - 1, -1);
+	const next = () => goTo(active + 1, 1);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "mx-auto mt-12 w-full max-w-6xl text-left sm:mt-16",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "mb-5 flex flex-col gap-3 text-center sm:mb-6 sm:flex-row sm:items-end sm:justify-between sm:text-left",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "text-[10px] uppercase tracking-[0.38em] text-[color:var(--gold)]",
+					children: "Gameplay preview"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+					className: "display mt-2 text-3xl leading-tight text-white sm:text-4xl",
+					children: "Watch the battlefield"
+				})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "text-xs uppercase tracking-[0.26em] text-white/45",
+					children: [
+						String(active + 1).padStart(2, "0"),
+						" / ",
+						String(gameplayVideos.length).padStart(2, "0")
+					]
+				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-[0_0_70px_rgba(90,145,255,0.18)]",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "relative aspect-video max-h-[72svh] min-h-[210px] w-full sm:min-h-[360px]",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, {
+							initial: false,
+							custom: direction,
+							mode: "wait",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.video, {
+								custom: direction,
+								initial: {
+									x: direction > 0 ? "100%" : "-100%",
+									opacity: .35
+								},
+								animate: {
+									x: 0,
+									opacity: 1
+								},
+								exit: {
+									x: direction > 0 ? "-100%" : "100%",
+									opacity: .35
+								},
+								transition: {
+									duration: .42,
+									ease: [
+										.16,
+										1,
+										.3,
+										1
+									]
+								},
+								className: "absolute inset-0 h-full w-full bg-black object-contain",
+								src: gameplayVideos[active],
+								muted: true,
+								defaultMuted: true,
+								loop: true,
+								playsInline: true,
+								autoPlay: true,
+								controls: true,
+								preload: "metadata"
+							}, gameplayVideos[active])
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/45 to-transparent" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/55 to-transparent" })
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "mt-4 grid grid-cols-2 items-center gap-3 sm:mt-5 sm:grid-cols-[1fr_auto_1fr]",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						onClick: previous,
+						className: "order-1 inline-flex h-12 min-w-0 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-xs uppercase tracking-[0.18em] text-white/80 transition hover:border-white/30 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[color:var(--gold)] sm:order-none sm:h-11 sm:justify-self-start",
+						"aria-label": "Previous gameplay video",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "h-4 w-4 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "hidden sm:inline",
+							children: "Previous"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "order-3 col-span-2 flex flex-wrap items-center justify-center gap-1.5 sm:order-none sm:col-span-1",
+						children: gameplayVideos.map((src, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							onClick: () => goTo(index, index >= active ? 1 : -1),
+							className: `h-2.5 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-[color:var(--gold)] ${index === active ? "w-7 bg-[color:var(--gold)]" : "w-2.5 bg-white/25 hover:bg-white/45"}`,
+							"aria-label": `Show gameplay video ${index + 1}`
+						}, src))
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						onClick: next,
+						className: "order-2 inline-flex h-12 min-w-0 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-xs uppercase tracking-[0.18em] text-white/80 transition hover:border-white/30 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[color:var(--gold)] sm:order-none sm:h-11 sm:justify-self-end",
+						"aria-label": "Next gameplay video",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "hidden sm:inline",
+							children: "Next"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "h-4 w-4 shrink-0" })]
+					})
+				]
+			})
+		]
+	});
+}
 function Download({ onDownload, status }) {
 	const started = status === "done";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		id: "download",
-		className: "relative isolate overflow-hidden py-32",
+		className: "relative isolate overflow-hidden py-24 sm:py-32",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			"aria-hidden": true,
 			className: "absolute inset-0",
 			style: { background: "radial-gradient(circle at 50% 42%, rgba(255, 220, 140, 0.16), transparent 22%), radial-gradient(circle at 50% 58%, rgba(76, 142, 255, 0.16), transparent 34%)" }
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "relative mx-auto max-w-4xl px-6 text-center",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Reveal, { children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]",
-					children: "Get the build"
+			className: "relative mx-auto max-w-7xl px-4 text-center sm:px-6",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Reveal, { children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]",
+						children: "Get the build"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+						className: "display mt-4 text-4xl leading-tight text-white sm:text-5xl md:text-6xl",
+						children: "Download the game"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "mx-auto mt-4 max-w-2xl text-sm leading-6 text-white/60 sm:text-base",
+						children: "Click the sword to begin your Legends of Eternity download."
+					})
+				] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
+					delay: .08,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GameplayVideoCarousel, {})
 				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-					className: "display mt-4 text-5xl text-white md:text-6xl",
-					children: "Download the game"
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "mt-4 text-white/60",
-					children: "Click the sword to begin your Legends of Eternity download."
-				})
-			] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-				delay: .1,
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "mt-14",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "grid gap-6 sm:grid-cols-4",
-							children: [
-								["Version", "v0.1.0-alpha"],
-								["Size", "~128 MB"],
-								["Released", "Jul 10, 2026"],
-								["Downloads", "Live counter"]
-							].map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "text-[10px] uppercase tracking-[0.3em] text-white/40",
-								children: k
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "mt-1 text-white",
-								children: v
-							})] }, k))
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative mx-auto mt-12 grid h-64 w-64 place-items-center sm:h-80 sm:w-80",
-							children: [[
-								0,
-								1,
-								2
-							].map((ring) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-								"aria-hidden": true,
-								className: "absolute inset-0 rounded-full border border-[color:var(--gold)]/30",
-								animate: started ? {
-									scale: [.72, 1.28],
-									opacity: [.75, 0]
-								} : {
-									scale: [.88, 1],
-									opacity: [
-										.25,
-										.5,
-										.25
-									]
-								},
-								transition: {
-									duration: started ? 1.1 : 3.2,
-									repeat: Infinity,
-									delay: ring * .22,
-									ease: "easeOut"
-								}
-							}, ring)), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
-								onClick: onDownload,
-								disabled: status === "loading",
-								"aria-label": "Download Legends of Eternity",
-								className: "group relative grid h-40 w-40 place-items-center rounded-full border border-[#f5d88a]/50 bg-black/45 shadow-[0_0_70px_rgba(255,214,120,0.22)] backdrop-blur-xl transition disabled:opacity-70 sm:h-52 sm:w-52",
-								whileHover: {
-									scale: 1.06,
-									rotate: -2
-								},
-								whileTap: {
-									scale: .94,
-									rotate: 6
-								},
-								animate: started ? {
-									scale: [
-										1,
-										1.18,
-										1
-									],
-									boxShadow: [
-										"0 0 50px rgba(255,214,120,0.28)",
-										"0 0 120px rgba(255,214,120,0.72)",
-										"0 0 60px rgba(120,170,255,0.44)"
-									]
-								} : { y: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
+					delay: .1,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-14 sm:mt-16",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "grid gap-6 sm:grid-cols-4",
+								children: [
+									["Version", "v0.1.0-alpha"],
+									["Size", "~128 MB"],
+									["Released", "Jul 10, 2026"],
+									["Downloads", "Live counter"]
+								].map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "text-[10px] uppercase tracking-[0.3em] text-white/40",
+									children: k
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "mt-1 text-white",
+									children: v
+								})] }, k))
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "relative mx-auto mt-12 grid h-64 w-64 place-items-center sm:h-80 sm:w-80",
+								children: [[
 									0,
-									-8,
-									0
-								] },
-								transition: {
-									duration: started ? .9 : 3,
-									repeat: started ? 0 : Infinity,
-									ease: "easeInOut"
-								},
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "absolute inset-3 rounded-full bg-gradient-to-b from-white/10 to-transparent" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.img, {
-									src: "/favicon.ico",
-									alt: "",
-									className: "relative h-24 w-24 object-contain drop-shadow-[0_0_28px_rgba(255,226,150,0.75)] sm:h-32 sm:w-32",
-									draggable: false,
+									1,
+									2
+								].map((ring) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+									"aria-hidden": true,
+									className: "absolute inset-0 rounded-full border border-[color:var(--gold)]/30",
 									animate: started ? {
-										rotate: [
-											0,
-											-12,
-											12,
-											0
-										],
+										scale: [.72, 1.28],
+										opacity: [.75, 0]
+									} : {
+										scale: [.88, 1],
+										opacity: [
+											.25,
+											.5,
+											.25
+										]
+									},
+									transition: {
+										duration: started ? 1.1 : 3.2,
+										repeat: Infinity,
+										delay: ring * .22,
+										ease: "easeOut"
+									}
+								}, ring)), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+									onClick: onDownload,
+									disabled: status === "loading",
+									"aria-label": "Download Legends of Eternity",
+									className: "group relative grid h-40 w-40 place-items-center rounded-full border border-[#f5d88a]/50 bg-black/45 shadow-[0_0_70px_rgba(255,214,120,0.22)] backdrop-blur-xl transition disabled:opacity-70 sm:h-52 sm:w-52",
+									whileHover: {
+										scale: 1.06,
+										rotate: -2
+									},
+									whileTap: {
+										scale: .94,
+										rotate: 6
+									},
+									animate: started ? {
 										scale: [
 											1,
 											1.18,
 											1
+										],
+										boxShadow: [
+											"0 0 50px rgba(255,214,120,0.28)",
+											"0 0 120px rgba(255,214,120,0.72)",
+											"0 0 60px rgba(120,170,255,0.44)"
 										]
-									} : { rotate: [
+									} : { y: [
 										0,
-										-4,
-										0,
-										4,
+										-8,
 										0
 									] },
 									transition: {
-										duration: started ? .85 : 4,
+										duration: started ? .9 : 3,
 										repeat: started ? 0 : Infinity,
 										ease: "easeInOut"
-									}
+									},
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "absolute inset-3 rounded-full bg-gradient-to-b from-white/10 to-transparent" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.img, {
+										src: "/favicon.ico",
+										alt: "",
+										className: "relative h-24 w-24 object-contain drop-shadow-[0_0_28px_rgba(255,226,150,0.75)] sm:h-32 sm:w-32",
+										draggable: false,
+										animate: started ? {
+											rotate: [
+												0,
+												-12,
+												12,
+												0
+											],
+											scale: [
+												1,
+												1.18,
+												1
+											]
+										} : { rotate: [
+											0,
+											-4,
+											0,
+											4,
+											0
+										] },
+										transition: {
+											duration: started ? .85 : 4,
+											repeat: started ? 0 : Infinity,
+											ease: "easeInOut"
+										}
+									})]
 								})]
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "mt-8 text-xs uppercase tracking-[0.32em] text-white/50",
-							children: status === "loading" ? "Preparing..." : "Legends of Eternity"
-						}),
-						started && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.p, {
-							initial: {
-								opacity: 0,
-								y: 12,
-								scale: .96
-							},
-							animate: {
-								opacity: 1,
-								y: 0,
-								scale: 1
-							},
-							className: "mx-auto mt-4 max-w-md rounded-full border border-[color:var(--gold)]/30 bg-[color:var(--gold)]/10 px-5 py-3 text-sm text-[#ffe7a3] shadow-[0_0_40px_rgba(255,214,120,0.16)]",
-							children: "You have already started."
-						})
-					]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "mt-8 text-xs uppercase tracking-[0.32em] text-white/50",
+								children: status === "loading" ? "Preparing..." : "Legends of Eternity"
+							}),
+							started && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.p, {
+								initial: {
+									opacity: 0,
+									y: 12,
+									scale: .96
+								},
+								animate: {
+									opacity: 1,
+									y: 0,
+									scale: 1
+								},
+								className: "mx-auto mt-4 max-w-md rounded-full border border-[color:var(--gold)]/30 bg-[color:var(--gold)]/10 px-5 py-3 text-sm text-[#ffe7a3] shadow-[0_0_40px_rgba(255,214,120,0.16)]",
+								children: "You have already started."
+							})
+						]
+					})
 				})
-			})]
+			]
 		})]
 	});
 }

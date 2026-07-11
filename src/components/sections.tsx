@@ -1,4 +1,5 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { AssetImg } from "@/components/asset-img";
@@ -623,11 +624,103 @@ export function Technology() {
   );
 }
 
+const gameplayVideos = Array.from({ length: 10 }, (_, index) => `/play${index + 1}.mp4`);
+
+function GameplayVideoCarousel() {
+  const [active, setActive] = useState(0);
+  const [direction, setDirection] = useState(1);
+
+  const goTo = (nextIndex: number, nextDirection: number) => {
+    setDirection(nextDirection);
+    setActive((nextIndex + gameplayVideos.length) % gameplayVideos.length);
+  };
+
+  const previous = () => goTo(active - 1, -1);
+  const next = () => goTo(active + 1, 1);
+
+  return (
+    <div className="mx-auto mt-12 w-full max-w-6xl text-left sm:mt-16">
+      <div className="mb-5 flex flex-col gap-3 text-center sm:mb-6 sm:flex-row sm:items-end sm:justify-between sm:text-left">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.38em] text-[color:var(--gold)]">Gameplay preview</div>
+          <h3 className="display mt-2 text-3xl leading-tight text-white sm:text-4xl">Watch the battlefield</h3>
+        </div>
+        <div className="text-xs uppercase tracking-[0.26em] text-white/45">
+          {String(active + 1).padStart(2, "0")} / {String(gameplayVideos.length).padStart(2, "0")}
+        </div>
+      </div>
+
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-[0_0_70px_rgba(90,145,255,0.18)]">
+        <div className="relative aspect-video max-h-[72svh] min-h-[210px] w-full sm:min-h-[360px]">
+          <AnimatePresence initial={false} custom={direction} mode="wait">
+            <motion.video
+              key={gameplayVideos[active]}
+              custom={direction}
+              initial={{ x: direction > 0 ? "100%" : "-100%", opacity: 0.35 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: direction > 0 ? "-100%" : "100%", opacity: 0.35 }}
+              transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute inset-0 h-full w-full bg-black object-contain"
+              src={gameplayVideos[active]}
+              muted
+              defaultMuted
+              loop
+              playsInline
+              autoPlay
+              controls
+              preload="metadata"
+            />
+          </AnimatePresence>
+        </div>
+
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/45 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/55 to-transparent" />
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 items-center gap-3 sm:mt-5 sm:grid-cols-[1fr_auto_1fr]">
+        <button
+          type="button"
+          onClick={previous}
+          className="order-1 inline-flex h-12 min-w-0 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-xs uppercase tracking-[0.18em] text-white/80 transition hover:border-white/30 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[color:var(--gold)] sm:order-none sm:h-11 sm:justify-self-start"
+          aria-label="Previous gameplay video"
+        >
+          <ChevronLeft className="h-4 w-4 shrink-0" />
+          <span className="hidden sm:inline">Previous</span>
+        </button>
+
+        <div className="order-3 col-span-2 flex flex-wrap items-center justify-center gap-1.5 sm:order-none sm:col-span-1">
+          {gameplayVideos.map((src, index) => (
+            <button
+              key={src}
+              type="button"
+              onClick={() => goTo(index, index >= active ? 1 : -1)}
+              className={`h-2.5 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-[color:var(--gold)] ${
+                index === active ? "w-7 bg-[color:var(--gold)]" : "w-2.5 bg-white/25 hover:bg-white/45"
+              }`}
+              aria-label={`Show gameplay video ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={next}
+          className="order-2 inline-flex h-12 min-w-0 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-xs uppercase tracking-[0.18em] text-white/80 transition hover:border-white/30 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[color:var(--gold)] sm:order-none sm:h-11 sm:justify-self-end"
+          aria-label="Next gameplay video"
+        >
+          <span className="hidden sm:inline">Next</span>
+          <ChevronRight className="h-4 w-4 shrink-0" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function Download({ onDownload, status }: { onDownload: () => void; status: "idle" | "loading" | "done" }) {
   const started = status === "done";
 
   return (
-    <section id="download" className="relative isolate overflow-hidden py-32">
+    <section id="download" className="relative isolate overflow-hidden py-24 sm:py-32">
       <div
         aria-hidden
         className="absolute inset-0"
@@ -636,17 +729,21 @@ export function Download({ onDownload, status }: { onDownload: () => void; statu
             "radial-gradient(circle at 50% 42%, rgba(255, 220, 140, 0.16), transparent 22%), radial-gradient(circle at 50% 58%, rgba(76, 142, 255, 0.16), transparent 34%)",
         }}
       />
-      <div className="relative mx-auto max-w-4xl px-6 text-center">
+      <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6">
         <Reveal>
           <span className="text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]">Get the build</span>
-          <h2 className="display mt-4 text-5xl text-white md:text-6xl">Download the game</h2>
-          <p className="mt-4 text-white/60">
+          <h2 className="display mt-4 text-4xl leading-tight text-white sm:text-5xl md:text-6xl">Download the game</h2>
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-white/60 sm:text-base">
             Click the sword to begin your Legends of Eternity download.
           </p>
         </Reveal>
 
+        <Reveal delay={0.08}>
+          <GameplayVideoCarousel />
+        </Reveal>
+
         <Reveal delay={0.1}>
-          <div className="mt-14">
+          <div className="mt-14 sm:mt-16">
             <div className="grid gap-6 sm:grid-cols-4">
               {[
                 ["Version", "v0.1.0-alpha"],
