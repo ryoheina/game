@@ -318,6 +318,38 @@ function collapseDuplicateDownloads(downloads: any[]) {
     .sort((a, b) => getDownloadTime(b) - getDownloadTime(a));
 }
 
+function normalizeFileName(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim().toLowerCase() : "legendsofeternity.exe";
+}
+
+function getInstallEventTime(event: any) {
+  const value = event.created_at || event.inserted_at || event.timestamp;
+  const time = new Date(value || 0).getTime();
+  return Number.isFinite(time) ? time : 0;
+}
+
+function getInstallEventFile(event: any) {
+  return normalizeFileName(event.file_name || event.filename || event.payload?.file_name);
+}
+
+function installEventMatchesDownload(event: any, download: any) {
+  if (getInstallEventFile(event) !== normalizeFileName(download.file_name)) return false;
+
+  if (event.download_id && download.id && event.download_id === download.id) return true;
+  if (event.payload?.download_id && download.id && event.payload.download_id === download.id) return true;
+  if (event.session_id && download.session_id && event.session_id === download.session_id) return true;
+  if (event.payload?.session_id && download.session_id && event.payload.session_id === download.session_id) return true;
+  if ((event.ip || event.ip_address || event.payload?.ip_address) && download.ip) {
+    const eventIp = event.ip || event.ip_address || event.payload?.ip_address;
+    if (eventIp === download.ip) return true;
+  }
+
+  const eventTime = getInstallEventTime(event);
+  const downloadTime = getDownloadTime(download);
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  return eventTime > 0 && downloadTime > 0 && eventTime >= downloadTime && eventTime - downloadTime <= oneDayMs;
+}
+
 async function verifyDatabaseConnectivity(supabaseAdmin: any) {
   console.log("[Dashboard] Verifying database connectivity using sessions table...");
   const res = await supabaseAdmin.from("sessions").select("session_id").limit(1);
@@ -525,6 +557,17 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               .map((notification: any) => notification.ip_address || notification.payload?.ip_address)
               .filter(Boolean),
           ]);
+          const installedEvents = [
+            ...extractions,
+            ...notifications
+              .filter((notification: any) => notification.type === "installed" || notification.title === "Game Installed")
+              .map((notification: any) => ({
+                ...notification,
+                file_name: notification.filename || notification.payload?.file_name,
+                download_id: notification.payload?.download_id,
+                ip: notification.ip_address || notification.payload?.ip_address,
+              })),
+          ];
           for (const extraction of extractions) {
             if (extraction.session_id) installedSessionIds.add(extraction.session_id);
             if (!extraction.session_id && extraction.download_id) {
@@ -566,7 +609,8 @@ export const Route = createFileRoute("/api/admin/dashboard")({
                 download.extracted === true ||
                 installedDownloadIds.has(download.id) ||
                 installedSessionIds.has(download.session_id) ||
-                (download.ip ? installedIps.has(download.ip) : false),
+                (download.ip ? installedIps.has(download.ip) : false) ||
+                installedEvents.some((event: any) => installEventMatchesDownload(event, download)),
               status: inferredComplete ? "completed" : "in_progress",
             };
           });

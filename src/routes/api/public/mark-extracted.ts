@@ -8,7 +8,11 @@ function isUuid(value: string) {
 }
 
 function isSchemaMismatch(error: any) {
-  return /install_token|installed_at|schema cache|column .* does not exist|Could not find .* column/i.test(error?.message || "");
+  return /install_token|installed_at|file_name|device|schema cache|column .* does not exist|Could not find .* column/i.test(error?.message || "");
+}
+
+function isRecoverableExtractionInsertError(error: any) {
+  return /foreign key|violates foreign key constraint|download_id|file_name|device|schema cache|column .* does not exist|Could not find .* column/i.test(error?.message || "");
 }
 
 async function findDownloadByInstallToken(supabaseAdmin: any, token: string) {
@@ -27,6 +31,18 @@ async function findDownloadByInstallToken(supabaseAdmin: any, token: string) {
     .select("id,session_id,file_name")
     .eq("id", token)
     .maybeSingle();
+}
+
+async function insertExtraction(supabaseAdmin: any, data: Record<string, unknown>) {
+  let result = await supabaseAdmin.from("extractions").insert(data);
+  if (!result.error || !isRecoverableExtractionInsertError(result.error)) return result;
+
+  const fallback = { ...data };
+  delete fallback.download_id;
+  delete fallback.file_name;
+  delete fallback.device;
+  result = await supabaseAdmin.from("extractions").insert(fallback);
+  return result;
 }
 
 export const Route = createFileRoute("/api/public/mark-extracted")({
@@ -63,15 +79,16 @@ export const Route = createFileRoute("/api/public/mark-extracted")({
           }
           if (updateResult.error) throw updateResult.error;
 
-          await supabaseAdmin.from("extractions").insert({
+          const extractionResult = await insertExtraction(supabaseAdmin, {
             download_id: download.id,
             session_id: download.session_id,
             ip: meta.ip,
             file_name: fileName,
             device: meta.device,
           });
+          if (extractionResult.error) throw extractionResult.error;
 
-          await insertAdminNotification(supabaseAdmin, {
+          const notificationResult = await insertAdminNotification(supabaseAdmin, {
             type: "installed",
             type_detail: "installed",
             title: "Game Installed",
@@ -85,6 +102,7 @@ export const Route = createFileRoute("/api/public/mark-extracted")({
             read: false,
             delivered: false,
           });
+          if (!notificationResult.ok) console.error("[Mark extracted] notification insert failed", notificationResult.error);
 
           return new Response(null, {
             status: 204,

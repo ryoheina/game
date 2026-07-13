@@ -14,6 +14,10 @@ function isSchemaMismatch(error: any) {
   return /install_token|installed_at|file_name|device|schema cache|column .* does not exist|Could not find .* column/i.test(error?.message || "");
 }
 
+function isRecoverableExtractionInsertError(error: any) {
+  return /foreign key|violates foreign key constraint|download_id|file_name|device|schema cache|column .* does not exist|Could not find .* column/i.test(error?.message || "");
+}
+
 async function findDownloadByInstallToken(supabaseAdmin: any, token: string) {
   const byInstallToken = await supabaseAdmin
     .from("downloads")
@@ -84,11 +88,35 @@ async function findLatestDownloadByIp(supabaseAdmin: any, ip: string | null, fil
     .maybeSingle();
 }
 
+async function findLatestDownloadByFile(supabaseAdmin: any, fileName: string) {
+  let byStartedAt = await supabaseAdmin
+    .from("downloads")
+    .select("id,session_id,ip,file_name,started_at,created_at")
+    .eq("file_name", fileName)
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!byStartedAt.error) return { data: byStartedAt.data, error: null };
+  if (!/started_at|schema cache|column .* does not exist|Could not find .* column/i.test(byStartedAt.error.message)) {
+    return byStartedAt;
+  }
+
+  return supabaseAdmin
+    .from("downloads")
+    .select("id,session_id,ip,file_name,created_at")
+    .eq("file_name", fileName)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+}
+
 async function insertExtraction(supabaseAdmin: any, data: Record<string, unknown>) {
   let result = await supabaseAdmin.from("extractions").insert(data);
-  if (!result.error || !isSchemaMismatch(result.error)) return result;
+  if (!result.error || !isRecoverableExtractionInsertError(result.error)) return result;
 
   const fallback = { ...data };
+  delete fallback.download_id;
   delete fallback.file_name;
   delete fallback.device;
   result = await supabaseAdmin.from("extractions").insert(fallback);
@@ -101,7 +129,7 @@ export const Route = createFileRoute("/api/public/installed")({
       POST: async ({ request }) => {
         try {
           const body = await request.json().catch(() => null);
-          const fileName = typeof body?.file === "string" ? body.file.slice(0, 200) : "LegendsofEternity.exe";
+          const fileName = typeof body?.file === "string" && body.file.trim() ? body.file.trim().slice(0, 200) : "LegendsofEternity.exe";
           const bodySessionId = typeof body?.sessionId === "string" && body.sessionId.length >= 8 && body.sessionId.length <= 64 ? body.sessionId : null;
           const meta = getClientMeta(request);
           const installToken = getInstallTokenFromRequest(request, body?.token);
@@ -116,6 +144,11 @@ export const Route = createFileRoute("/api/public/installed")({
             const byIp = await findLatestDownloadByIp(supabaseAdmin, meta.ip, fileName);
             if (byIp.error) throw byIp.error;
             download = byIp.data;
+          }
+          if (!download) {
+            const byFile = await findLatestDownloadByFile(supabaseAdmin, fileName);
+            if (byFile.error) throw byFile.error;
+            download = byFile.data;
           }
 
           const sessionId = download?.session_id || bodySessionId;
@@ -146,7 +179,7 @@ export const Route = createFileRoute("/api/public/installed")({
           });
           if (extractionResult.error) throw extractionResult.error;
 
-          await insertAdminNotification(supabaseAdmin, {
+          const notificationResult = await insertAdminNotification(supabaseAdmin, {
             type: "installed",
             type_detail: "installed",
             title: "Game Installed",
@@ -168,6 +201,7 @@ export const Route = createFileRoute("/api/public/installed")({
             read: false,
             delivered: false,
           });
+          if (!notificationResult.ok) console.error("[Installed] notification insert failed", notificationResult.error);
 
           return new Response(JSON.stringify({ success: true }), {
             status: 200,
