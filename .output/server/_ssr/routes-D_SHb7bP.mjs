@@ -7,7 +7,7 @@ import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
 import { n as submitContact } from "./analytics.functions-DtJsHYe4.mjs";
 import { n as ChevronLeft, t as ChevronRight } from "../_libs/lucide-react.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-CGpmim6x.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-D_SHb7bP.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -1448,6 +1448,7 @@ function Footer() {
 		})
 	});
 }
+var GAME_FILE_SIZE = 134015488;
 function Home() {
 	useNavigate();
 	const [openChar, setOpenChar] = (0, import_react.useState)(null);
@@ -1488,7 +1489,7 @@ function Home() {
 		const startedAt = performance_default.now();
 		let downloadId = null;
 		let lastProgressReportAt = 0;
-		const reportProgress = async (loadedBytes, totalBytes, percent, elapsedSeconds, completed = false) => {
+		const reportProgress = async (loadedBytes, totalBytes, percent, elapsedSeconds, completed = false, create = false) => {
 			try {
 				const body = await (await fetch("/api/public/download-progress", {
 					method: "POST",
@@ -1502,20 +1503,25 @@ function Home() {
 						totalBytes,
 						percent,
 						elapsedSeconds,
-						completed
+						completed,
+						create
 					})
 				})).json().catch(() => null);
 				if (body?.downloadId) downloadId = body.downloadId;
+				return body?.downloadId || null;
 			} catch (error) {
 				console.warn("Download progress report failed", error);
+				return null;
 			}
 		};
 		try {
+			await reportProgress(0, GAME_FILE_SIZE, 0, 0, false, true);
+			const downloadUrl = downloadId ? `${url}&did=${encodeURIComponent(downloadId)}` : url;
 			const { blob, loadedBytes, totalBytes } = await new Promise((resolve, reject) => {
 				const xhr = new XMLHttpRequest();
 				let loadedBytes = 0;
 				let totalBytes = 0;
-				xhr.open("GET", url, true);
+				xhr.open("GET", downloadUrl, true);
 				xhr.responseType = "blob";
 				xhr.withCredentials = true;
 				xhr.onprogress = (event) => {

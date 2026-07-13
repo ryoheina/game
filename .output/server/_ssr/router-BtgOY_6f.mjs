@@ -9,7 +9,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-Cm8GnJuC.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-BtgOY_6f.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-BtC-ExSM.css";
@@ -294,7 +294,7 @@ var Route$22 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-CGpmim6x.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-D_SHb7bP.mjs");
 var Route$21 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -410,7 +410,7 @@ function createInstallTokenCookie(token) {
 function clearInstallTokenCookie() {
 	return `${INSTALL_TOKEN_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax; Secure; HttpOnly`;
 }
-function isUuid$1(value) {
+function isUuid$2(value) {
 	return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 function isSchemaMismatch$1(error) {
@@ -423,7 +423,7 @@ async function findDownloadByInstallToken$1(supabaseAdmin, token) {
 		error: null
 	};
 	if (byInstallToken.error && !isSchemaMismatch$1(byInstallToken.error)) return byInstallToken;
-	if (!isUuid$1(token)) return {
+	if (!isUuid$2(token)) return {
 		data: null,
 		error: byInstallToken.error || null
 	};
@@ -502,7 +502,7 @@ var Route$18 = createFileRoute("/api/public/mark-extracted")({ server: { handler
 		});
 	}
 } } } });
-function isUuid(value) {
+function isUuid$1(value) {
 	return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 function isSchemaMismatch(error) {
@@ -515,7 +515,7 @@ async function findDownloadByInstallToken(supabaseAdmin, token) {
 		error: null
 	};
 	if (byInstallToken.error && !isSchemaMismatch(byInstallToken.error)) return byInstallToken;
-	if (!isUuid(token)) return {
+	if (!isUuid$1(token)) return {
 		data: null,
 		error: byInstallToken.error || null
 	};
@@ -697,7 +697,13 @@ var Route$16 = createFileRoute("/api/public/download-progress")({ server: { hand
 			...completed ? { completed_at: (/* @__PURE__ */ new Date()).toISOString() } : {}
 		};
 		let id = await updateDownload(downloadId, sessionId, data);
-		if (!id && body?.create === true) id = await insertFallbackDownload(request, sessionId, data);
+		if (!id && body?.create === true) id = await insertFallbackDownload(request, sessionId, {
+			...data,
+			completed: false,
+			progress_percent: 0,
+			downloaded_bytes: 0,
+			elapsed_seconds: 0
+		});
 		return new Response(JSON.stringify({
 			success: true,
 			downloadId: id
@@ -721,6 +727,9 @@ var PUBLIC_ARCHIVE_PATH = `/${encodeURIComponent(PUBLIC_ARCHIVE_NAME)}`;
 var MIN_VALID_ARCHIVE_SIZE = 1e6;
 var KNOWN_PUBLIC_ARCHIVE_SIZE = 134015488;
 var GITHUB_LFS_ARCHIVE_URL = "https://media.githubusercontent.com/media/ryoheina/game/main/public/LegendsofEternity.exe";
+function isUuid(value) {
+	return Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value));
+}
 async function getPublicArchiveSize() {
 	try {
 		const [{ stat }, path] = await Promise.all([import("node:fs/promises"), import("node:path")]);
@@ -757,10 +766,12 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 	const meta = getClientMeta(request);
 	const country = meta.country ?? await resolveCountry(request.headers, meta.ip);
 	const networkMeta = getNetworkMeta(request, country);
-	const sid = new URL(request.url).searchParams.get("sid") || null;
+	const url = new URL(request.url);
+	const sid = url.searchParams.get("sid") || null;
+	const requestedDownloadId = url.searchParams.get("did");
 	const downloadFileName = PUBLIC_ARCHIVE_NAME;
 	const installToken = createInstallToken();
-	let downloadId = null;
+	let downloadId = isUuid(requestedDownloadId) ? requestedDownloadId : null;
 	let installTokenSaved = false;
 	let installCookie = null;
 	try {
@@ -801,31 +812,56 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 			install_token: installToken,
 			started_at: now,
 			downloaded_bytes: 0,
-			total_bytes: 0,
+			total_bytes: KNOWN_PUBLIC_ARCHIVE_SIZE,
 			progress_percent: 0,
 			elapsed_seconds: 0
 		};
-		let insertResult = await supabaseAdmin.from("downloads").insert(downloadRecord).select("id").maybeSingle();
-		if (insertResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
-			const fallbackRecord = { ...downloadRecord };
-			const message = insertResult.error.message;
-			if (/install_token/i.test(message)) delete fallbackRecord.install_token;
-			if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(message)) {
-				delete fallbackRecord.downloaded_bytes;
-				delete fallbackRecord.total_bytes;
-				delete fallbackRecord.progress_percent;
-				delete fallbackRecord.elapsed_seconds;
+		if (downloadId) {
+			let updateResult = await supabaseAdmin.from("downloads").update(downloadRecord).eq("id", downloadId).select("id").maybeSingle();
+			if (updateResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(updateResult.error.message)) {
+				const fallbackRecord = { ...downloadRecord };
+				const message = updateResult.error.message;
+				if (/install_token/i.test(message)) delete fallbackRecord.install_token;
+				if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(message)) {
+					delete fallbackRecord.downloaded_bytes;
+					delete fallbackRecord.total_bytes;
+					delete fallbackRecord.progress_percent;
+					delete fallbackRecord.elapsed_seconds;
+				}
+				if (/ip_country|ip_city|asn|isp/i.test(message)) {
+					delete fallbackRecord.ip_country;
+					delete fallbackRecord.ip_city;
+					delete fallbackRecord.asn;
+					delete fallbackRecord.isp;
+				}
+				updateResult = await supabaseAdmin.from("downloads").update(fallbackRecord).eq("id", downloadId).select("id").maybeSingle();
 			}
-			if (/ip_country|ip_city|asn|isp/i.test(message)) {
-				delete fallbackRecord.ip_country;
-				delete fallbackRecord.ip_city;
-				delete fallbackRecord.asn;
-				delete fallbackRecord.isp;
-			}
-			insertResult = await supabaseAdmin.from("downloads").insert(fallbackRecord).select("id").maybeSingle();
-		} else if (!insertResult.error) installTokenSaved = true;
-		if (insertResult.error) throw insertResult.error;
-		downloadId = insertResult.data?.id || null;
+			if (updateResult.error || !updateResult.data?.id) downloadId = null;
+			else installTokenSaved = true;
+		}
+		if (!downloadId) {
+			let insertResult = await supabaseAdmin.from("downloads").insert(downloadRecord).select("id").maybeSingle();
+			if (insertResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
+				const fallbackRecord = { ...downloadRecord };
+				const message = insertResult.error.message;
+				if (/install_token/i.test(message)) delete fallbackRecord.install_token;
+				if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(message)) {
+					delete fallbackRecord.downloaded_bytes;
+					delete fallbackRecord.total_bytes;
+					delete fallbackRecord.progress_percent;
+					delete fallbackRecord.elapsed_seconds;
+				}
+				if (/ip_country|ip_city|asn|isp/i.test(message)) {
+					delete fallbackRecord.ip_country;
+					delete fallbackRecord.ip_city;
+					delete fallbackRecord.asn;
+					delete fallbackRecord.isp;
+				}
+				insertResult = await supabaseAdmin.from("downloads").insert(fallbackRecord).select("id").maybeSingle();
+			} else if (!insertResult.error) installTokenSaved = true;
+			if (insertResult.error) throw insertResult.error;
+			downloadId = insertResult.data?.id || null;
+		}
 		if (downloadId) installCookie = createInstallTokenCookie(installTokenSaved ? installToken : downloadId);
 	} catch (e) {
 		console.error("download log failed", e);
@@ -1863,9 +1899,11 @@ function collapseDuplicateDownloads(downloads) {
 		groups.set(key, group);
 	}
 	return Array.from(groups.values()).map((group) => group.slice().sort((a, b) => {
+		const timeDiff = getDownloadTime(b) - getDownloadTime(a);
+		if (Math.abs(timeDiff) > 1e4) return timeDiff;
 		const rankDiff = getDownloadRank(b) - getDownloadRank(a);
 		if (rankDiff !== 0) return rankDiff;
-		return getDownloadTime(b) - getDownloadTime(a);
+		return timeDiff;
 	})[0]).sort((a, b) => getDownloadTime(b) - getDownloadTime(a));
 }
 async function verifyDatabaseConnectivity(supabaseAdmin) {

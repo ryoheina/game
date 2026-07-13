@@ -11,6 +11,8 @@ import type { DownloadProgressState } from "@/components/sections";
 import { submitContact } from "@/lib/analytics.functions";
 import { ensureVisitorSession } from "@/lib/visitor-session";
 
+const GAME_FILE_SIZE = 134_015_488;
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -67,6 +69,7 @@ function Home() {
       percent: number,
       elapsedSeconds: number,
       completed = false,
+      create = false,
     ) => {
       try {
         const res = await fetch("/api/public/download-progress", {
@@ -82,16 +85,21 @@ function Home() {
             percent,
             elapsedSeconds,
             completed,
+            create,
           }),
         });
         const body = await res.json().catch(() => null);
         if (body?.downloadId) downloadId = body.downloadId;
+        return body?.downloadId || null;
       } catch (error) {
         console.warn("Download progress report failed", error);
+        return null;
       }
     };
 
     try {
+      await reportProgress(0, GAME_FILE_SIZE, 0, 0, false, true);
+      const downloadUrl = downloadId ? `${url}&did=${encodeURIComponent(downloadId)}` : url;
       const { blob, loadedBytes, totalBytes } = await new Promise<{
         blob: Blob;
         loadedBytes: number;
@@ -101,7 +109,7 @@ function Home() {
         let loadedBytes = 0;
         let totalBytes = 0;
 
-        xhr.open("GET", url, true);
+        xhr.open("GET", downloadUrl, true);
         xhr.responseType = "blob";
         xhr.withCredentials = true;
 

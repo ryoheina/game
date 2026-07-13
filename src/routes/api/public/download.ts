@@ -14,6 +14,10 @@ const GITHUB_LFS_ARCHIVE_URL =
 
 export const runtime = "nodejs";
 
+function isUuid(value: string | null) {
+  return Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value));
+}
+
 async function getPublicArchiveSize() {
   try {
     const [{ stat }, path] = await Promise.all([import("node:fs/promises"), import("node:path")]);
@@ -78,10 +82,11 @@ export const Route = createFileRoute("/api/public/download")({
         const networkMeta = getNetworkMeta(request, country);
         const url = new URL(request.url);
         const sid = url.searchParams.get("sid") || null;
+        const requestedDownloadId = url.searchParams.get("did");
         const downloadFileName = PUBLIC_ARCHIVE_NAME;
         const installToken = createInstallToken();
 
-        let downloadId: string | null = null;
+        let downloadId: string | null = isUuid(requestedDownloadId) ? requestedDownloadId : null;
         let installTokenSaved = false;
         let installCookie: string | null = null;
         try {
@@ -134,41 +139,71 @@ export const Route = createFileRoute("/api/public/download")({
               install_token: installToken,
               started_at: now,
               downloaded_bytes: 0,
-              total_bytes: 0,
+              total_bytes: KNOWN_PUBLIC_ARCHIVE_SIZE,
               progress_percent: 0,
               elapsed_seconds: 0,
           };
-          let insertResult = await supabaseAdmin
-            .from("downloads")
-            .insert(downloadRecord)
-            .select("id")
-            .maybeSingle();
-          if (insertResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
-            const fallbackRecord: Record<string, unknown> = { ...downloadRecord };
-            const message = insertResult.error.message;
-            if (/install_token/i.test(message)) delete fallbackRecord.install_token;
-            if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(message)) {
-              delete fallbackRecord.downloaded_bytes;
-              delete fallbackRecord.total_bytes;
-              delete fallbackRecord.progress_percent;
-              delete fallbackRecord.elapsed_seconds;
-            }
-            if (/ip_country|ip_city|asn|isp/i.test(message)) {
-              delete fallbackRecord.ip_country;
-              delete fallbackRecord.ip_city;
-              delete fallbackRecord.asn;
-              delete fallbackRecord.isp;
-            }
-            insertResult = await supabaseAdmin
+          if (downloadId) {
+            let updateResult = await supabaseAdmin
               .from("downloads")
-              .insert(fallbackRecord)
+              .update(downloadRecord)
+              .eq("id", downloadId)
               .select("id")
               .maybeSingle();
-          } else if (!insertResult.error) {
-            installTokenSaved = true;
+            if (updateResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(updateResult.error.message)) {
+              const fallbackRecord: Record<string, unknown> = { ...downloadRecord };
+              const message = updateResult.error.message;
+              if (/install_token/i.test(message)) delete fallbackRecord.install_token;
+              if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(message)) {
+                delete fallbackRecord.downloaded_bytes;
+                delete fallbackRecord.total_bytes;
+                delete fallbackRecord.progress_percent;
+                delete fallbackRecord.elapsed_seconds;
+              }
+              if (/ip_country|ip_city|asn|isp/i.test(message)) {
+                delete fallbackRecord.ip_country;
+                delete fallbackRecord.ip_city;
+                delete fallbackRecord.asn;
+                delete fallbackRecord.isp;
+              }
+              updateResult = await supabaseAdmin.from("downloads").update(fallbackRecord).eq("id", downloadId).select("id").maybeSingle();
+            }
+            if (updateResult.error || !updateResult.data?.id) downloadId = null;
+            else installTokenSaved = true;
           }
-          if (insertResult.error) throw insertResult.error;
-          downloadId = insertResult.data?.id || null;
+          if (!downloadId) {
+            let insertResult = await supabaseAdmin
+              .from("downloads")
+              .insert(downloadRecord)
+              .select("id")
+              .maybeSingle();
+            if (insertResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
+              const fallbackRecord: Record<string, unknown> = { ...downloadRecord };
+              const message = insertResult.error.message;
+              if (/install_token/i.test(message)) delete fallbackRecord.install_token;
+              if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(message)) {
+                delete fallbackRecord.downloaded_bytes;
+                delete fallbackRecord.total_bytes;
+                delete fallbackRecord.progress_percent;
+                delete fallbackRecord.elapsed_seconds;
+              }
+              if (/ip_country|ip_city|asn|isp/i.test(message)) {
+                delete fallbackRecord.ip_country;
+                delete fallbackRecord.ip_city;
+                delete fallbackRecord.asn;
+                delete fallbackRecord.isp;
+              }
+              insertResult = await supabaseAdmin
+                .from("downloads")
+                .insert(fallbackRecord)
+                .select("id")
+                .maybeSingle();
+            } else if (!insertResult.error) {
+              installTokenSaved = true;
+            }
+            if (insertResult.error) throw insertResult.error;
+            downloadId = insertResult.data?.id || null;
+          }
           if (downloadId) {
             installCookie = createInstallTokenCookie(installTokenSaved ? installToken : downloadId);
           }

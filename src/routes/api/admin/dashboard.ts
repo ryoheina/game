@@ -306,9 +306,11 @@ function collapseDuplicateDownloads(downloads: any[]) {
       group
         .slice()
         .sort((a, b) => {
+          const timeDiff = getDownloadTime(b) - getDownloadTime(a);
+          if (Math.abs(timeDiff) > 10_000) return timeDiff;
           const rankDiff = getDownloadRank(b) - getDownloadRank(a);
           if (rankDiff !== 0) return rankDiff;
-          return getDownloadTime(b) - getDownloadTime(a);
+          return timeDiff;
         })[0],
     )
     .sort((a, b) => getDownloadTime(b) - getDownloadTime(a));

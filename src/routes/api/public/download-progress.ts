@@ -121,7 +121,15 @@ export const Route = createFileRoute("/api/public/download-progress")({
           };
 
           let id = await updateDownload(downloadId, sessionId, data);
-          if (!id && body?.create === true) id = await insertFallbackDownload(request, sessionId, data);
+          if (!id && body?.create === true) {
+            id = await insertFallbackDownload(request, sessionId, {
+              ...data,
+              completed: false,
+              progress_percent: 0,
+              downloaded_bytes: 0,
+              elapsed_seconds: 0,
+            });
+          }
 
           return new Response(JSON.stringify({ success: true, downloadId: id }), {
             headers: { "content-type": "application/json", "Cache-Control": "no-store" },
