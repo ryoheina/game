@@ -7,7 +7,7 @@ import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
 import { n as submitContact } from "./analytics.functions-DquHcGug.mjs";
 import { n as ChevronLeft, t as ChevronRight } from "../_libs/lucide-react.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-BgyPlLLz.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-CrGDvm4A.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -1486,13 +1486,39 @@ function Home() {
 		const fileName = "LegendsofEternity.exe";
 		const url = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${encodeURIComponent(fileName)}`;
 		const startedAt = performance_default.now();
+		let downloadId = null;
+		let lastProgressReportAt = 0;
+		const reportProgress = async (loadedBytes, totalBytes, percent, elapsedSeconds, completed = false) => {
+			try {
+				const body = await (await fetch("/api/public/download-progress", {
+					method: "POST",
+					credentials: "same-origin",
+					headers: { "content-type": "application/json" },
+					body: JSON.stringify({
+						downloadId,
+						sessionId: sid,
+						fileName,
+						downloadedBytes: loadedBytes,
+						totalBytes,
+						percent,
+						elapsedSeconds,
+						completed
+					})
+				})).json().catch(() => null);
+				if (body?.downloadId) downloadId = body.downloadId;
+			} catch (error) {
+				console.warn("Download progress report failed", error);
+			}
+		};
 		try {
 			const response = await fetch(url, { credentials: "same-origin" });
 			if (!response.ok) throw new Error("Download failed");
+			downloadId = response.headers.get("x-download-id");
 			const totalBytes = Number(response.headers.get("content-length") || "0");
 			const reader = response.body?.getReader();
 			const chunks = [];
 			let loadedBytes = 0;
+			await reportProgress(0, totalBytes, 0, 0);
 			if (reader) while (true) {
 				const { done, value } = await reader.read();
 				if (done) break;
@@ -1508,6 +1534,11 @@ function Home() {
 					percent,
 					elapsedSeconds
 				});
+				const now = performance_default.now();
+				if (now - lastProgressReportAt >= 1e3) {
+					lastProgressReportAt = now;
+					reportProgress(loadedBytes, totalBytes, percent, elapsedSeconds);
+				}
 			}
 			else {
 				const blob = await response.blob();
@@ -1524,6 +1555,7 @@ function Home() {
 			anchor.click();
 			document.body.removeChild(anchor);
 			window.setTimeout(() => URL.revokeObjectURL(objectUrl), 3e4);
+			await reportProgress(loadedBytes || blob.size, totalBytes || blob.size, 100, Math.max(0, (performance_default.now() - startedAt) / 1e3), true);
 			setDownloadStatus({
 				phase: "complete",
 				loadedBytes: loadedBytes || blob.size,

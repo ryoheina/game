@@ -58,15 +58,49 @@ function Home() {
     const fileName = "LegendsofEternity.exe";
     const url = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${encodeURIComponent(fileName)}`;
     const startedAt = performance.now();
+    let downloadId: string | null = null;
+    let lastProgressReportAt = 0;
+
+    const reportProgress = async (
+      loadedBytes: number,
+      totalBytes: number,
+      percent: number,
+      elapsedSeconds: number,
+      completed = false,
+    ) => {
+      try {
+        const res = await fetch("/api/public/download-progress", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            downloadId,
+            sessionId: sid,
+            fileName,
+            downloadedBytes: loadedBytes,
+            totalBytes,
+            percent,
+            elapsedSeconds,
+            completed,
+          }),
+        });
+        const body = await res.json().catch(() => null);
+        if (body?.downloadId) downloadId = body.downloadId;
+      } catch (error) {
+        console.warn("Download progress report failed", error);
+      }
+    };
 
     try {
       const response = await fetch(url, { credentials: "same-origin" });
       if (!response.ok) throw new Error("Download failed");
 
+      downloadId = response.headers.get("x-download-id");
       const totalBytes = Number(response.headers.get("content-length") || "0");
       const reader = response.body?.getReader();
       const chunks: Uint8Array[] = [];
       let loadedBytes = 0;
+      await reportProgress(0, totalBytes, 0, 0);
 
       if (reader) {
         while (true) {
@@ -78,6 +112,11 @@ function Home() {
           const elapsedSeconds = Math.max(0, (performance.now() - startedAt) / 1000);
           const percent = totalBytes > 0 ? Math.min(99, Math.round((loadedBytes / totalBytes) * 100)) : 0;
           setDownloadStatus({ phase: "loading", loadedBytes, totalBytes, percent, elapsedSeconds });
+          const now = performance.now();
+          if (now - lastProgressReportAt >= 1000) {
+            lastProgressReportAt = now;
+            void reportProgress(loadedBytes, totalBytes, percent, elapsedSeconds);
+          }
         }
       } else {
         const blob = await response.blob();
@@ -97,6 +136,14 @@ function Home() {
       anchor.click();
       document.body.removeChild(anchor);
       window.setTimeout(() => URL.revokeObjectURL(objectUrl), 30_000);
+
+      await reportProgress(
+        loadedBytes || blob.size,
+        totalBytes || blob.size,
+        100,
+        Math.max(0, (performance.now() - startedAt) / 1000),
+        true,
+      );
 
       setDownloadStatus({
         phase: "complete",

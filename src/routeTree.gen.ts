@@ -18,6 +18,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as ApiPublicVisitRouteImport } from './routes/api/public/visit'
 import { Route as ApiPublicMarkExtractedRouteImport } from './routes/api/public/mark-extracted'
 import { Route as ApiPublicInstalledRouteImport } from './routes/api/public/installed'
+import { Route as ApiPublicDownloadProgressRouteImport } from './routes/api/public/download-progress'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
 import { Route as ApiMeStatsRouteImport } from './routes/api/me/stats'
 import { Route as ApiMeLogoutRouteImport } from './routes/api/me/logout'
@@ -79,6 +80,12 @@ const ApiPublicInstalledRoute = ApiPublicInstalledRouteImport.update({
   path: '/api/public/installed',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDownloadProgressRoute =
+  ApiPublicDownloadProgressRouteImport.update({
+    id: '/api/public/download-progress',
+    path: '/api/public/download-progress',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicDownloadRoute = ApiPublicDownloadRouteImport.update({
   id: '/api/public/download',
   path: '/api/public/download',
@@ -185,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/api/me/logout': typeof ApiMeLogoutRoute
   '/api/me/stats': typeof ApiMeStatsRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/download-progress': typeof ApiPublicDownloadProgressRoute
   '/api/public/installed': typeof ApiPublicInstalledRoute
   '/api/public/mark-extracted': typeof ApiPublicMarkExtractedRoute
   '/api/public/visit': typeof ApiPublicVisitRoute
@@ -211,6 +219,7 @@ export interface FileRoutesByTo {
   '/api/me/logout': typeof ApiMeLogoutRoute
   '/api/me/stats': typeof ApiMeStatsRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/download-progress': typeof ApiPublicDownloadProgressRoute
   '/api/public/installed': typeof ApiPublicInstalledRoute
   '/api/public/mark-extracted': typeof ApiPublicMarkExtractedRoute
   '/api/public/visit': typeof ApiPublicVisitRoute
@@ -239,6 +248,7 @@ export interface FileRoutesById {
   '/api/me/logout': typeof ApiMeLogoutRoute
   '/api/me/stats': typeof ApiMeStatsRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/download-progress': typeof ApiPublicDownloadProgressRoute
   '/api/public/installed': typeof ApiPublicInstalledRoute
   '/api/public/mark-extracted': typeof ApiPublicMarkExtractedRoute
   '/api/public/visit': typeof ApiPublicVisitRoute
@@ -267,6 +277,7 @@ export interface FileRouteTypes {
     | '/api/me/logout'
     | '/api/me/stats'
     | '/api/public/download'
+    | '/api/public/download-progress'
     | '/api/public/installed'
     | '/api/public/mark-extracted'
     | '/api/public/visit'
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/api/me/logout'
     | '/api/me/stats'
     | '/api/public/download'
+    | '/api/public/download-progress'
     | '/api/public/installed'
     | '/api/public/mark-extracted'
     | '/api/public/visit'
@@ -320,6 +332,7 @@ export interface FileRouteTypes {
     | '/api/me/logout'
     | '/api/me/stats'
     | '/api/public/download'
+    | '/api/public/download-progress'
     | '/api/public/installed'
     | '/api/public/mark-extracted'
     | '/api/public/visit'
@@ -347,6 +360,7 @@ export interface RootRouteChildren {
   ApiMeLogoutRoute: typeof ApiMeLogoutRoute
   ApiMeStatsRoute: typeof ApiMeStatsRoute
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
+  ApiPublicDownloadProgressRoute: typeof ApiPublicDownloadProgressRoute
   ApiPublicInstalledRoute: typeof ApiPublicInstalledRoute
   ApiPublicMarkExtractedRoute: typeof ApiPublicMarkExtractedRoute
   ApiPublicVisitRoute: typeof ApiPublicVisitRoute
@@ -415,6 +429,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/installed'
       fullPath: '/api/public/installed'
       preLoaderRoute: typeof ApiPublicInstalledRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/download-progress': {
+      id: '/api/public/download-progress'
+      path: '/api/public/download-progress'
+      fullPath: '/api/public/download-progress'
+      preLoaderRoute: typeof ApiPublicDownloadProgressRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/download': {
@@ -565,6 +586,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMeLogoutRoute: ApiMeLogoutRoute,
   ApiMeStatsRoute: ApiMeStatsRoute,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
+  ApiPublicDownloadProgressRoute: ApiPublicDownloadProgressRoute,
   ApiPublicInstalledRoute: ApiPublicInstalledRoute,
   ApiPublicMarkExtractedRoute: ApiPublicMarkExtractedRoute,
   ApiPublicVisitRoute: ApiPublicVisitRoute,

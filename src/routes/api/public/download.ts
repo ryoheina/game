@@ -305,8 +305,9 @@ export const Route = createFileRoute("/api/public/download")({
             "Cache-Control": "no-store",
             ...(installCookie ? { "Set-Cookie": installCookie } : {}),
           });
+          if (downloadId) headers.set("X-Download-Id", downloadId);
           const contentLengthHeader = assetResponse.headers.get("content-length");
-          if (contentLengthHeader) headers.set("Content-Length", contentLengthHeader);
+          headers.set("Content-Length", contentLengthHeader || String(contentLength || KNOWN_PUBLIC_ARCHIVE_SIZE));
 
           return new Response(readable, {
             status: 200,

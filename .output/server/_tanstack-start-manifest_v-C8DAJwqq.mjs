@@ -1,4 +1,4 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-GSjqjHrl.js
+//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-C8DAJwqq.js
 var tsrStartManifest = () => ({ routes: {
 	__root__: {
 		filePath: "E:/game/src/routes/__root.tsx",
@@ -24,36 +24,37 @@ var tsrStartManifest = () => ({ routes: {
 			"/api/me/logout",
 			"/api/me/stats",
 			"/api/public/download",
+			"/api/public/download-progress",
 			"/api/public/installed",
 			"/api/public/mark-extracted",
 			"/api/public/visit"
 		],
-		preloads: ["/assets/index-DA3ckjOp.js", "/assets/jsx-runtime-D8nDyRPw.js"],
+		preloads: ["/assets/index-DaJPXf2D.js", "/assets/jsx-runtime-D8nDyRPw.js"],
 		scripts: [{ attrs: {
 			type: "module",
 			async: !0,
-			src: "/assets/index-DA3ckjOp.js"
+			src: "/assets/index-DaJPXf2D.js"
 		} }]
 	},
 	"/": {
 		filePath: "E:/game/src/routes/index.tsx",
 		children: void 0,
-		preloads: ["/assets/routes-FKEKFfP-.js", "/assets/fx-CGwUS9qe.js"]
+		preloads: ["/assets/routes-BKfVp0k3.js", "/assets/fx-CGwUS9qe.js"]
 	},
 	"/_authenticated": {
 		filePath: "E:/game/src/routes/_authenticated/route.tsx",
 		children: ["/_authenticated/admin"],
-		preloads: ["/assets/route-pMBG_wL5.js"]
+		preloads: ["/assets/route-Dm-8ejYz.js"]
 	},
 	"/auth": {
 		filePath: "E:/game/src/routes/auth.tsx",
 		children: void 0,
-		preloads: ["/assets/auth-Dyfid8k7.js", "/assets/fx-CGwUS9qe.js"]
+		preloads: ["/assets/auth-BRdIAWdY.js", "/assets/fx-CGwUS9qe.js"]
 	},
 	"/installed": {
 		filePath: "E:/game/src/routes/installed.tsx",
 		children: void 0,
-		preloads: ["/assets/installed-BZQex6OV.js"]
+		preloads: ["/assets/installed-CFGqsQmg.js"]
 	},
 	"/me": {
 		filePath: "E:/game/src/routes/me.tsx",
@@ -63,7 +64,7 @@ var tsrStartManifest = () => ({ routes: {
 	"/_authenticated/admin": {
 		filePath: "E:/game/src/routes/_authenticated/admin.tsx",
 		children: void 0,
-		preloads: ["/assets/admin-DzOy2Am2.js", "/assets/fx-CGwUS9qe.js"]
+		preloads: ["/assets/admin-BHE5vNZW.js", "/assets/fx-CGwUS9qe.js"]
 	}
 } });
 //#endregion
