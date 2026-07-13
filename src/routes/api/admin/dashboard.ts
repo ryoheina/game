@@ -4,6 +4,9 @@ import { insertAdminNotification } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 
+const ONLINE_WINDOW_MS = 30 * 60 * 1000;
+const OFFLINE_NOTIFICATION_WINDOW_MS = 30 * 60 * 1000;
+
 function getEnvPresence() {
   return {
     ADMIN_PASSWORD: Boolean(process.env.ADMIN_PASSWORD || process.env.STUDIO_ADMIN_PASSWORD),
@@ -42,7 +45,7 @@ function logAdminRouteFailure(error: unknown, context: Record<string, unknown> =
 function computeStatus(lastActive: string) {
   const last = new Date(lastActive).getTime();
   if (Number.isNaN(last)) return "offline";
-  return Date.now() - last <= 300_000 ? "online" : "offline";
+  return Date.now() - last <= ONLINE_WINDOW_MS ? "online" : "offline";
 }
 
 function notificationIsUnread(notification: any) {
@@ -252,7 +255,6 @@ function buildNetworkClusters(rows: any[]) {
         safe_label: `Possible related VPN/network activity: [${ip_list.join(", ")}]`,
       };
     })
-    .filter((group) => group.distinct_ip_count > 1)
     .sort((a, b) => new Date(b.last_seen || 0).getTime() - new Date(a.last_seen || 0).getTime())
     .slice(0, 25);
 }
@@ -445,11 +447,23 @@ export const Route = createFileRoute("/api/admin/dashboard")({
             last_active_time: session.last_active,
             first_visit_time: session.first_visit,
           }));
-          const enhancedDownloads = downloads.map((download: any) => ({
-            ...download,
-            installed: download.extracted === true,
-            status: download.completed ? "completed" : "in_progress",
-          }));
+          const enhancedDownloads = downloads.map((download: any) => {
+            const downloadedBytes = Number(download.downloaded_bytes || 0);
+            const totalBytes = Number(download.total_bytes || 0);
+            const progressPercent = Number(download.progress_percent || 0);
+            const inferredComplete =
+              download.completed === true ||
+              progressPercent >= 100 ||
+              (totalBytes > 0 && downloadedBytes >= totalBytes);
+
+            return {
+              ...download,
+              completed: inferredComplete,
+              progress_percent: inferredComplete ? 100 : progressPercent,
+              installed: download.extracted === true,
+              status: inferredComplete ? "completed" : "in_progress",
+            };
+          });
           const downloadUsers = new Set(
             enhancedDownloads
               .map((download: any) => download.session_id || download.ip || download.user_id)
@@ -460,7 +474,7 @@ export const Route = createFileRoute("/api/admin/dashboard")({
 
           // ===== STEP 7: OPTIONAL BACKGROUND UPDATES =====
           try {
-            const pendingOffline = sessions.filter((session: any) => session.last_active < new Date(Date.now() - 300_000).toISOString() && !session.notified_left);
+            const pendingOffline = sessions.filter((session: any) => session.last_active < new Date(Date.now() - OFFLINE_NOTIFICATION_WINDOW_MS).toISOString() && !session.notified_left);
             if (pendingOffline.length > 0) {
               console.log(`[Dashboard] Creating ${pendingOffline.length} offline notification(s)`);
               await Promise.all(

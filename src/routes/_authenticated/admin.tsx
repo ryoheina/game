@@ -4,6 +4,8 @@ import useAdminNotifications from "@/hooks/use-admin-notifications";
 import { useDesktopNotifications } from "@/hooks/use-desktop-notifications";
 import { MouseGlow } from "@/components/fx";
 
+const KNOWN_GAME_FILE_SIZE = 134_015_488;
+
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
   component: Admin,
@@ -511,9 +513,11 @@ function Admin() {
                         <td className="px-2 py-2">{d.status}</td>
                         <td className="min-w-[260px] px-2 py-2">
                           {(() => {
-                            const percent = d.completed ? 100 : Math.max(0, Math.min(100, Number(d.progress_percent || 0)));
                             const downloadedBytes = Number(d.downloaded_bytes || 0);
-                            const totalBytes = Number(d.total_bytes || 0);
+                            const totalBytes = Number(d.total_bytes || 0) || (d.file_name === "LegendsofEternity.exe" ? KNOWN_GAME_FILE_SIZE : 0);
+                            const storedPercent = Number(d.progress_percent || 0);
+                            const bytePercent = totalBytes > 0 && downloadedBytes > 0 ? Math.round((downloadedBytes / totalBytes) * 100) : 0;
+                            const percent = d.completed ? 100 : Math.max(0, Math.min(99, storedPercent || bytePercent));
                             const elapsedSeconds = Number(d.elapsed_seconds || 0);
                             return (
                               <div className="rounded-2xl border border-white/10 bg-black/25 p-3">

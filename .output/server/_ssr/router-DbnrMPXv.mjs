@@ -4,12 +4,12 @@ import { c as HeadContent, d as createRouter, f as Outlet, g as Link, h as creat
 import { i as resolveCountry, n as insertAdminNotification, t as getClientMeta } from "./notifications-DBPsE-pR.mjs";
 import { n as supabaseAdmin } from "./client.server-CPH4V7T6.mjs";
 import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
-import { t as recordVisit } from "./analytics.functions-BaB3c0KN.mjs";
+import { t as recordVisit } from "./analytics.functions-DquHcGug.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-B2Ue29OL.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-DbnrMPXv.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-C98Fmh04.css";
@@ -38,6 +38,7 @@ function sendVisit(sessionId, path, heartbeat = false) {
 		})
 	});
 }
+var HEARTBEAT_INTERVAL_MS = 2e4;
 function shouldTrackVisitorPath(pathname) {
 	return pathname === "/" || pathname === "/installed";
 }
@@ -63,9 +64,10 @@ function useVisitorTracking(pathname) {
 			if (!sid) return;
 			sendVisit(sid, path, true).catch(() => {});
 		};
+		sendHeartbeat();
 		const heartbeat = window.setInterval(() => {
 			sendHeartbeat();
-		}, 3e4);
+		}, HEARTBEAT_INTERVAL_MS);
 		const onVisible = () => {
 			if (document.visibilityState === "visible") sendHeartbeat();
 		};
@@ -269,7 +271,7 @@ var Route$21 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-Bj4djt27.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-BgyPlLLz.mjs");
 var Route$20 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -292,7 +294,7 @@ var Route$20 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-etlVvds3.mjs");
+var $$splitComponentImporter = () => import("./admin-DTJfMjJl.mjs");
 var Route$19 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
@@ -592,7 +594,35 @@ var Route$16 = createFileRoute("/api/public/installed")({ server: { handlers: { 
 var PUBLIC_ARCHIVE_NAME = "LegendsofEternity.exe";
 var PUBLIC_ARCHIVE_PATH = `/${encodeURIComponent(PUBLIC_ARCHIVE_NAME)}`;
 var MIN_VALID_ARCHIVE_SIZE = 1e6;
+var KNOWN_PUBLIC_ARCHIVE_SIZE = 134015488;
 var GITHUB_LFS_ARCHIVE_URL = "https://media.githubusercontent.com/media/ryoheina/game/main/public/LegendsofEternity.exe";
+async function getPublicArchiveSize() {
+	try {
+		const [{ stat }, path] = await Promise.all([import("node:fs/promises"), import("node:path")]);
+		const candidates = [path.join(processModule.cwd(), "public", PUBLIC_ARCHIVE_NAME), path.join(processModule.cwd(), ".output", "public", PUBLIC_ARCHIVE_NAME)];
+		for (const candidate of candidates) try {
+			const file = await stat(candidate);
+			if (file.isFile() && file.size > 0) return file.size;
+		} catch {}
+	} catch {}
+	return KNOWN_PUBLIC_ARCHIVE_SIZE;
+}
+function getHeaderValue(headers, names) {
+	for (const name of names) {
+		const value = headers.get(name);
+		if (value) return value;
+	}
+	return null;
+}
+function getNetworkMeta(request, country) {
+	const ipCity = getHeaderValue(request.headers, ["x-vercel-ip-city", "cf-ipcity"]);
+	return {
+		ip_country: getHeaderValue(request.headers, ["x-vercel-ip-country", "cf-ipcountry"]) || country,
+		ip_city: ipCity ? decodeURIComponent(ipCity) : null,
+		asn: getHeaderValue(request.headers, ["x-vercel-ip-as-number", "cf-asn"]),
+		isp: getHeaderValue(request.headers, ["x-vercel-ip-as-name", "cf-isp"])
+	};
+}
 async function updateDownloadProgress(downloadId, data) {
 	if (!downloadId) return;
 	const { error } = await supabaseAdmin.from("downloads").update(data).eq("id", downloadId);
@@ -601,6 +631,7 @@ async function updateDownloadProgress(downloadId, data) {
 var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { GET: async ({ request }) => {
 	const meta = getClientMeta(request);
 	const country = meta.country ?? await resolveCountry(request.headers, meta.ip);
+	const networkMeta = getNetworkMeta(request, country);
 	const sid = new URL(request.url).searchParams.get("sid") || null;
 	const downloadFileName = PUBLIC_ARCHIVE_NAME;
 	const installToken = createInstallToken();
@@ -636,6 +667,7 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 			session_id: sid,
 			ip: meta.ip,
 			country,
+			...networkMeta,
 			browser: meta.browser,
 			os: meta.os,
 			device: meta.device,
@@ -649,8 +681,22 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 			elapsed_seconds: 0
 		};
 		let insertResult = await supabaseAdmin.from("downloads").insert(downloadRecord).select("id").maybeSingle();
-		if (insertResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
-			const { install_token: _installToken, downloaded_bytes: _downloadedBytes, total_bytes: _totalBytes, progress_percent: _progressPercent, elapsed_seconds: _elapsedSeconds, ...fallbackRecord } = downloadRecord;
+		if (insertResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
+			const fallbackRecord = { ...downloadRecord };
+			const message = insertResult.error.message;
+			if (/install_token/i.test(message)) delete fallbackRecord.install_token;
+			if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(message)) {
+				delete fallbackRecord.downloaded_bytes;
+				delete fallbackRecord.total_bytes;
+				delete fallbackRecord.progress_percent;
+				delete fallbackRecord.elapsed_seconds;
+			}
+			if (/ip_country|ip_city|asn|isp/i.test(message)) {
+				delete fallbackRecord.ip_country;
+				delete fallbackRecord.ip_city;
+				delete fallbackRecord.asn;
+				delete fallbackRecord.isp;
+			}
 			insertResult = await supabaseAdmin.from("downloads").insert(fallbackRecord).select("id").maybeSingle();
 		} else if (!insertResult.error) installTokenSaved = true;
 		if (insertResult.error) throw insertResult.error;
@@ -707,8 +753,10 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 				console.error("post-download update failed", e);
 			}
 		};
-		const contentLength = Number(assetResponse.headers.get("content-length") || "0");
-		if (downloadId && contentLength > 0) updateDownloadProgress(downloadId, {
+		const headerContentLength = Number(assetResponse.headers.get("content-length") || "0");
+		const fileContentLength = await getPublicArchiveSize();
+		const contentLength = headerContentLength > 0 ? headerContentLength : fileContentLength;
+		if (downloadId && contentLength > 0) await updateDownloadProgress(downloadId, {
 			total_bytes: contentLength,
 			progress_percent: 0,
 			downloaded_bytes: 0,
@@ -738,19 +786,19 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 					if (done) break;
 					if (!value) continue;
 					downloadedBytes += value.length;
-					await writer.write(value);
 					const nowMs = Date.now();
 					if (downloadId && nowMs - lastProgressUpdateAt >= 1e3) {
 						lastProgressUpdateAt = nowMs;
 						const elapsedSeconds = Math.max(0, Math.round((nowMs - startedAt) / 1e3));
 						const progressPercent = contentLength > 0 ? Math.min(99, Math.round(downloadedBytes / contentLength * 100)) : 0;
-						updateDownloadProgress(downloadId, {
+						await updateDownloadProgress(downloadId, {
 							downloaded_bytes: downloadedBytes,
 							total_bytes: contentLength,
 							progress_percent: progressPercent,
 							elapsed_seconds: elapsedSeconds
 						}).catch((e) => console.error("download progress update failed", e));
 					}
+					await writer.write(value);
 				}
 				if (downloadId) await updateDownloadProgress(downloadId, {
 					downloaded_bytes: downloadedBytes,
@@ -1477,6 +1525,8 @@ var Route$4 = createFileRoute("/api/admin/delete-download")({ server: { handlers
 		});
 	}
 } } } });
+var ONLINE_WINDOW_MS = 1800 * 1e3;
+var OFFLINE_NOTIFICATION_WINDOW_MS = 1800 * 1e3;
 function getEnvPresence() {
 	return {
 		ADMIN_PASSWORD: Boolean(processModule.env.ADMIN_PASSWORD || processModule.env.STUDIO_ADMIN_PASSWORD),
@@ -1511,7 +1561,7 @@ function logAdminRouteFailure(error, context = {}) {
 function computeStatus(lastActive) {
 	const last = new Date(lastActive).getTime();
 	if (Number.isNaN(last)) return "offline";
-	return Date.now() - last <= 3e5 ? "online" : "offline";
+	return Date.now() - last <= ONLINE_WINDOW_MS ? "online" : "offline";
 }
 function notificationIsUnread(notification) {
 	return notification.read !== true;
@@ -1646,7 +1696,7 @@ function buildNetworkClusters(rows) {
 			cluster_confidence: Math.round(confidenceParts / 4 * 100),
 			safe_label: `Possible related VPN/network activity: [${ip_list.join(", ")}]`
 		};
-	}).filter((group) => group.distinct_ip_count > 1).sort((a, b) => new Date(b.last_seen || 0).getTime() - new Date(a.last_seen || 0).getTime()).slice(0, 25);
+	}).sort((a, b) => new Date(b.last_seen || 0).getTime() - new Date(a.last_seen || 0).getTime()).slice(0, 25);
 }
 async function verifyDatabaseConnectivity(supabaseAdmin) {
 	console.log("[Dashboard] Verifying database connectivity using sessions table...");
@@ -1845,16 +1895,24 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 			last_active_time: session.last_active,
 			first_visit_time: session.first_visit
 		}));
-		const enhancedDownloads = downloads.map((download) => ({
-			...download,
-			installed: download.extracted === true,
-			status: download.completed ? "completed" : "in_progress"
-		}));
+		const enhancedDownloads = downloads.map((download) => {
+			const downloadedBytes = Number(download.downloaded_bytes || 0);
+			const totalBytes = Number(download.total_bytes || 0);
+			const progressPercent = Number(download.progress_percent || 0);
+			const inferredComplete = download.completed === true || progressPercent >= 100 || totalBytes > 0 && downloadedBytes >= totalBytes;
+			return {
+				...download,
+				completed: inferredComplete,
+				progress_percent: inferredComplete ? 100 : progressPercent,
+				installed: download.extracted === true,
+				status: inferredComplete ? "completed" : "in_progress"
+			};
+		});
 		const downloadUsers = new Set(enhancedDownloads.map((download) => download.session_id || download.ip || download.user_id).filter(Boolean)).size;
 		const completedDownloads = enhancedDownloads.filter((download) => download.completed).length;
 		const unreadNotifications = notifications.filter(notificationIsUnread);
 		try {
-			const pendingOffline = sessions.filter((session) => session.last_active < (/* @__PURE__ */ new Date(Date.now() - 3e5)).toISOString() && !session.notified_left);
+			const pendingOffline = sessions.filter((session) => session.last_active < (/* @__PURE__ */ new Date(Date.now() - OFFLINE_NOTIFICATION_WINDOW_MS)).toISOString() && !session.notified_left);
 			if (pendingOffline.length > 0) {
 				console.log(`[Dashboard] Creating ${pendingOffline.length} offline notification(s)`);
 				await Promise.all(pendingOffline.map((session) => insertAdminNotification(supabaseAdmin, {

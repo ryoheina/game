@@ -1,7 +1,7 @@
 import { f as getRequest, i as TSS_SERVER_FUNCTION, l as createServerFn } from "./esm-9EjmF9OT.mjs";
 import { i as resolveCountry, n as insertAdminNotification, r as requireSupabaseAuth, t as getClientMeta } from "./notifications-DBPsE-pR.mjs";
 import { n as objectType, r as stringType, t as booleanType } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-B5FWFJE3.js
+//#region node_modules/.nitro/vite/services/ssr/assets/analytics.functions-BZ2oeubs.js
 var createServerRpc = (serverFnMeta, splitImportFn) => {
 	const url = "/_serverFn/" + serverFnMeta.id;
 	return Object.assign(splitImportFn, {
@@ -10,6 +10,28 @@ var createServerRpc = (serverFnMeta, splitImportFn) => {
 		[TSS_SERVER_FUNCTION]: true
 	});
 };
+var VISITOR_RETURN_WINDOW_MS = 1800 * 1e3;
+function getHeaderValue(headers, names) {
+	if (!headers) return null;
+	for (const name of names) {
+		const value = headers.get(name);
+		if (value) return value;
+	}
+	return null;
+}
+function getNetworkMeta(request, country) {
+	const headers = request?.headers ?? null;
+	const ipCountry = getHeaderValue(headers, ["x-vercel-ip-country", "cf-ipcountry"]) || country;
+	const ipCity = getHeaderValue(headers, ["x-vercel-ip-city", "cf-ipcity"]);
+	const asn = getHeaderValue(headers, ["x-vercel-ip-as-number", "cf-asn"]);
+	const isp = getHeaderValue(headers, ["x-vercel-ip-as-name", "cf-isp"]);
+	return {
+		ip_country: ipCountry,
+		ip_city: ipCity ? decodeURIComponent(ipCity) : null,
+		asn,
+		isp
+	};
+}
 async function recordVisit(request, data) {
 	const meta = request ? getClientMeta(request) : {
 		ip: null,
@@ -21,20 +43,28 @@ async function recordVisit(request, data) {
 		device: "Desktop"
 	};
 	const country = meta.country ?? (request ? await resolveCountry(request.headers, meta.ip) : null);
+	const networkMeta = getNetworkMeta(request, country);
 	const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
 	const now = (/* @__PURE__ */ new Date()).toISOString();
 	const { data: existing } = await supabaseAdmin.from("sessions").select("session_id,last_active").eq("session_id", data.sessionId).maybeSingle();
 	if (existing) {
-		const wasOffline = Date.now() - new Date(existing.last_active).getTime() > 3e5;
-		await supabaseAdmin.from("sessions").update({
+		const wasOffline = Date.now() - new Date(existing.last_active).getTime() > VISITOR_RETURN_WINDOW_MS;
+		const sessionUpdate = {
 			last_active: now,
 			ip: meta.ip,
 			country,
 			browser: meta.browser,
 			device: meta.device,
 			user_agent: meta.ua,
-			notified_left: false
-		}).eq("session_id", data.sessionId);
+			notified_left: false,
+			...networkMeta
+		};
+		let sessionUpdateRes = await supabaseAdmin.from("sessions").update(sessionUpdate).eq("session_id", data.sessionId);
+		if (sessionUpdateRes.error && /ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(sessionUpdateRes.error.message)) {
+			const { ip_country: _ipCountry, ip_city: _ipCity, asn: _asn, isp: _isp, ...fallbackUpdate } = sessionUpdate;
+			sessionUpdateRes = await supabaseAdmin.from("sessions").update(fallbackUpdate).eq("session_id", data.sessionId);
+		}
+		if (sessionUpdateRes.error) throw sessionUpdateRes.error;
 		if (data.heartbeat) return { ok: true };
 		if (wasOffline) try {
 			await insertAdminNotification(supabaseAdmin, {
@@ -62,28 +92,42 @@ async function recordVisit(request, data) {
 			console.error("notify failed", e);
 		}
 	} else if (data.heartbeat) return { ok: true };
-	await supabaseAdmin.from("visits").insert({
+	const visitRecord = {
 		session_id: data.sessionId,
 		path: data.path,
 		ip: meta.ip,
 		country,
+		...networkMeta,
 		browser: meta.browser,
 		os: meta.os,
 		device: meta.device,
 		user_agent: meta.ua,
 		referrer: meta.referrer
-	});
+	};
+	let visitInsertRes = await supabaseAdmin.from("visits").insert(visitRecord);
+	if (visitInsertRes.error && /ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(visitInsertRes.error.message)) {
+		const { ip_country: _ipCountry, ip_city: _ipCity, asn: _asn, isp: _isp, ...fallbackVisitRecord } = visitRecord;
+		visitInsertRes = await supabaseAdmin.from("visits").insert(fallbackVisitRecord);
+	}
+	if (visitInsertRes.error) throw visitInsertRes.error;
 	if (!existing) {
-		await supabaseAdmin.from("sessions").insert({
+		const sessionRecord = {
 			session_id: data.sessionId,
 			ip: meta.ip,
 			country,
+			...networkMeta,
 			browser: meta.browser,
 			device: meta.device,
 			user_agent: meta.ua,
 			first_visit: now,
 			last_active: now
-		});
+		};
+		let sessionInsertRes = await supabaseAdmin.from("sessions").insert(sessionRecord);
+		if (sessionInsertRes.error && /ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(sessionInsertRes.error.message)) {
+			const { ip_country: _ipCountry, ip_city: _ipCity, asn: _asn, isp: _isp, ...fallbackSessionRecord } = sessionRecord;
+			sessionInsertRes = await supabaseAdmin.from("sessions").insert(fallbackSessionRecord);
+		}
+		if (sessionInsertRes.error) throw sessionInsertRes.error;
 		try {
 			await insertAdminNotification(supabaseAdmin, {
 				type: "visitor",

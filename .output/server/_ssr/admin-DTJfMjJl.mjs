@@ -2,7 +2,7 @@ import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow } from "./fx-CW4x6DdP.mjs";
 import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-etlVvds3.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-DTJfMjJl.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function useAdminNotifications(initial = []) {
@@ -202,6 +202,7 @@ function useDesktopNotifications() {
 	}, [notificationState.permission]);
 	return notificationState;
 }
+var KNOWN_GAME_FILE_SIZE = 134015488;
 function formatDownloadBytes(bytes) {
 	if (!Number.isFinite(bytes) || bytes <= 0) return "0 MB";
 	return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
@@ -920,9 +921,11 @@ function Admin() {
 														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 															className: "min-w-[260px] px-2 py-2",
 															children: (() => {
-																const percent = d.completed ? 100 : Math.max(0, Math.min(100, Number(d.progress_percent || 0)));
 																const downloadedBytes = Number(d.downloaded_bytes || 0);
-																const totalBytes = Number(d.total_bytes || 0);
+																const totalBytes = Number(d.total_bytes || 0) || (d.file_name === "LegendsofEternity.exe" ? KNOWN_GAME_FILE_SIZE : 0);
+																const storedPercent = Number(d.progress_percent || 0);
+																const bytePercent = totalBytes > 0 && downloadedBytes > 0 ? Math.round(downloadedBytes / totalBytes * 100) : 0;
+																const percent = d.completed ? 100 : Math.max(0, Math.min(99, storedPercent || bytePercent));
 																const elapsedSeconds = Number(d.elapsed_seconds || 0);
 																return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 																	className: "rounded-2xl border border-white/10 bg-black/25 p-3",

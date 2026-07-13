@@ -11,6 +11,8 @@ function sendVisit(sessionId: string, path: string, heartbeat = false) {
   });
 }
 
+const HEARTBEAT_INTERVAL_MS = 20_000;
+
 function shouldTrackVisitorPath(pathname: string) {
   return pathname === "/" || pathname === "/installed";
 }
@@ -42,9 +44,11 @@ export function useVisitorTracking(pathname: string) {
       sendVisit(sid, path, true).catch(() => {});
     };
 
+    sendHeartbeat();
+
     const heartbeat = window.setInterval(() => {
       sendHeartbeat();
-    }, 30_000);
+    }, HEARTBEAT_INTERVAL_MS);
     const onVisible = () => {
       if (document.visibilityState === "visible") sendHeartbeat();
     };

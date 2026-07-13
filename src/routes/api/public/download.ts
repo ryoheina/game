@@ -8,8 +8,48 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 const PUBLIC_ARCHIVE_NAME = "LegendsofEternity.exe";
 const PUBLIC_ARCHIVE_PATH = `/${encodeURIComponent(PUBLIC_ARCHIVE_NAME)}`;
 const MIN_VALID_ARCHIVE_SIZE = 1_000_000;
+const KNOWN_PUBLIC_ARCHIVE_SIZE = 134_015_488;
 const GITHUB_LFS_ARCHIVE_URL =
   "https://media.githubusercontent.com/media/ryoheina/game/main/public/LegendsofEternity.exe";
+
+export const runtime = "nodejs";
+
+async function getPublicArchiveSize() {
+  try {
+    const [{ stat }, path] = await Promise.all([import("node:fs/promises"), import("node:path")]);
+    const candidates = [
+      path.join(process.cwd(), "public", PUBLIC_ARCHIVE_NAME),
+      path.join(process.cwd(), ".output", "public", PUBLIC_ARCHIVE_NAME),
+    ];
+
+    for (const candidate of candidates) {
+      try {
+        const file = await stat(candidate);
+        if (file.isFile() && file.size > 0) return file.size;
+      } catch {}
+    }
+  } catch {}
+
+  return KNOWN_PUBLIC_ARCHIVE_SIZE;
+}
+
+function getHeaderValue(headers: Headers, names: string[]) {
+  for (const name of names) {
+    const value = headers.get(name);
+    if (value) return value;
+  }
+  return null;
+}
+
+function getNetworkMeta(request: Request, country: string | null) {
+  const ipCity = getHeaderValue(request.headers, ["x-vercel-ip-city", "cf-ipcity"]);
+  return {
+    ip_country: getHeaderValue(request.headers, ["x-vercel-ip-country", "cf-ipcountry"]) || country,
+    ip_city: ipCity ? decodeURIComponent(ipCity) : null,
+    asn: getHeaderValue(request.headers, ["x-vercel-ip-as-number", "cf-asn"]),
+    isp: getHeaderValue(request.headers, ["x-vercel-ip-as-name", "cf-isp"]),
+  };
+}
 
 async function updateDownloadProgress(
   downloadId: string | null,
@@ -35,6 +75,7 @@ export const Route = createFileRoute("/api/public/download")({
       GET: async ({ request }) => {
         const meta = getClientMeta(request);
         const country = meta.country ?? (await resolveCountry(request.headers, meta.ip));
+        const networkMeta = getNetworkMeta(request, country);
         const url = new URL(request.url);
         const sid = url.searchParams.get("sid") || null;
         const downloadFileName = PUBLIC_ARCHIVE_NAME;
@@ -84,6 +125,7 @@ export const Route = createFileRoute("/api/public/download")({
               session_id: sid,
               ip: meta.ip,
               country,
+              ...networkMeta,
               browser: meta.browser,
               os: meta.os,
               device: meta.device,
@@ -101,15 +143,22 @@ export const Route = createFileRoute("/api/public/download")({
             .insert(downloadRecord)
             .select("id")
             .maybeSingle();
-          if (insertResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
-            const {
-              install_token: _installToken,
-              downloaded_bytes: _downloadedBytes,
-              total_bytes: _totalBytes,
-              progress_percent: _progressPercent,
-              elapsed_seconds: _elapsedSeconds,
-              ...fallbackRecord
-            } = downloadRecord;
+          if (insertResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
+            const fallbackRecord: Record<string, unknown> = { ...downloadRecord };
+            const message = insertResult.error.message;
+            if (/install_token/i.test(message)) delete fallbackRecord.install_token;
+            if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(message)) {
+              delete fallbackRecord.downloaded_bytes;
+              delete fallbackRecord.total_bytes;
+              delete fallbackRecord.progress_percent;
+              delete fallbackRecord.elapsed_seconds;
+            }
+            if (/ip_country|ip_city|asn|isp/i.test(message)) {
+              delete fallbackRecord.ip_country;
+              delete fallbackRecord.ip_city;
+              delete fallbackRecord.asn;
+              delete fallbackRecord.isp;
+            }
             insertResult = await supabaseAdmin
               .from("downloads")
               .insert(fallbackRecord)
@@ -176,9 +225,11 @@ export const Route = createFileRoute("/api/public/download")({
             }
           };
 
-          const contentLength = Number(assetResponse.headers.get("content-length") || "0");
+          const headerContentLength = Number(assetResponse.headers.get("content-length") || "0");
+          const fileContentLength = await getPublicArchiveSize();
+          const contentLength = headerContentLength > 0 ? headerContentLength : fileContentLength;
           if (downloadId && contentLength > 0) {
-            void updateDownloadProgress(downloadId, {
+            await updateDownloadProgress(downloadId, {
               total_bytes: contentLength,
               progress_percent: 0,
               downloaded_bytes: 0,
@@ -213,20 +264,21 @@ export const Route = createFileRoute("/api/public/download")({
                 if (!value) continue;
 
                 downloadedBytes += value.length;
-                await writer.write(value);
 
                 const nowMs = Date.now();
                 if (downloadId && nowMs - lastProgressUpdateAt >= 1000) {
                   lastProgressUpdateAt = nowMs;
                   const elapsedSeconds = Math.max(0, Math.round((nowMs - startedAt) / 1000));
                   const progressPercent = contentLength > 0 ? Math.min(99, Math.round((downloadedBytes / contentLength) * 100)) : 0;
-                  void updateDownloadProgress(downloadId, {
+                  await updateDownloadProgress(downloadId, {
                     downloaded_bytes: downloadedBytes,
                     total_bytes: contentLength,
                     progress_percent: progressPercent,
                     elapsed_seconds: elapsedSeconds,
                   }).catch((e) => console.error("download progress update failed", e));
                 }
+
+                await writer.write(value);
               }
 
               if (downloadId) {
