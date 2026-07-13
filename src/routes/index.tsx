@@ -164,6 +164,7 @@ function Home() {
         100,
         Math.max(0, (performance.now() - startedAt) / 1000),
         true,
+        !downloadId,
       );
 
       setDownloadStatus({

@@ -9,7 +9,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-BtgOY_6f.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-B3v6HGCp.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-BtC-ExSM.css";
@@ -294,7 +294,7 @@ var Route$22 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-D_SHb7bP.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-DnfDIsLd.mjs");
 var Route$21 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -622,19 +622,42 @@ function cleanNumber(value, fallback = 0) {
 	const number = Number(value);
 	return Number.isFinite(number) && number >= 0 ? number : fallback;
 }
+function stripUnavailableColumns(data, errorMessage) {
+	const next = { ...data };
+	if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(errorMessage)) {
+		delete next.downloaded_bytes;
+		delete next.total_bytes;
+		delete next.progress_percent;
+		delete next.elapsed_seconds;
+	}
+	if (/completed_at/i.test(errorMessage)) delete next.completed_at;
+	if (/completed/i.test(errorMessage)) delete next.completed;
+	return next;
+}
+async function updateDownloadById(id, data) {
+	let updateData = { ...data };
+	for (let attempt = 0; attempt < 3; attempt += 1) {
+		const result = await supabaseAdmin.from("downloads").update(updateData).eq("id", id).select("id").maybeSingle();
+		if (!result.error && result.data?.id) return result.data.id;
+		if (!result.error) return null;
+		console.error("[Download progress] update failed", result.error.message);
+		const stripped = stripUnavailableColumns(updateData, result.error.message);
+		if (JSON.stringify(stripped) === JSON.stringify(updateData)) return null;
+		updateData = stripped;
+	}
+	return null;
+}
 async function updateDownload(downloadId, sessionId, data) {
 	if (downloadId) {
-		const byId = await supabaseAdmin.from("downloads").update(data).eq("id", downloadId).select("id").maybeSingle();
-		if (!byId.error && byId.data?.id) return byId.data.id;
-		if (byId.error) console.error("[Download progress] update by id failed", byId.error.message);
+		const byId = await updateDownloadById(downloadId, data);
+		if (byId) return byId;
 	}
 	if (sessionId) {
 		let latest = await supabaseAdmin.from("downloads").select("id").eq("session_id", sessionId).eq("file_name", PUBLIC_ARCHIVE_NAME$1).order("started_at", { ascending: false }).limit(1).maybeSingle();
 		if (latest.error && /started_at|schema cache|column .* does not exist|Could not find .* column/i.test(latest.error.message)) latest = await supabaseAdmin.from("downloads").select("id").eq("session_id", sessionId).eq("file_name", PUBLIC_ARCHIVE_NAME$1).order("created_at", { ascending: false }).limit(1).maybeSingle();
 		if (!latest.error && latest.data?.id) {
-			const bySession = await supabaseAdmin.from("downloads").update(data).eq("id", latest.data.id).select("id").maybeSingle();
-			if (!bySession.error && bySession.data?.id) return bySession.data.id;
-			if (bySession.error) console.error("[Download progress] update by session failed", bySession.error.message);
+			const bySession = await updateDownloadById(latest.data.id, data);
+			if (bySession) return bySession;
 		}
 		if (latest.error) console.error("[Download progress] lookup by session failed", latest.error.message);
 	}
@@ -699,10 +722,10 @@ var Route$16 = createFileRoute("/api/public/download-progress")({ server: { hand
 		let id = await updateDownload(downloadId, sessionId, data);
 		if (!id && body?.create === true) id = await insertFallbackDownload(request, sessionId, {
 			...data,
-			completed: false,
-			progress_percent: 0,
-			downloaded_bytes: 0,
-			elapsed_seconds: 0
+			completed,
+			progress_percent: completed ? 100 : 0,
+			downloaded_bytes: completed ? downloadedBytes : 0,
+			elapsed_seconds
 		});
 		return new Response(JSON.stringify({
 			success: true,
@@ -759,8 +782,23 @@ function getNetworkMeta(request, country) {
 }
 async function updateDownloadProgress(downloadId, data) {
 	if (!downloadId) return;
-	const { error } = await supabaseAdmin.from("downloads").update(data).eq("id", downloadId);
-	if (error && !/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|schema cache|column .* does not exist|Could not find .* column/i.test(error.message)) throw error;
+	let updateData = { ...data };
+	for (let attempt = 0; attempt < 3; attempt += 1) {
+		const { error } = await supabaseAdmin.from("downloads").update(updateData).eq("id", downloadId);
+		if (!error) return;
+		if (!/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|completed_at|completed|schema cache|column .* does not exist|Could not find .* column/i.test(error.message)) throw error;
+		const nextData = { ...updateData };
+		if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(error.message)) {
+			delete nextData.downloaded_bytes;
+			delete nextData.total_bytes;
+			delete nextData.progress_percent;
+			delete nextData.elapsed_seconds;
+		}
+		if (/completed_at/i.test(error.message)) delete nextData.completed_at;
+		if (/completed/i.test(error.message)) delete nextData.completed;
+		if (JSON.stringify(nextData) === JSON.stringify(updateData)) return;
+		updateData = nextData;
+	}
 }
 var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { GET: async ({ request }) => {
 	const meta = getClientMeta(request);
@@ -2097,6 +2135,7 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 		console.log(`[Dashboard] Network clusters built: ${networkClusters.length}`);
 		const installedSessionIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.session_id).filter(Boolean), ...extractions.map((extraction) => extraction.session_id).filter(Boolean)]);
 		const installedDownloadIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.id).filter(Boolean), ...extractions.map((extraction) => extraction.download_id).filter(Boolean)]);
+		const completedDownloadIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.completed === true || Boolean(download.completed_at)).map((download) => download.id).filter(Boolean), ...notifications.filter((notification) => notification.type === "download" || notification.title === "Download Complete").map((notification) => notification.payload?.download_id).filter(Boolean)]);
 		for (const extraction of extractions) {
 			if (extraction.session_id) installedSessionIds.add(extraction.session_id);
 			if (!extraction.session_id && extraction.download_id) {
@@ -2119,7 +2158,7 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 			const downloadedBytes = Number(download.downloaded_bytes || 0);
 			const totalBytes = Number(download.total_bytes || 0);
 			const progressPercent = Number(download.progress_percent || 0);
-			const inferredComplete = download.completed === true || progressPercent >= 100 || totalBytes > 0 && downloadedBytes >= totalBytes;
+			const inferredComplete = download.completed === true || Boolean(download.completed_at) || completedDownloadIds.has(download.id) || progressPercent >= 100 || totalBytes > 0 && downloadedBytes >= totalBytes;
 			return {
 				...download,
 				completed: inferredComplete,

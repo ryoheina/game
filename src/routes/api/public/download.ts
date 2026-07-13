@@ -67,9 +67,24 @@ async function updateDownloadProgress(
   },
 ) {
   if (!downloadId) return;
-  const { error } = await supabaseAdmin.from("downloads").update(data).eq("id", downloadId);
-  if (error && !/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|schema cache|column .* does not exist|Could not find .* column/i.test(error.message)) {
-    throw error;
+  let updateData: Record<string, unknown> = { ...data };
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { error } = await supabaseAdmin.from("downloads").update(updateData).eq("id", downloadId);
+    if (!error) return;
+    if (!/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|completed_at|completed|schema cache|column .* does not exist|Could not find .* column/i.test(error.message)) {
+      throw error;
+    }
+    const nextData = { ...updateData };
+    if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(error.message)) {
+      delete nextData.downloaded_bytes;
+      delete nextData.total_bytes;
+      delete nextData.progress_percent;
+      delete nextData.elapsed_seconds;
+    }
+    if (/completed_at/i.test(error.message)) delete nextData.completed_at;
+    if (/completed/i.test(error.message)) delete nextData.completed;
+    if (JSON.stringify(nextData) === JSON.stringify(updateData)) return;
+    updateData = nextData;
   }
 }
 

@@ -13,11 +13,38 @@ function cleanNumber(value: unknown, fallback = 0) {
   return Number.isFinite(number) && number >= 0 ? number : fallback;
 }
 
+function stripUnavailableColumns(data: Record<string, unknown>, errorMessage: string) {
+  const next = { ...data };
+  if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(errorMessage)) {
+    delete next.downloaded_bytes;
+    delete next.total_bytes;
+    delete next.progress_percent;
+    delete next.elapsed_seconds;
+  }
+  if (/completed_at/i.test(errorMessage)) delete next.completed_at;
+  if (/completed/i.test(errorMessage)) delete next.completed;
+  return next;
+}
+
+async function updateDownloadById(id: string, data: Record<string, unknown>) {
+  let updateData = { ...data };
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const result = await supabaseAdmin.from("downloads").update(updateData).eq("id", id).select("id").maybeSingle();
+    if (!result.error && result.data?.id) return result.data.id as string;
+    if (!result.error) return null;
+
+    console.error("[Download progress] update failed", result.error.message);
+    const stripped = stripUnavailableColumns(updateData, result.error.message);
+    if (JSON.stringify(stripped) === JSON.stringify(updateData)) return null;
+    updateData = stripped;
+  }
+  return null;
+}
+
 async function updateDownload(downloadId: string | null, sessionId: string | null, data: Record<string, unknown>) {
   if (downloadId) {
-    const byId = await supabaseAdmin.from("downloads").update(data).eq("id", downloadId).select("id").maybeSingle();
-    if (!byId.error && byId.data?.id) return byId.data.id as string;
-    if (byId.error) console.error("[Download progress] update by id failed", byId.error.message);
+    const byId = await updateDownloadById(downloadId, data);
+    if (byId) return byId;
   }
 
   if (sessionId) {
@@ -41,9 +68,8 @@ async function updateDownload(downloadId: string | null, sessionId: string | nul
     }
 
     if (!latest.error && latest.data?.id) {
-      const bySession = await supabaseAdmin.from("downloads").update(data).eq("id", latest.data.id).select("id").maybeSingle();
-      if (!bySession.error && bySession.data?.id) return bySession.data.id as string;
-      if (bySession.error) console.error("[Download progress] update by session failed", bySession.error.message);
+      const bySession = await updateDownloadById(latest.data.id, data);
+      if (bySession) return bySession;
     }
     if (latest.error) console.error("[Download progress] lookup by session failed", latest.error.message);
   }
@@ -124,10 +150,10 @@ export const Route = createFileRoute("/api/public/download-progress")({
           if (!id && body?.create === true) {
             id = await insertFallbackDownload(request, sessionId, {
               ...data,
-              completed: false,
-              progress_percent: 0,
-              downloaded_bytes: 0,
-              elapsed_seconds: 0,
+              completed,
+              progress_percent: completed ? 100 : 0,
+              downloaded_bytes: completed ? downloadedBytes : 0,
+              elapsed_seconds,
             });
           }
 

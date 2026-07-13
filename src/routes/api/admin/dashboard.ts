@@ -504,6 +504,16 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               .filter(Boolean),
             ...extractions.map((extraction: any) => extraction.download_id).filter(Boolean),
           ]);
+          const completedDownloadIds = new Set([
+            ...downloads
+              .filter((download: any) => download.completed === true || Boolean(download.completed_at))
+              .map((download: any) => download.id)
+              .filter(Boolean),
+            ...notifications
+              .filter((notification: any) => notification.type === "download" || notification.title === "Download Complete")
+              .map((notification: any) => notification.payload?.download_id)
+              .filter(Boolean),
+          ]);
           for (const extraction of extractions) {
             if (extraction.session_id) installedSessionIds.add(extraction.session_id);
             if (!extraction.session_id && extraction.download_id) {
@@ -528,6 +538,8 @@ export const Route = createFileRoute("/api/admin/dashboard")({
             const progressPercent = Number(download.progress_percent || 0);
             const inferredComplete =
               download.completed === true ||
+              Boolean(download.completed_at) ||
+              completedDownloadIds.has(download.id) ||
               progressPercent >= 100 ||
               (totalBytes > 0 && downloadedBytes >= totalBytes);
 

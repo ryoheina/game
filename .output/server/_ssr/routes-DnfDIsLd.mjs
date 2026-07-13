@@ -7,7 +7,7 @@ import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
 import { n as submitContact } from "./analytics.functions-DtJsHYe4.mjs";
 import { n as ChevronLeft, t as ChevronRight } from "../_libs/lucide-react.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-D_SHb7bP.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-DnfDIsLd.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -1569,7 +1569,7 @@ function Home() {
 			anchor.click();
 			document.body.removeChild(anchor);
 			window.setTimeout(() => URL.revokeObjectURL(objectUrl), 3e4);
-			await reportProgress(loadedBytes || blob.size, totalBytes || blob.size, 100, Math.max(0, (performance_default.now() - startedAt) / 1e3), true);
+			await reportProgress(loadedBytes || blob.size, totalBytes || blob.size, 100, Math.max(0, (performance_default.now() - startedAt) / 1e3), true, !downloadId);
 			setDownloadStatus({
 				phase: "complete",
 				loadedBytes: loadedBytes || blob.size,
