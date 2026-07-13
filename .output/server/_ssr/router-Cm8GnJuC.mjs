@@ -9,7 +9,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-IxyZS8sf.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-Cm8GnJuC.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-BtC-ExSM.css";
@@ -294,7 +294,7 @@ var Route$22 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-jDOEfHZx.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-CGpmim6x.mjs");
 var Route$21 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -629,7 +629,8 @@ async function updateDownload(downloadId, sessionId, data) {
 		if (byId.error) console.error("[Download progress] update by id failed", byId.error.message);
 	}
 	if (sessionId) {
-		const latest = await supabaseAdmin.from("downloads").select("id").eq("session_id", sessionId).eq("file_name", PUBLIC_ARCHIVE_NAME$1).order("started_at", { ascending: false }).limit(1).maybeSingle();
+		let latest = await supabaseAdmin.from("downloads").select("id").eq("session_id", sessionId).eq("file_name", PUBLIC_ARCHIVE_NAME$1).order("started_at", { ascending: false }).limit(1).maybeSingle();
+		if (latest.error && /started_at|schema cache|column .* does not exist|Could not find .* column/i.test(latest.error.message)) latest = await supabaseAdmin.from("downloads").select("id").eq("session_id", sessionId).eq("file_name", PUBLIC_ARCHIVE_NAME$1).order("created_at", { ascending: false }).limit(1).maybeSingle();
 		if (!latest.error && latest.data?.id) {
 			const bySession = await supabaseAdmin.from("downloads").update(data).eq("id", latest.data.id).select("id").maybeSingle();
 			if (!bySession.error && bySession.data?.id) return bySession.data.id;
@@ -696,7 +697,7 @@ var Route$16 = createFileRoute("/api/public/download-progress")({ server: { hand
 			...completed ? { completed_at: (/* @__PURE__ */ new Date()).toISOString() } : {}
 		};
 		let id = await updateDownload(downloadId, sessionId, data);
-		if (!id) id = await insertFallbackDownload(request, sessionId, data);
+		if (!id && body?.create === true) id = await insertFallbackDownload(request, sessionId, data);
 		return new Response(JSON.stringify({
 			success: true,
 			downloadId: id
@@ -1843,6 +1844,30 @@ function buildNetworkClusters(rows) {
 		};
 	}).sort((a, b) => new Date(b.last_seen || 0).getTime() - new Date(a.last_seen || 0).getTime()).slice(0, 25);
 }
+function getDownloadTime(download) {
+	const value = download.started_at || download.created_at || download.completed_at;
+	const time = new Date(value || 0).getTime();
+	return Number.isFinite(time) ? time : 0;
+}
+function getDownloadRank(download) {
+	const downloadedBytes = Number(download.downloaded_bytes || 0);
+	const progressPercent = Number(download.progress_percent || 0);
+	return (download.completed === true ? 1e9 : 0) + progressPercent * 1e6 + downloadedBytes;
+}
+function collapseDuplicateDownloads(downloads) {
+	const groups = /* @__PURE__ */ new Map();
+	for (const download of downloads) {
+		const key = [download.session_id || download.ip || "unknown", download.file_name || "unknown"].join("|");
+		const group = groups.get(key) || [];
+		group.push(download);
+		groups.set(key, group);
+	}
+	return Array.from(groups.values()).map((group) => group.slice().sort((a, b) => {
+		const rankDiff = getDownloadRank(b) - getDownloadRank(a);
+		if (rankDiff !== 0) return rankDiff;
+		return getDownloadTime(b) - getDownloadTime(a);
+	})[0]).sort((a, b) => getDownloadTime(b) - getDownloadTime(a));
+}
 async function verifyDatabaseConnectivity(supabaseAdmin) {
 	console.log("[Dashboard] Verifying database connectivity using sessions table...");
 	const res = await supabaseAdmin.from("sessions").select("session_id").limit(1);
@@ -2052,7 +2077,7 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 				first_visit_time: session.first_visit
 			};
 		});
-		const enhancedDownloads = downloads.map((download) => {
+		const enhancedDownloads = collapseDuplicateDownloads(downloads.map((download) => {
 			const downloadedBytes = Number(download.downloaded_bytes || 0);
 			const totalBytes = Number(download.total_bytes || 0);
 			const progressPercent = Number(download.progress_percent || 0);
@@ -2064,7 +2089,7 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 				installed: download.extracted === true || installedDownloadIds.has(download.id) || installedSessionIds.has(download.session_id),
 				status: inferredComplete ? "completed" : "in_progress"
 			};
-		});
+		}));
 		const downloadUsers = new Set(enhancedDownloads.map((download) => download.session_id || download.ip || download.user_id).filter(Boolean)).size;
 		const completedDownloads = enhancedDownloads.filter((download) => download.completed).length;
 		const unreadNotifications = notifications.filter(notificationIsUnread);

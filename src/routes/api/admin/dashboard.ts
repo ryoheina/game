@@ -279,6 +279,41 @@ function buildNetworkClusters(rows: any[]) {
     .slice(0, 25);
 }
 
+function getDownloadTime(download: any) {
+  const value = download.started_at || download.created_at || download.completed_at;
+  const time = new Date(value || 0).getTime();
+  return Number.isFinite(time) ? time : 0;
+}
+
+function getDownloadRank(download: any) {
+  const downloadedBytes = Number(download.downloaded_bytes || 0);
+  const progressPercent = Number(download.progress_percent || 0);
+  const completedRank = download.completed === true ? 1_000_000_000 : 0;
+  return completedRank + progressPercent * 1_000_000 + downloadedBytes;
+}
+
+function collapseDuplicateDownloads(downloads: any[]) {
+  const groups = new Map<string, any[]>();
+  for (const download of downloads) {
+    const key = [download.session_id || download.ip || "unknown", download.file_name || "unknown"].join("|");
+    const group = groups.get(key) || [];
+    group.push(download);
+    groups.set(key, group);
+  }
+
+  return Array.from(groups.values())
+    .map((group) =>
+      group
+        .slice()
+        .sort((a, b) => {
+          const rankDiff = getDownloadRank(b) - getDownloadRank(a);
+          if (rankDiff !== 0) return rankDiff;
+          return getDownloadTime(b) - getDownloadTime(a);
+        })[0],
+    )
+    .sort((a, b) => getDownloadTime(b) - getDownloadTime(a));
+}
+
 async function verifyDatabaseConnectivity(supabaseAdmin: any) {
   console.log("[Dashboard] Verifying database connectivity using sessions table...");
   const res = await supabaseAdmin.from("sessions").select("session_id").limit(1);
@@ -485,7 +520,7 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               first_visit_time: session.first_visit,
             };
           });
-          const enhancedDownloads = downloads.map((download: any) => {
+          const enhancedDownloadsRaw = downloads.map((download: any) => {
             const downloadedBytes = Number(download.downloaded_bytes || 0);
             const totalBytes = Number(download.total_bytes || 0);
             const progressPercent = Number(download.progress_percent || 0);
@@ -502,6 +537,7 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               status: inferredComplete ? "completed" : "in_progress",
             };
           });
+          const enhancedDownloads = collapseDuplicateDownloads(enhancedDownloadsRaw);
           const downloadUsers = new Set(
             enhancedDownloads
               .map((download: any) => download.session_id || download.ip || download.user_id)

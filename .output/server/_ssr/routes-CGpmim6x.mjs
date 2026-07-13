@@ -7,7 +7,7 @@ import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
 import { n as submitContact } from "./analytics.functions-DtJsHYe4.mjs";
 import { n as ChevronLeft, t as ChevronRight } from "../_libs/lucide-react.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-jDOEfHZx.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-CGpmim6x.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -1518,9 +1518,6 @@ function Home() {
 				xhr.open("GET", url, true);
 				xhr.responseType = "blob";
 				xhr.withCredentials = true;
-				xhr.onloadstart = () => {
-					reportProgress(0, 0, 0, 0);
-				};
 				xhr.onprogress = (event) => {
 					loadedBytes = event.loaded;
 					totalBytes = event.lengthComputable ? event.total : totalBytes;

@@ -21,7 +21,7 @@ async function updateDownload(downloadId: string | null, sessionId: string | nul
   }
 
   if (sessionId) {
-    const latest = await supabaseAdmin
+    let latest = await supabaseAdmin
       .from("downloads")
       .select("id")
       .eq("session_id", sessionId)
@@ -29,6 +29,16 @@ async function updateDownload(downloadId: string | null, sessionId: string | nul
       .order("started_at", { ascending: false })
       .limit(1)
       .maybeSingle();
+    if (latest.error && /started_at|schema cache|column .* does not exist|Could not find .* column/i.test(latest.error.message)) {
+      latest = await supabaseAdmin
+        .from("downloads")
+        .select("id")
+        .eq("session_id", sessionId)
+        .eq("file_name", PUBLIC_ARCHIVE_NAME)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+    }
 
     if (!latest.error && latest.data?.id) {
       const bySession = await supabaseAdmin.from("downloads").update(data).eq("id", latest.data.id).select("id").maybeSingle();
@@ -111,7 +121,7 @@ export const Route = createFileRoute("/api/public/download-progress")({
           };
 
           let id = await updateDownload(downloadId, sessionId, data);
-          if (!id) id = await insertFallbackDownload(request, sessionId, data);
+          if (!id && body?.create === true) id = await insertFallbackDownload(request, sessionId, data);
 
           return new Response(JSON.stringify({ success: true, downloadId: id }), {
             headers: { "content-type": "application/json", "Cache-Control": "no-store" },

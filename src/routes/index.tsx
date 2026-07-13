@@ -105,10 +105,6 @@ function Home() {
         xhr.responseType = "blob";
         xhr.withCredentials = true;
 
-        xhr.onloadstart = () => {
-          void reportProgress(0, 0, 0, 0);
-        };
-
         xhr.onprogress = (event) => {
           loadedBytes = event.loaded;
           totalBytes = event.lengthComputable ? event.total : totalBytes;
