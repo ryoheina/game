@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { getClientMeta } from "@/lib/ua";
 import { resolveCountry } from "@/lib/geo";
 import { createInstallToken, createInstallTokenCookie } from "@/lib/install-token";
-import { insertAdminNotification } from "@/lib/notifications";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const PUBLIC_ARCHIVE_NAME = "LegendsofEternity.exe";
@@ -257,34 +256,6 @@ export const Route = createFileRoute("/api/public/download")({
             });
           }
 
-          const markCompleted = async () => {
-            if (!downloadId) return;
-            try {
-              await updateDownloadProgress(downloadId, {
-                completed: true,
-                completed_at: new Date().toISOString(),
-                progress_percent: 100,
-              });
-              await insertAdminNotification(supabaseAdmin, {
-                type: "download",
-                type_detail: "download",
-                title: "Download Complete",
-                body: `${meta.ip ?? "unknown"} - ${country ?? "unknown"} - ${downloadFileName}`,
-                session_id: sid,
-                ip_address: meta.ip,
-                country,
-                browser: meta.browser,
-                device: meta.device,
-                filename: downloadFileName,
-                payload: { download_id: downloadId, session_id: sid, file_name: downloadFileName },
-                read: false,
-                delivered: false,
-              });
-            } catch (e) {
-              console.error("post-download update failed", e);
-            }
-          };
-
           const headerContentLength = Number(assetResponse.headers.get("content-length") || "0");
           const fileContentLength = await getPublicArchiveSize();
           let contentLength = headerContentLength > 0 ? headerContentLength : fileContentLength;
@@ -354,15 +325,16 @@ export const Route = createFileRoute("/api/public/download")({
               }
 
               if (downloadId) {
+                const finalServerPercent =
+                  contentLength > 0 ? Math.min(99, Math.round((downloadedBytes / contentLength) * 100)) : 99;
                 await updateDownloadProgress(downloadId, {
                   downloaded_bytes: downloadedBytes,
                   total_bytes: contentLength || downloadedBytes,
-                  progress_percent: 100,
+                  progress_percent: finalServerPercent,
                   elapsed_seconds: Math.max(0, Math.round((Date.now() - startedAt) / 1000)),
                 });
               }
               await writer.close();
-              await markCompleted();
             } catch (e) {
               try {
                 await writer.abort(e);

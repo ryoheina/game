@@ -115,7 +115,7 @@ export const Route = createFileRoute("/api/public/download-progress")({
           const downloadedBytes = Math.round(cleanNumber(body?.downloadedBytes));
           const totalBytes = Math.round(cleanNumber(body?.totalBytes, KNOWN_PUBLIC_ARCHIVE_SIZE) || KNOWN_PUBLIC_ARCHIVE_SIZE);
           const elapsedSeconds = Math.round(cleanNumber(body?.elapsedSeconds));
-          const completed = body?.completed === true || (totalBytes > 0 && downloadedBytes >= totalBytes);
+          const completed = body?.completed === true;
           const progressPercent = completed
             ? 100
             : Math.max(0, Math.min(99, Math.round(cleanNumber(body?.percent) || (totalBytes > 0 ? (downloadedBytes / totalBytes) * 100 : 0))));

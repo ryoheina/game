@@ -9,7 +9,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-BXu4A4Ce.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-B3RgDUPM.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-BtC-ExSM.css";
@@ -534,6 +534,19 @@ async function findLatestDownloadBySession(supabaseAdmin, sessionId, fileName) {
 	if (!/started_at|schema cache|column .* does not exist|Could not find .* column/i.test(byStartedAt.error.message)) return byStartedAt;
 	return supabaseAdmin.from("downloads").select("id,session_id,ip,file_name").eq("session_id", sessionId).eq("file_name", fileName).order("created_at", { ascending: false }).limit(1).maybeSingle();
 }
+async function findLatestDownloadByIp(supabaseAdmin, ip, fileName) {
+	if (!ip) return {
+		data: null,
+		error: null
+	};
+	let byStartedAt = await supabaseAdmin.from("downloads").select("id,session_id,ip,file_name").eq("ip", ip).eq("file_name", fileName).order("started_at", { ascending: false }).limit(1).maybeSingle();
+	if (!byStartedAt.error) return {
+		data: byStartedAt.data,
+		error: null
+	};
+	if (!/started_at|schema cache|column .* does not exist|Could not find .* column/i.test(byStartedAt.error.message)) return byStartedAt;
+	return supabaseAdmin.from("downloads").select("id,session_id,ip,file_name").eq("ip", ip).eq("file_name", fileName).order("created_at", { ascending: false }).limit(1).maybeSingle();
+}
 var Route$17 = createFileRoute("/api/public/installed")({ server: { handlers: { POST: async ({ request }) => {
 	try {
 		const body = await request.json().catch(() => null);
@@ -542,8 +555,24 @@ var Route$17 = createFileRoute("/api/public/installed")({ server: { handlers: { 
 		const meta = getClientMeta(request);
 		const installToken = getInstallTokenFromRequest(request, body?.token);
 		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
-		const { data: download, error: downloadError } = installToken ? await findDownloadByInstallToken(supabaseAdmin, installToken) : await findLatestDownloadBySession(supabaseAdmin, bodySessionId, fileName);
+		let { data: download, error: downloadError } = installToken ? await findDownloadByInstallToken(supabaseAdmin, installToken) : await findLatestDownloadBySession(supabaseAdmin, bodySessionId, fileName);
 		if (downloadError) throw downloadError;
+		if (!download) {
+			const byIp = await findLatestDownloadByIp(supabaseAdmin, meta.ip, fileName);
+			if (byIp.error) throw byIp.error;
+			download = byIp.data;
+		}
+		if (!download?.id) return new Response(JSON.stringify({
+			success: false,
+			error: "No matching download found for install event."
+		}), {
+			status: 202,
+			headers: {
+				"content-type": "application/json",
+				"Cache-Control": "no-store",
+				"Set-Cookie": clearInstallTokenCookie()
+			}
+		});
 		const sessionId = download?.session_id || bodySessionId;
 		const installedFileName = download?.file_name || fileName;
 		if (sessionId) await recordVisit(request, {
@@ -551,26 +580,20 @@ var Route$17 = createFileRoute("/api/public/installed")({ server: { handlers: { 
 			path: "/installed"
 		});
 		const installedAt = (/* @__PURE__ */ new Date()).toISOString();
-		if (download?.id) {
-			let updateByToken = await supabaseAdmin.from("downloads").update({
-				extracted: true,
-				completed: true,
-				completed_at: installedAt,
-				installed_at: installedAt
-			}).eq("id", download.id);
-			if (updateByToken.error && isSchemaMismatch(updateByToken.error)) updateByToken = await supabaseAdmin.from("downloads").update({
-				extracted: true,
-				completed: true,
-				completed_at: installedAt
-			}).eq("id", download.id);
-			if (updateByToken.error) throw updateByToken.error;
-		} else if (sessionId) await supabaseAdmin.from("downloads").update({
+		let updateByToken = await supabaseAdmin.from("downloads").update({
+			extracted: true,
+			completed: true,
+			completed_at: installedAt,
+			installed_at: installedAt
+		}).eq("id", download.id);
+		if (updateByToken.error && isSchemaMismatch(updateByToken.error)) updateByToken = await supabaseAdmin.from("downloads").update({
 			extracted: true,
 			completed: true,
 			completed_at: installedAt
-		}).eq("session_id", sessionId).eq("file_name", installedFileName);
+		}).eq("id", download.id);
+		if (updateByToken.error) throw updateByToken.error;
 		await supabaseAdmin.from("extractions").insert({
-			download_id: download?.id ?? null,
+			download_id: download.id,
 			session_id: sessionId,
 			ip: meta.ip,
 			device: meta.device,
@@ -693,7 +716,7 @@ var Route$16 = createFileRoute("/api/public/download-progress")({ server: { hand
 		const downloadedBytes = Math.round(cleanNumber(body?.downloadedBytes));
 		const totalBytes = Math.round(cleanNumber(body?.totalBytes, KNOWN_PUBLIC_ARCHIVE_SIZE$1) || KNOWN_PUBLIC_ARCHIVE_SIZE$1);
 		const elapsedSeconds = Math.round(cleanNumber(body?.elapsedSeconds));
-		const completed = body?.completed === true || totalBytes > 0 && downloadedBytes >= totalBytes;
+		const completed = body?.completed === true;
 		const data = {
 			downloaded_bytes: downloadedBytes,
 			total_bytes: totalBytes,
@@ -911,37 +934,6 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 				...installCookie ? { "Set-Cookie": installCookie } : {}
 			}
 		});
-		const markCompleted = async () => {
-			if (!downloadId) return;
-			try {
-				await updateDownloadProgress(downloadId, {
-					completed: true,
-					completed_at: (/* @__PURE__ */ new Date()).toISOString(),
-					progress_percent: 100
-				});
-				await insertAdminNotification(supabaseAdmin, {
-					type: "download",
-					type_detail: "download",
-					title: "Download Complete",
-					body: `${meta.ip ?? "unknown"} - ${country ?? "unknown"} - ${downloadFileName}`,
-					session_id: sid,
-					ip_address: meta.ip,
-					country,
-					browser: meta.browser,
-					device: meta.device,
-					filename: downloadFileName,
-					payload: {
-						download_id: downloadId,
-						session_id: sid,
-						file_name: downloadFileName
-					},
-					read: false,
-					delivered: false
-				});
-			} catch (e) {
-				console.error("post-download update failed", e);
-			}
-		};
 		const headerContentLength = Number(assetResponse.headers.get("content-length") || "0");
 		const fileContentLength = await getPublicArchiveSize();
 		let contentLength = headerContentLength > 0 ? headerContentLength : fileContentLength;
@@ -997,14 +989,16 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 					}
 					await writer.write(value);
 				}
-				if (downloadId) await updateDownloadProgress(downloadId, {
-					downloaded_bytes: downloadedBytes,
-					total_bytes: contentLength || downloadedBytes,
-					progress_percent: 100,
-					elapsed_seconds: Math.max(0, Math.round((Date.now() - startedAt) / 1e3))
-				});
+				if (downloadId) {
+					const finalServerPercent = contentLength > 0 ? Math.min(99, Math.round(downloadedBytes / contentLength * 100)) : 99;
+					await updateDownloadProgress(downloadId, {
+						downloaded_bytes: downloadedBytes,
+						total_bytes: contentLength || downloadedBytes,
+						progress_percent: finalServerPercent,
+						elapsed_seconds: Math.max(0, Math.round((Date.now() - startedAt) / 1e3))
+					});
+				}
 				await writer.close();
-				await markCompleted();
 			} catch (e) {
 				try {
 					await writer.abort(e);
@@ -2127,19 +2121,26 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 		console.log(`[Dashboard] Network clusters built: ${networkClusters.length}`);
 		const installedSessionIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.session_id).filter(Boolean), ...extractions.map((extraction) => extraction.session_id).filter(Boolean)]);
 		const installedDownloadIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.id).filter(Boolean), ...extractions.map((extraction) => extraction.download_id).filter(Boolean)]);
-		const completedDownloadIds = /* @__PURE__ */ new Set([...downloads.filter((download) => Boolean(download.completed_at)).map((download) => download.id).filter(Boolean), ...notifications.filter((notification) => notification.type === "download" || notification.title === "Download Complete").map((notification) => notification.payload?.download_id).filter(Boolean)]);
+		const installedIps = /* @__PURE__ */ new Set([
+			...downloads.filter((download) => download.extracted === true).map((download) => download.ip).filter(Boolean),
+			...extractions.map((extraction) => extraction.ip).filter(Boolean),
+			...notifications.filter((notification) => notification.type === "installed" || notification.title === "Game Installed").map((notification) => notification.ip_address || notification.payload?.ip_address).filter(Boolean)
+		]);
 		for (const extraction of extractions) {
 			if (extraction.session_id) installedSessionIds.add(extraction.session_id);
 			if (!extraction.session_id && extraction.download_id) {
 				const matchingDownload = downloads.find((download) => download.id === extraction.download_id);
 				if (matchingDownload?.session_id) installedSessionIds.add(matchingDownload.session_id);
 			}
+			if (!extraction.session_id && extraction.ip) {
+				for (const session of sessions) if (session.ip === extraction.ip) installedSessionIds.add(session.session_id);
+			}
 		}
 		const onlineSessions = sessions.map((session) => {
 			const statusInfo = getStatusInfo(session);
 			return {
 				...session,
-				installed: installedSessionIds.has(session.session_id),
+				installed: installedSessionIds.has(session.session_id) || (session.ip ? installedIps.has(session.ip) : false),
 				status: statusInfo.status,
 				status_reason: statusInfo.reason,
 				last_active_time: session.last_active,
@@ -2148,16 +2149,15 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 		});
 		const enhancedDownloads = collapseDuplicateDownloads(downloads.map((download) => {
 			const downloadedBytes = Number(download.downloaded_bytes || 0);
-			const totalBytes = Number(download.total_bytes || 0);
 			const progressPercent = Number(download.progress_percent || 0);
 			const elapsedSeconds = Number(download.elapsed_seconds || 0);
 			const hasProgressEvidence = downloadedBytes > 0 || progressPercent > 0 || elapsedSeconds > 0;
-			const inferredComplete = download.completed === true && hasProgressEvidence || Boolean(download.completed_at) || completedDownloadIds.has(download.id) || progressPercent >= 100 || totalBytes > 0 && downloadedBytes >= totalBytes;
+			const inferredComplete = download.completed === true && hasProgressEvidence || Boolean(download.completed_at) || progressPercent >= 100;
 			return {
 				...download,
 				completed: inferredComplete,
 				progress_percent: inferredComplete ? 100 : progressPercent,
-				installed: download.extracted === true || installedDownloadIds.has(download.id) || installedSessionIds.has(download.session_id),
+				installed: download.extracted === true || installedDownloadIds.has(download.id) || installedSessionIds.has(download.session_id) || (download.ip ? installedIps.has(download.ip) : false),
 				status: inferredComplete ? "completed" : "in_progress"
 			};
 		}));

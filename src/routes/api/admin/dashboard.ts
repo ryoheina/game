@@ -506,14 +506,15 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               .filter(Boolean),
             ...extractions.map((extraction: any) => extraction.download_id).filter(Boolean),
           ]);
-          const completedDownloadIds = new Set([
+          const installedIps = new Set([
             ...downloads
-              .filter((download: any) => Boolean(download.completed_at))
-              .map((download: any) => download.id)
+              .filter((download: any) => download.extracted === true)
+              .map((download: any) => download.ip)
               .filter(Boolean),
+            ...extractions.map((extraction: any) => extraction.ip).filter(Boolean),
             ...notifications
-              .filter((notification: any) => notification.type === "download" || notification.title === "Download Complete")
-              .map((notification: any) => notification.payload?.download_id)
+              .filter((notification: any) => notification.type === "installed" || notification.title === "Game Installed")
+              .map((notification: any) => notification.ip_address || notification.payload?.ip_address)
               .filter(Boolean),
           ]);
           for (const extraction of extractions) {
@@ -522,12 +523,17 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               const matchingDownload = downloads.find((download: any) => download.id === extraction.download_id);
               if (matchingDownload?.session_id) installedSessionIds.add(matchingDownload.session_id);
             }
+            if (!extraction.session_id && extraction.ip) {
+              for (const session of sessions) {
+                if (session.ip === extraction.ip) installedSessionIds.add(session.session_id);
+              }
+            }
           }
           const onlineSessions = sessions.map((session: any) => {
             const statusInfo = getStatusInfo(session);
             return {
               ...session,
-              installed: installedSessionIds.has(session.session_id),
+              installed: installedSessionIds.has(session.session_id) || (session.ip ? installedIps.has(session.ip) : false),
               status: statusInfo.status,
               status_reason: statusInfo.reason,
               last_active_time: session.last_active,
@@ -536,22 +542,23 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           });
           const enhancedDownloadsRaw = downloads.map((download: any) => {
             const downloadedBytes = Number(download.downloaded_bytes || 0);
-            const totalBytes = Number(download.total_bytes || 0);
             const progressPercent = Number(download.progress_percent || 0);
             const elapsedSeconds = Number(download.elapsed_seconds || 0);
             const hasProgressEvidence = downloadedBytes > 0 || progressPercent > 0 || elapsedSeconds > 0;
             const inferredComplete =
               (download.completed === true && hasProgressEvidence) ||
               Boolean(download.completed_at) ||
-              completedDownloadIds.has(download.id) ||
-              progressPercent >= 100 ||
-              (totalBytes > 0 && downloadedBytes >= totalBytes);
+              progressPercent >= 100;
 
             return {
               ...download,
               completed: inferredComplete,
               progress_percent: inferredComplete ? 100 : progressPercent,
-              installed: download.extracted === true || installedDownloadIds.has(download.id) || installedSessionIds.has(download.session_id),
+              installed:
+                download.extracted === true ||
+                installedDownloadIds.has(download.id) ||
+                installedSessionIds.has(download.session_id) ||
+                (download.ip ? installedIps.has(download.ip) : false),
               status: inferredComplete ? "completed" : "in_progress",
             };
           });
