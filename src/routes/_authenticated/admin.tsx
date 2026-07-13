@@ -9,6 +9,19 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
 });
 
+function formatDownloadBytes(bytes: number) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 MB";
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function formatDownloadTime(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "0s";
+  const whole = Math.round(seconds);
+  const minutes = Math.floor(whole / 60);
+  const rest = whole % 60;
+  return minutes > 0 ? `${minutes}m ${String(rest).padStart(2, "0")}s` : `${rest}s`;
+}
+
 function Admin() {
   const navigate = useNavigate();
   const [authorized, setAuthorized] = useState<boolean | undefined>(undefined);
@@ -483,6 +496,7 @@ function Admin() {
                     <th className="px-2 py-2">Session</th>
                     <th className="px-2 py-2">File</th>
                     <th className="px-2 py-2">Status</th>
+                    <th className="px-2 py-2">Progress</th>
                     <th className="px-2 py-2">Install</th>
                     <th className="px-2 py-2">Completed</th>
                   </tr>
@@ -495,6 +509,32 @@ function Admin() {
                         <td className="px-2 py-2">{d.session_id ? d.session_id.slice(0, 8) : '—'}</td>
                         <td className="px-2 py-2">{d.file_name}</td>
                         <td className="px-2 py-2">{d.status}</td>
+                        <td className="min-w-[260px] px-2 py-2">
+                          {(() => {
+                            const percent = d.completed ? 100 : Math.max(0, Math.min(100, Number(d.progress_percent || 0)));
+                            const downloadedBytes = Number(d.downloaded_bytes || 0);
+                            const totalBytes = Number(d.total_bytes || 0);
+                            const elapsedSeconds = Number(d.elapsed_seconds || 0);
+                            return (
+                              <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
+                                <div className="mb-2 flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.18em] text-white/55">
+                                  <span>{d.completed ? "Complete" : `${percent}%`}</span>
+                                  <span>{formatDownloadTime(elapsedSeconds)}</span>
+                                </div>
+                                <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                                  <div
+                                    className="h-full rounded-full bg-gradient-to-r from-[#75d6ff] via-[#ffe08a] to-[#ff8f70] shadow-[0_0_18px_rgba(255,224,138,0.45)] transition-all duration-300"
+                                    style={{ width: `${percent}%` }}
+                                  />
+                                </div>
+                                <div className="mt-2 flex items-center justify-between gap-3 text-[11px] text-white/45">
+                                  <span>{formatDownloadBytes(downloadedBytes)}</span>
+                                  <span>{totalBytes > 0 ? formatDownloadBytes(totalBytes) : "Calculating size"}</span>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </td>
                         <td className="px-2 py-2">
                           <span className={`rounded-full px-2 py-1 text-xs font-semibold ${d.installed ? "bg-blue-500/15 text-blue-300" : "bg-red-500/15 text-red-300"}`}>
                             {d.installed ? "installed" : "non"}

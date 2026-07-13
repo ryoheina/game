@@ -2,7 +2,7 @@ import { t as createMiddleware } from "./createStart-Dt05N14y.mjs";
 import { f as getRequest } from "./esm-9EjmF9OT.mjs";
 import { t as createClient } from "../_libs/supabase__supabase-js.mjs";
 import processModule from "node:process";
-//#region node_modules/.nitro/vite/services/ssr/assets/notifications-Dg5sYI5P.js
+//#region node_modules/.nitro/vite/services/ssr/assets/notifications-DBPsE-pR.js
 function isNewSupabaseApiKey(value) {
 	return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
 }
@@ -60,7 +60,7 @@ var UNKNOWN_COUNTRY_CODES = /* @__PURE__ */ new Set([
 	"T1",
 	"ZZ"
 ]);
-function isPrivateIp(ip) {
+function isPrivateIp$1(ip) {
 	const normalized = ip.trim().toLowerCase();
 	if (!normalized || normalized === "unknown") return true;
 	if (normalized === "::1" || normalized.startsWith("fc") || normalized.startsWith("fd")) return true;
@@ -80,7 +80,7 @@ function getCountryFromHeaders(headers) {
 	return code;
 }
 async function lookupCountryByIp(ip) {
-	if (!ip || isPrivateIp(ip)) return null;
+	if (!ip || isPrivateIp$1(ip)) return null;
 	if (countryCache.has(ip)) return countryCache.get(ip) ?? null;
 	try {
 		const res = await fetch(`https://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,countryCode`, { signal: AbortSignal.timeout(2500) });
@@ -126,10 +126,33 @@ function parseUA(ua) {
 		device
 	};
 }
+function normalizeForwardedIp(value) {
+	if (!value) return null;
+	let ip = value.trim();
+	if (!ip) return null;
+	if (ip.startsWith("[") && ip.includes("]")) ip = ip.slice(1, ip.indexOf("]"));
+	if (/^\d{1,3}(\.\d{1,3}){3}:\d+$/.test(ip)) ip = ip.slice(0, ip.lastIndexOf(":"));
+	return ip || null;
+}
+function isPrivateIp(ip) {
+	return /^(10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|::1$|fc00:|fd00:|fe80:)/i.test(ip);
+}
 function getClientMeta(request) {
 	const headers = request.headers;
-	const forwardedIps = headers.get("x-forwarded-for")?.split(",").map((ip) => ip.trim()).filter(Boolean);
-	const ip = headers.get("cf-connecting-ip") || forwardedIps?.find((candidate) => !/^(10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|::1$)/.test(candidate)) || forwardedIps?.[0] || headers.get("x-real-ip") || null;
+	const forwardedIps = headers.get("x-forwarded-for")?.split(",").map((ip) => normalizeForwardedIp(ip)).filter(Boolean);
+	const directCandidates = [
+		headers.get("cf-connecting-ip"),
+		headers.get("true-client-ip"),
+		headers.get("x-real-ip"),
+		headers.get("x-client-ip"),
+		headers.get("x-vercel-forwarded-for"),
+		headers.get("x-nf-client-connection-ip"),
+		headers.get("fly-client-ip"),
+		headers.get("fastly-client-ip"),
+		headers.get("x-forwarded"),
+		headers.get("forwarded")?.match(/for="?([^";,]+)"?/i)?.[1]
+	].map((ip) => normalizeForwardedIp(ip)).filter(Boolean);
+	const ip = directCandidates.find((candidate) => !isPrivateIp(candidate)) || forwardedIps?.find((candidate) => !isPrivateIp(candidate)) || directCandidates[0] || forwardedIps?.[0] || null;
 	const country = getCountryFromHeaders(headers);
 	const ua = headers.get("user-agent") || "";
 	return {

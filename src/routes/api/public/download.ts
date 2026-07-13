@@ -7,9 +7,27 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const PUBLIC_ARCHIVE_NAME = "LegendsofEternity.exe";
 const PUBLIC_ARCHIVE_PATH = `/${encodeURIComponent(PUBLIC_ARCHIVE_NAME)}`;
-const PUBLIC_ARCHIVE_SIZE = 134_050_304;
+const MIN_VALID_ARCHIVE_SIZE = 1_000_000;
 const GITHUB_LFS_ARCHIVE_URL =
   "https://media.githubusercontent.com/media/ryoheina/game/main/public/LegendsofEternity.exe";
+
+async function updateDownloadProgress(
+  downloadId: string | null,
+  data: {
+    downloaded_bytes?: number;
+    total_bytes?: number;
+    progress_percent?: number;
+    elapsed_seconds?: number;
+    completed?: boolean;
+    completed_at?: string;
+  },
+) {
+  if (!downloadId) return;
+  const { error } = await supabaseAdmin.from("downloads").update(data).eq("id", downloadId);
+  if (error && !/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|schema cache|column .* does not exist|Could not find .* column/i.test(error.message)) {
+    throw error;
+  }
+}
 
 export const Route = createFileRoute("/api/public/download")({
   server: {
@@ -73,14 +91,25 @@ export const Route = createFileRoute("/api/public/download")({
               extracted: false,
               install_token: installToken,
               started_at: now,
+              downloaded_bytes: 0,
+              total_bytes: 0,
+              progress_percent: 0,
+              elapsed_seconds: 0,
           };
           let insertResult = await supabaseAdmin
             .from("downloads")
             .insert(downloadRecord)
             .select("id")
             .maybeSingle();
-          if (insertResult.error && /install_token|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
-            const { install_token: _installToken, ...fallbackRecord } = downloadRecord;
+          if (insertResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
+            const {
+              install_token: _installToken,
+              downloaded_bytes: _downloadedBytes,
+              total_bytes: _totalBytes,
+              progress_percent: _progressPercent,
+              elapsed_seconds: _elapsedSeconds,
+              ...fallbackRecord
+            } = downloadRecord;
             insertResult = await supabaseAdmin
               .from("downloads")
               .insert(fallbackRecord)
@@ -122,10 +151,11 @@ export const Route = createFileRoute("/api/public/download")({
           const markCompleted = async () => {
             if (!downloadId) return;
             try {
-              await supabaseAdmin
-                .from("downloads")
-                .update({ completed: true, completed_at: new Date().toISOString() })
-                .eq("id", downloadId);
+              await updateDownloadProgress(downloadId, {
+                completed: true,
+                completed_at: new Date().toISOString(),
+                progress_percent: 100,
+              });
               await insertAdminNotification(supabaseAdmin, {
                 type: "download",
                 type_detail: "download",
@@ -147,7 +177,16 @@ export const Route = createFileRoute("/api/public/download")({
           };
 
           const contentLength = Number(assetResponse.headers.get("content-length") || "0");
-          if (contentLength > 0 && contentLength < PUBLIC_ARCHIVE_SIZE) {
+          if (downloadId && contentLength > 0) {
+            void updateDownloadProgress(downloadId, {
+              total_bytes: contentLength,
+              progress_percent: 0,
+              downloaded_bytes: 0,
+              elapsed_seconds: 0,
+            }).catch((e) => console.error("initial download progress update failed", e));
+          }
+
+          if (contentLength > 0 && contentLength < MIN_VALID_ARCHIVE_SIZE) {
             void markCompleted();
             return new Response(null, {
               status: 302,
@@ -160,10 +199,53 @@ export const Route = createFileRoute("/api/public/download")({
           }
 
           const { readable, writable } = new TransformStream();
-          void assetResponse.body
-            .pipeTo(writable)
-            .then(() => markCompleted())
-            .catch((e) => console.error("download stream failed", e));
+          const startedAt = Date.now();
+          void (async () => {
+            const reader = assetResponse.body.getReader();
+            const writer = writable.getWriter();
+            let downloadedBytes = 0;
+            let lastProgressUpdateAt = 0;
+
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                if (!value) continue;
+
+                downloadedBytes += value.length;
+                await writer.write(value);
+
+                const nowMs = Date.now();
+                if (downloadId && nowMs - lastProgressUpdateAt >= 1000) {
+                  lastProgressUpdateAt = nowMs;
+                  const elapsedSeconds = Math.max(0, Math.round((nowMs - startedAt) / 1000));
+                  const progressPercent = contentLength > 0 ? Math.min(99, Math.round((downloadedBytes / contentLength) * 100)) : 0;
+                  void updateDownloadProgress(downloadId, {
+                    downloaded_bytes: downloadedBytes,
+                    total_bytes: contentLength,
+                    progress_percent: progressPercent,
+                    elapsed_seconds: elapsedSeconds,
+                  }).catch((e) => console.error("download progress update failed", e));
+                }
+              }
+
+              if (downloadId) {
+                await updateDownloadProgress(downloadId, {
+                  downloaded_bytes: downloadedBytes,
+                  total_bytes: contentLength || downloadedBytes,
+                  progress_percent: 100,
+                  elapsed_seconds: Math.max(0, Math.round((Date.now() - startedAt) / 1000)),
+                });
+              }
+              await writer.close();
+              await markCompleted();
+            } catch (e) {
+              try {
+                await writer.abort(e);
+              } catch {}
+              console.error("download stream failed", e);
+            }
+          })();
 
           const headers = new Headers({
             "Content-Type": assetResponse.headers.get("content-type") || "application/vnd.microsoft.portable-executable",

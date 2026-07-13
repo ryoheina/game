@@ -23,18 +23,45 @@ export function parseUA(ua: string | null | undefined) {
   return { browser, os, device };
 }
 
+function normalizeForwardedIp(value: string | null | undefined) {
+  if (!value) return null;
+  let ip = value.trim();
+  if (!ip) return null;
+  if (ip.startsWith("[") && ip.includes("]")) ip = ip.slice(1, ip.indexOf("]"));
+  if (/^\d{1,3}(\.\d{1,3}){3}:\d+$/.test(ip)) ip = ip.slice(0, ip.lastIndexOf(":"));
+  return ip || null;
+}
+
+function isPrivateIp(ip: string) {
+  return /^(10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|::1$|fc00:|fd00:|fe80:)/i.test(ip);
+}
+
 export function getClientMeta(request: Request) {
   const headers = request.headers;
   const forwardedIps = headers
     .get("x-forwarded-for")
     ?.split(",")
-    .map((ip) => ip.trim())
+    .map((ip) => normalizeForwardedIp(ip))
     .filter(Boolean);
+  const directCandidates = [
+    headers.get("cf-connecting-ip"),
+    headers.get("true-client-ip"),
+    headers.get("x-real-ip"),
+    headers.get("x-client-ip"),
+    headers.get("x-vercel-forwarded-for"),
+    headers.get("x-nf-client-connection-ip"),
+    headers.get("fly-client-ip"),
+    headers.get("fastly-client-ip"),
+    headers.get("x-forwarded"),
+    headers.get("forwarded")?.match(/for="?([^";,]+)"?/i)?.[1],
+  ]
+    .map((ip) => normalizeForwardedIp(ip))
+    .filter(Boolean) as string[];
   const ip =
-    headers.get("cf-connecting-ip") ||
-    forwardedIps?.find((candidate) => !/^(10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|::1$)/.test(candidate)) ||
+    directCandidates.find((candidate) => !isPrivateIp(candidate)) ||
+    forwardedIps?.find((candidate) => !isPrivateIp(candidate)) ||
+    directCandidates[0] ||
     forwardedIps?.[0] ||
-    headers.get("x-real-ip") ||
     null;
   const country = getCountryFromHeaders(headers);
   const ua = headers.get("user-agent") || "";

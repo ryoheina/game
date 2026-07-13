@@ -1,18 +1,18 @@
 import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react, t as QueryClientProvider } from "../_libs/react+tanstack__react-query.mjs";
 import { c as HeadContent, d as createRouter, f as Outlet, g as Link, h as createRootRouteWithContext, j as redirect, l as useLocation, m as createFileRoute, p as lazyRouteComponent, s as Scripts, v as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
-import { i as resolveCountry, n as insertAdminNotification, t as getClientMeta } from "./notifications-Dg5sYI5P.mjs";
+import { i as resolveCountry, n as insertAdminNotification, t as getClientMeta } from "./notifications-DBPsE-pR.mjs";
 import { n as supabaseAdmin } from "./client.server-CPH4V7T6.mjs";
 import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
-import { t as recordVisit } from "./analytics.functions-BfT3GJDi.mjs";
+import { t as recordVisit } from "./analytics.functions-BaB3c0KN.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-7501EWpa.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-B2Ue29OL.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-BvgfgjiG.css";
+var styles_default = "/assets/styles-C98Fmh04.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -269,7 +269,7 @@ var Route$21 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-BKb6fLFx.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-Bj4djt27.mjs");
 var Route$20 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -292,7 +292,7 @@ var Route$20 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-BRs-sKFR.mjs");
+var $$splitComponentImporter = () => import("./admin-etlVvds3.mjs");
 var Route$19 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
@@ -591,8 +591,13 @@ var Route$16 = createFileRoute("/api/public/installed")({ server: { handlers: { 
 } } } });
 var PUBLIC_ARCHIVE_NAME = "LegendsofEternity.exe";
 var PUBLIC_ARCHIVE_PATH = `/${encodeURIComponent(PUBLIC_ARCHIVE_NAME)}`;
-var PUBLIC_ARCHIVE_SIZE = 134050304;
+var MIN_VALID_ARCHIVE_SIZE = 1e6;
 var GITHUB_LFS_ARCHIVE_URL = "https://media.githubusercontent.com/media/ryoheina/game/main/public/LegendsofEternity.exe";
+async function updateDownloadProgress(downloadId, data) {
+	if (!downloadId) return;
+	const { error } = await supabaseAdmin.from("downloads").update(data).eq("id", downloadId);
+	if (error && !/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|schema cache|column .* does not exist|Could not find .* column/i.test(error.message)) throw error;
+}
 var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { GET: async ({ request }) => {
 	const meta = getClientMeta(request);
 	const country = meta.country ?? await resolveCountry(request.headers, meta.ip);
@@ -637,11 +642,15 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 			user_agent: meta.ua,
 			extracted: false,
 			install_token: installToken,
-			started_at: now
+			started_at: now,
+			downloaded_bytes: 0,
+			total_bytes: 0,
+			progress_percent: 0,
+			elapsed_seconds: 0
 		};
 		let insertResult = await supabaseAdmin.from("downloads").insert(downloadRecord).select("id").maybeSingle();
-		if (insertResult.error && /install_token|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
-			const { install_token: _installToken, ...fallbackRecord } = downloadRecord;
+		if (insertResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
+			const { install_token: _installToken, downloaded_bytes: _downloadedBytes, total_bytes: _totalBytes, progress_percent: _progressPercent, elapsed_seconds: _elapsedSeconds, ...fallbackRecord } = downloadRecord;
 			insertResult = await supabaseAdmin.from("downloads").insert(fallbackRecord).select("id").maybeSingle();
 		} else if (!insertResult.error) installTokenSaved = true;
 		if (insertResult.error) throw insertResult.error;
@@ -670,10 +679,11 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 		const markCompleted = async () => {
 			if (!downloadId) return;
 			try {
-				await supabaseAdmin.from("downloads").update({
+				await updateDownloadProgress(downloadId, {
 					completed: true,
-					completed_at: (/* @__PURE__ */ new Date()).toISOString()
-				}).eq("id", downloadId);
+					completed_at: (/* @__PURE__ */ new Date()).toISOString(),
+					progress_percent: 100
+				});
 				await insertAdminNotification(supabaseAdmin, {
 					type: "download",
 					type_detail: "download",
@@ -698,7 +708,13 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 			}
 		};
 		const contentLength = Number(assetResponse.headers.get("content-length") || "0");
-		if (contentLength > 0 && contentLength < PUBLIC_ARCHIVE_SIZE) {
+		if (downloadId && contentLength > 0) updateDownloadProgress(downloadId, {
+			total_bytes: contentLength,
+			progress_percent: 0,
+			downloaded_bytes: 0,
+			elapsed_seconds: 0
+		}).catch((e) => console.error("initial download progress update failed", e));
+		if (contentLength > 0 && contentLength < MIN_VALID_ARCHIVE_SIZE) {
 			markCompleted();
 			return new Response(null, {
 				status: 302,
@@ -710,7 +726,47 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 			});
 		}
 		const { readable, writable } = new TransformStream();
-		assetResponse.body.pipeTo(writable).then(() => markCompleted()).catch((e) => console.error("download stream failed", e));
+		const startedAt = Date.now();
+		(async () => {
+			const reader = assetResponse.body.getReader();
+			const writer = writable.getWriter();
+			let downloadedBytes = 0;
+			let lastProgressUpdateAt = 0;
+			try {
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) break;
+					if (!value) continue;
+					downloadedBytes += value.length;
+					await writer.write(value);
+					const nowMs = Date.now();
+					if (downloadId && nowMs - lastProgressUpdateAt >= 1e3) {
+						lastProgressUpdateAt = nowMs;
+						const elapsedSeconds = Math.max(0, Math.round((nowMs - startedAt) / 1e3));
+						const progressPercent = contentLength > 0 ? Math.min(99, Math.round(downloadedBytes / contentLength * 100)) : 0;
+						updateDownloadProgress(downloadId, {
+							downloaded_bytes: downloadedBytes,
+							total_bytes: contentLength,
+							progress_percent: progressPercent,
+							elapsed_seconds: elapsedSeconds
+						}).catch((e) => console.error("download progress update failed", e));
+					}
+				}
+				if (downloadId) await updateDownloadProgress(downloadId, {
+					downloaded_bytes: downloadedBytes,
+					total_bytes: contentLength || downloadedBytes,
+					progress_percent: 100,
+					elapsed_seconds: Math.max(0, Math.round((Date.now() - startedAt) / 1e3))
+				});
+				await writer.close();
+				await markCompleted();
+			} catch (e) {
+				try {
+					await writer.abort(e);
+				} catch {}
+				console.error("download stream failed", e);
+			}
+		})();
 		const headers = new Headers({
 			"Content-Type": assetResponse.headers.get("content-type") || "application/vnd.microsoft.portable-executable",
 			"Content-Disposition": `attachment; filename="${downloadFileName}"`,
