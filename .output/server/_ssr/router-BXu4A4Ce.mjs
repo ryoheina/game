@@ -9,7 +9,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-ybuyX8w2.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-BXu4A4Ce.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-BtC-ExSM.css";
@@ -317,7 +317,7 @@ var Route$21 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-CJYopLQe.mjs");
+var $$splitComponentImporter = () => import("./admin-BCl84pEa.mjs");
 var Route$20 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
@@ -1916,7 +1916,9 @@ function getDownloadTime(download) {
 function getDownloadRank(download) {
 	const downloadedBytes = Number(download.downloaded_bytes || 0);
 	const progressPercent = Number(download.progress_percent || 0);
-	return (download.completed === true ? 1e9 : 0) + progressPercent * 1e6 + downloadedBytes;
+	const elapsedSeconds = Number(download.elapsed_seconds || 0);
+	const hasProgressEvidence = downloadedBytes > 0 || progressPercent > 0 || elapsedSeconds > 0;
+	return (download.completed === true && hasProgressEvidence ? 1e9 : 0) + progressPercent * 1e6 + downloadedBytes;
 }
 function collapseDuplicateDownloads(downloads) {
 	const groups = /* @__PURE__ */ new Map();
@@ -2125,7 +2127,7 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 		console.log(`[Dashboard] Network clusters built: ${networkClusters.length}`);
 		const installedSessionIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.session_id).filter(Boolean), ...extractions.map((extraction) => extraction.session_id).filter(Boolean)]);
 		const installedDownloadIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.id).filter(Boolean), ...extractions.map((extraction) => extraction.download_id).filter(Boolean)]);
-		const completedDownloadIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.completed === true || Boolean(download.completed_at)).map((download) => download.id).filter(Boolean), ...notifications.filter((notification) => notification.type === "download" || notification.title === "Download Complete").map((notification) => notification.payload?.download_id).filter(Boolean)]);
+		const completedDownloadIds = /* @__PURE__ */ new Set([...downloads.filter((download) => Boolean(download.completed_at)).map((download) => download.id).filter(Boolean), ...notifications.filter((notification) => notification.type === "download" || notification.title === "Download Complete").map((notification) => notification.payload?.download_id).filter(Boolean)]);
 		for (const extraction of extractions) {
 			if (extraction.session_id) installedSessionIds.add(extraction.session_id);
 			if (!extraction.session_id && extraction.download_id) {
@@ -2148,7 +2150,9 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 			const downloadedBytes = Number(download.downloaded_bytes || 0);
 			const totalBytes = Number(download.total_bytes || 0);
 			const progressPercent = Number(download.progress_percent || 0);
-			const inferredComplete = download.completed === true || Boolean(download.completed_at) || completedDownloadIds.has(download.id) || progressPercent >= 100 || totalBytes > 0 && downloadedBytes >= totalBytes;
+			const elapsedSeconds = Number(download.elapsed_seconds || 0);
+			const hasProgressEvidence = downloadedBytes > 0 || progressPercent > 0 || elapsedSeconds > 0;
+			const inferredComplete = download.completed === true && hasProgressEvidence || Boolean(download.completed_at) || completedDownloadIds.has(download.id) || progressPercent >= 100 || totalBytes > 0 && downloadedBytes >= totalBytes;
 			return {
 				...download,
 				completed: inferredComplete,

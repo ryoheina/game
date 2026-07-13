@@ -288,7 +288,9 @@ function getDownloadTime(download: any) {
 function getDownloadRank(download: any) {
   const downloadedBytes = Number(download.downloaded_bytes || 0);
   const progressPercent = Number(download.progress_percent || 0);
-  const completedRank = download.completed === true ? 1_000_000_000 : 0;
+  const elapsedSeconds = Number(download.elapsed_seconds || 0);
+  const hasProgressEvidence = downloadedBytes > 0 || progressPercent > 0 || elapsedSeconds > 0;
+  const completedRank = download.completed === true && hasProgressEvidence ? 1_000_000_000 : 0;
   return completedRank + progressPercent * 1_000_000 + downloadedBytes;
 }
 
@@ -506,7 +508,7 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           ]);
           const completedDownloadIds = new Set([
             ...downloads
-              .filter((download: any) => download.completed === true || Boolean(download.completed_at))
+              .filter((download: any) => Boolean(download.completed_at))
               .map((download: any) => download.id)
               .filter(Boolean),
             ...notifications
@@ -536,8 +538,10 @@ export const Route = createFileRoute("/api/admin/dashboard")({
             const downloadedBytes = Number(download.downloaded_bytes || 0);
             const totalBytes = Number(download.total_bytes || 0);
             const progressPercent = Number(download.progress_percent || 0);
+            const elapsedSeconds = Number(download.elapsed_seconds || 0);
+            const hasProgressEvidence = downloadedBytes > 0 || progressPercent > 0 || elapsedSeconds > 0;
             const inferredComplete =
-              download.completed === true ||
+              (download.completed === true && hasProgressEvidence) ||
               Boolean(download.completed_at) ||
               completedDownloadIds.has(download.id) ||
               progressPercent >= 100 ||

@@ -519,12 +519,13 @@ function Admin() {
                             const totalBytes = Number(d.total_bytes || 0) || (d.file_name === "LegendsofEternity.exe" ? KNOWN_GAME_FILE_SIZE : 0);
                             const storedPercent = Number(d.progress_percent || 0);
                             const bytePercent = totalBytes > 0 && downloadedBytes > 0 ? Math.round((downloadedBytes / totalBytes) * 100) : 0;
-                            const percent = d.completed ? 100 : Math.max(0, Math.min(99, storedPercent || bytePercent));
                             const elapsedSeconds = Number(d.elapsed_seconds || 0);
+                            const complete = d.completed === true && (downloadedBytes > 0 || storedPercent > 0 || elapsedSeconds > 0 || Boolean(d.completed_at));
+                            const percent = complete ? 100 : Math.max(0, Math.min(99, storedPercent || bytePercent));
                             return (
                               <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
                                 <div className="mb-2 flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.18em] text-white/55">
-                                  <span>{d.completed ? "Complete" : `${percent}%`}</span>
+                                  <span>{complete ? "Complete" : `${percent}%`}</span>
                                   <span>{formatDownloadTime(elapsedSeconds)}</span>
                                 </div>
                                 <div className="h-2 overflow-hidden rounded-full bg-white/10">
@@ -546,7 +547,9 @@ function Admin() {
                             {d.installed ? "installed" : "non"}
                           </span>
                         </td>
-                        <td className="px-2 py-2">{d.completed ? 'Yes' : 'No'}</td>
+                        <td className="px-2 py-2">
+                          {d.completed === true && (Number(d.downloaded_bytes || 0) > 0 || Number(d.progress_percent || 0) > 0 || Number(d.elapsed_seconds || 0) > 0 || Boolean(d.completed_at)) ? 'Yes' : 'No'}
+                        </td>
                         <td className="px-2 py-2">
                           <div className="flex gap-2">
                             <button
