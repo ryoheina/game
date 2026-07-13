@@ -1,18 +1,63 @@
 import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react, t as QueryClientProvider } from "../_libs/react+tanstack__react-query.mjs";
 import { c as HeadContent, d as createRouter, f as Outlet, g as Link, h as createRootRouteWithContext, j as redirect, l as useLocation, m as createFileRoute, p as lazyRouteComponent, s as Scripts, v as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
-import { i as resolveCountry, n as insertAdminNotification, t as getClientMeta } from "./notifications-DBPsE-pR.mjs";
-import { n as supabaseAdmin } from "./client.server-CPH4V7T6.mjs";
+import { t as createClient } from "../_libs/supabase__supabase-js.mjs";
+import { t as createMiddleware } from "./createStart-Dt05N14y.mjs";
+import { f as getRequest, i as TSS_SERVER_FUNCTION, l as createServerFn, m as getServerFnById } from "./esm-B_8KW7ZU.mjs";
 import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
-import { t as recordVisit } from "./analytics.functions-DtJsHYe4.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
+import { n as objectType, r as stringType, t as booleanType } from "../_libs/zod.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-B0knvH3u.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-CdLWBdNq.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-BtC-ExSM.css";
+function isNewSupabaseApiKey$1(value) {
+	return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
+}
+function createSupabaseFetch$1(supabaseKey) {
+	return async (input, init) => {
+		const url = typeof input === "string" ? input : input.url;
+		const method = init?.method ?? (typeof input !== "string" && input.method ? input.method : "GET");
+		console.log(`[Supabase] External request: ${method} ${url}`);
+		const headers = new Headers(typeof Request !== "undefined" && input instanceof Request ? input.headers : void 0);
+		if (init?.headers) new Headers(init.headers).forEach((value, key) => headers.set(key, value));
+		const authorizationHeader = headers.get("Authorization");
+		const keyType = isNewSupabaseApiKey$1(supabaseKey) ? "new" : "legacy";
+		console.log(`[Supabase] createSupabaseFetch keyType=${keyType} Authorization=${authorizationHeader ?? "none"} apikey=${headers.get("apikey") ?? "none"}`);
+		if (!isNewSupabaseApiKey$1(supabaseKey) && !authorizationHeader) headers.set("Authorization", `Bearer ${supabaseKey}`);
+		if (isNewSupabaseApiKey$1(supabaseKey) && headers.get("Authorization") === `Bearer ${supabaseKey}`) headers.delete("Authorization");
+		headers.set("apikey", supabaseKey);
+		return fetch(input, {
+			...init,
+			headers
+		});
+	};
+}
+function createSupabaseAdminClient() {
+	const SUPABASE_URL = processModule.env.SUPABASE_URL;
+	const SUPABASE_SERVICE_ROLE_KEY = processModule.env.SUPABASE_SERVICE_ROLE_KEY;
+	if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+		const message = `[Supabase] Missing critical environment variable(s): ${[...!SUPABASE_URL ? ["SUPABASE_URL"] : [], ...!SUPABASE_SERVICE_ROLE_KEY ? ["SUPABASE_SERVICE_ROLE_KEY"] : []].join(", ")}. Check Vercel Environment Variables or .env.local`;
+		console.error(message);
+		throw new Error(message);
+	}
+	return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+		global: { fetch: createSupabaseFetch$1(SUPABASE_SERVICE_ROLE_KEY) },
+		auth: {
+			storage: void 0,
+			persistSession: false,
+			autoRefreshToken: false
+		}
+	});
+}
+var _supabaseAdmin;
+var supabaseAdmin = new Proxy({}, { get(_, prop, receiver) {
+	if (!_supabaseAdmin) _supabaseAdmin = createSupabaseAdminClient();
+	return Reflect.get(_supabaseAdmin, prop, receiver);
+} });
+var styles_default = "/assets/styles-DvNaDs7S.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -300,27 +345,12 @@ var Route$22 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-DnfDIsLd.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-SDH1hSH8.mjs");
 var Route$21 = createFileRoute("/")({
-	head: () => ({ meta: [
-		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
-		{
-			name: "description",
-			content: "Enter the world of Legends of Eternity. Forge alliances, wield forbidden magic, and stand against eternal darkness in a next-generation 3D multiplayer fantasy RPG."
-		},
-		{
-			property: "og:title",
-			content: "Legends of Eternity"
-		},
-		{
-			property: "og:description",
-			content: "A next-generation 3D multiplayer fantasy RPG."
-		},
-		{
-			property: "og:type",
-			content: "website"
-		}
-	] }),
+	head: () => ({ meta: [{ title: "Legends of Eternity — A cinematic fantasy action RPG" }, {
+		name: "description",
+		content: "Master brutal combat, wield forbidden magic, and begin your legend in Legends of Eternity."
+	}] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
 var $$splitComponentImporter = () => import("./admin-BCl84pEa.mjs");
@@ -328,6 +358,425 @@ var Route$20 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
 });
+var createSsrRpc = (functionId) => {
+	const url = "/_serverFn/" + functionId;
+	const serverFnMeta = { id: functionId };
+	const fn = async (...args) => {
+		return (await getServerFnById(functionId, { origin: "server" }))(...args);
+	};
+	return Object.assign(fn, {
+		url,
+		serverFnMeta,
+		[TSS_SERVER_FUNCTION]: true
+	});
+};
+function isNewSupabaseApiKey(value) {
+	return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
+}
+function createSupabaseFetch(supabaseKey) {
+	return (input, init) => {
+		const headers = new Headers(typeof Request !== "undefined" && input instanceof Request ? input.headers : void 0);
+		if (init?.headers) new Headers(init.headers).forEach((value, key) => headers.set(key, value));
+		if (isNewSupabaseApiKey(supabaseKey) && headers.get("Authorization") === `Bearer ${supabaseKey}`) headers.delete("Authorization");
+		headers.set("apikey", supabaseKey);
+		return fetch(input, {
+			...init,
+			headers
+		});
+	};
+}
+var requireSupabaseAuth = createMiddleware({ type: "function" }).server(async ({ next }) => {
+	const SUPABASE_URL = processModule.env.SUPABASE_URL;
+	const SUPABASE_PUBLISHABLE_KEY = processModule.env.SUPABASE_PUBLISHABLE_KEY;
+	if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+		const message = `Missing Supabase environment variable(s): ${[...!SUPABASE_URL ? ["SUPABASE_URL"] : [], ...!SUPABASE_PUBLISHABLE_KEY ? ["SUPABASE_PUBLISHABLE_KEY"] : []].join(", ")}. Connect Supabase in Lovable Cloud.`;
+		console.error(`[Supabase] ${message}`);
+		throw new Error(message);
+	}
+	const request = getRequest();
+	if (!request?.headers) throw new Error("Unauthorized: No request headers available");
+	const authHeader = request.headers.get("authorization");
+	if (!authHeader) throw new Error("Unauthorized: No authorization header provided");
+	if (!authHeader.startsWith("Bearer ")) throw new Error("Unauthorized: Only Bearer tokens are supported");
+	const token = authHeader.replace("Bearer ", "");
+	if (!token) throw new Error("Unauthorized: No token provided");
+	if (token.split(".").length !== 3) throw new Error("Unauthorized: Invalid token");
+	const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+		global: {
+			fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY),
+			headers: { Authorization: `Bearer ${token}` }
+		},
+		auth: {
+			storage: void 0,
+			persistSession: false,
+			autoRefreshToken: false
+		}
+	});
+	const { data, error } = await supabase.auth.getClaims(token);
+	if (error || !data?.claims) throw new Error("Unauthorized: Invalid token");
+	if (!data.claims.sub) throw new Error("Unauthorized: No user ID found in token");
+	return next({ context: {
+		supabase,
+		userId: data.claims.sub,
+		claims: data.claims
+	} });
+});
+var countryCache = /* @__PURE__ */ new Map();
+var UNKNOWN_COUNTRY_CODES = /* @__PURE__ */ new Set([
+	"XX",
+	"T1",
+	"ZZ"
+]);
+function isPrivateIp$1(ip) {
+	const normalized = ip.trim().toLowerCase();
+	if (!normalized || normalized === "unknown") return true;
+	if (normalized === "::1" || normalized.startsWith("fc") || normalized.startsWith("fd")) return true;
+	if (/^127\.|^10\.|^192\.168\.|^169\.254\.|^0\./.test(normalized)) return true;
+	const parts = normalized.split(".");
+	if (parts.length === 4 && parts[0] === "172") {
+		const second = Number(parts[1]);
+		if (second >= 16 && second <= 31) return true;
+	}
+	return false;
+}
+function getCountryFromHeaders(headers) {
+	const raw = headers.get("cf-ipcountry") || headers.get("x-vercel-ip-country") || headers.get("x-client-geo-country") || headers.get("x-appengine-country") || headers.get("x-country-code") || headers.get("cloudfront-viewer-country") || null;
+	if (!raw) return null;
+	const code = raw.trim().toUpperCase();
+	if (!code || UNKNOWN_COUNTRY_CODES.has(code)) return null;
+	return code;
+}
+async function lookupCountryByIp(ip) {
+	if (!ip || isPrivateIp$1(ip)) return null;
+	if (countryCache.has(ip)) return countryCache.get(ip) ?? null;
+	try {
+		const res = await fetch(`https://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,countryCode`, { signal: AbortSignal.timeout(2500) });
+		if (!res.ok) {
+			countryCache.set(ip, null);
+			return null;
+		}
+		const data = await res.json();
+		const code = data.status === "success" && data.countryCode ? data.countryCode.toUpperCase() : null;
+		countryCache.set(ip, code);
+		return code;
+	} catch {
+		countryCache.set(ip, null);
+		return null;
+	}
+}
+async function resolveCountry(headers, ip) {
+	const fromHeaders = getCountryFromHeaders(headers);
+	if (fromHeaders) return fromHeaders;
+	if (!ip) return null;
+	return lookupCountryByIp(ip);
+}
+function parseUA(ua) {
+	const u = (ua || "").toLowerCase();
+	let browser = "Unknown";
+	if (u.includes("edg/")) browser = "Edge";
+	else if (u.includes("chrome/") && !u.includes("chromium")) browser = "Chrome";
+	else if (u.includes("firefox/")) browser = "Firefox";
+	else if (u.includes("safari/") && !u.includes("chrome")) browser = "Safari";
+	else if (u.includes("opr/") || u.includes("opera")) browser = "Opera";
+	let os = "Unknown";
+	if (u.includes("windows")) os = "Windows";
+	else if (u.includes("mac os") || u.includes("macintosh")) os = "macOS";
+	else if (u.includes("android")) os = "Android";
+	else if (u.includes("iphone") || u.includes("ipad") || u.includes("ios")) os = "iOS";
+	else if (u.includes("linux")) os = "Linux";
+	let device = "Desktop";
+	if (u.includes("mobile") || u.includes("iphone") || u.includes("android")) device = "Mobile";
+	else if (u.includes("tablet") || u.includes("ipad")) device = "Tablet";
+	return {
+		browser,
+		os,
+		device
+	};
+}
+function normalizeForwardedIp(value) {
+	if (!value) return null;
+	let ip = value.trim();
+	if (!ip) return null;
+	if (ip.startsWith("[") && ip.includes("]")) ip = ip.slice(1, ip.indexOf("]"));
+	if (/^\d{1,3}(\.\d{1,3}){3}:\d+$/.test(ip)) ip = ip.slice(0, ip.lastIndexOf(":"));
+	return ip || null;
+}
+function isPrivateIp(ip) {
+	return /^(10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|::1$|fc00:|fd00:|fe80:)/i.test(ip);
+}
+function getClientMeta(request) {
+	const headers = request.headers;
+	const forwardedIps = headers.get("x-forwarded-for")?.split(",").map((ip) => normalizeForwardedIp(ip)).filter(Boolean);
+	const directCandidates = [
+		headers.get("cf-connecting-ip"),
+		headers.get("true-client-ip"),
+		headers.get("x-real-ip"),
+		headers.get("x-client-ip"),
+		headers.get("x-vercel-forwarded-for"),
+		headers.get("x-nf-client-connection-ip"),
+		headers.get("fly-client-ip"),
+		headers.get("fastly-client-ip"),
+		headers.get("x-forwarded"),
+		headers.get("forwarded")?.match(/for="?([^";,]+)"?/i)?.[1]
+	].map((ip) => normalizeForwardedIp(ip)).filter(Boolean);
+	const ip = directCandidates.find((candidate) => !isPrivateIp(candidate)) || forwardedIps?.find((candidate) => !isPrivateIp(candidate)) || directCandidates[0] || forwardedIps?.[0] || null;
+	const country = getCountryFromHeaders(headers);
+	const ua = headers.get("user-agent") || "";
+	return {
+		ip,
+		country,
+		ua,
+		referrer: headers.get("referer") || null,
+		...parseUA(ua)
+	};
+}
+function isSchemaMismatch$2(error) {
+	const message = error && typeof error === "object" && "message" in error ? String(error.message) : String(error);
+	return /column .* does not exist|schema cache|Could not find .* column/i.test(message);
+}
+async function insertAdminNotification(supabaseAdmin, notification) {
+	const fullNotification = {
+		read: false,
+		delivered: false,
+		...notification
+	};
+	const { error } = await supabaseAdmin.from("notifications").insert(fullNotification);
+	if (!error) return { ok: true };
+	if (!isSchemaMismatch$2(error)) return {
+		ok: false,
+		error
+	};
+	const fallbackPayload = {
+		...notification.payload || {},
+		type_detail: notification.type_detail,
+		session_id: notification.session_id,
+		ip_address: notification.ip_address,
+		country: notification.country,
+		browser: notification.browser,
+		device: notification.device,
+		filename: notification.filename,
+		user_id: notification.user_id,
+		read: notification.read ?? false
+	};
+	const fallback = {
+		type: notification.type_detail || notification.type,
+		title: notification.title,
+		body: notification.body ?? null,
+		payload: fallbackPayload,
+		delivered: notification.delivered ?? false
+	};
+	const fallbackResult = await supabaseAdmin.from("notifications").insert(fallback);
+	if (fallbackResult.error) return {
+		ok: false,
+		error: fallbackResult.error
+	};
+	return {
+		ok: true,
+		fallback: true
+	};
+}
+var VISITOR_RETURN_WINDOW_MS = 1800 * 1e3;
+function getHeaderValue$1(headers, names) {
+	if (!headers) return null;
+	for (const name of names) {
+		const value = headers.get(name);
+		if (value) return value;
+	}
+	return null;
+}
+function getNetworkMeta$1(request, country) {
+	const headers = request?.headers ?? null;
+	const ipCountry = getHeaderValue$1(headers, ["x-vercel-ip-country", "cf-ipcountry"]) || country;
+	const ipCity = getHeaderValue$1(headers, ["x-vercel-ip-city", "cf-ipcity"]);
+	const asn = getHeaderValue$1(headers, ["x-vercel-ip-as-number", "cf-asn"]);
+	const isp = getHeaderValue$1(headers, ["x-vercel-ip-as-name", "cf-isp"]);
+	return {
+		ip_country: ipCountry,
+		ip_city: ipCity ? decodeURIComponent(ipCity) : null,
+		asn,
+		isp
+	};
+}
+async function recordVisit(request, data) {
+	const meta = request ? getClientMeta(request) : {
+		ip: null,
+		country: null,
+		ua: "",
+		referrer: null,
+		browser: "Unknown",
+		os: "Unknown",
+		device: "Desktop"
+	};
+	const country = meta.country ?? (request ? await resolveCountry(request.headers, meta.ip) : null);
+	const networkMeta = getNetworkMeta$1(request, country);
+	const { supabaseAdmin } = await import("./client.server-Cb3GfPp-.mjs");
+	const now = (/* @__PURE__ */ new Date()).toISOString();
+	const { data: existing } = await supabaseAdmin.from("sessions").select("session_id,last_active,notified_left").eq("session_id", data.sessionId).maybeSingle();
+	if (existing) {
+		if (data.leaving) {
+			const leaveUpdate = {
+				last_active: now,
+				ip: meta.ip,
+				country,
+				browser: meta.browser,
+				device: meta.device,
+				user_agent: meta.ua,
+				notified_left: true,
+				...networkMeta
+			};
+			let leaveUpdateRes = await supabaseAdmin.from("sessions").update(leaveUpdate).eq("session_id", data.sessionId);
+			if (leaveUpdateRes.error && /ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(leaveUpdateRes.error.message)) {
+				const { ip_country: _ipCountry, ip_city: _ipCity, asn: _asn, isp: _isp, ...fallbackLeaveUpdate } = leaveUpdate;
+				leaveUpdateRes = await supabaseAdmin.from("sessions").update(fallbackLeaveUpdate).eq("session_id", data.sessionId);
+			}
+			if (leaveUpdateRes.error) throw leaveUpdateRes.error;
+			if (existing.notified_left !== true) try {
+				await insertAdminNotification(supabaseAdmin, {
+					type: "visitor_left",
+					type_detail: "visitor",
+					title: "Visitor Left",
+					body: `${meta.ip ?? "unknown"} - ${country ?? "unknown"} - ${meta.device} - ${meta.browser}`,
+					session_id: data.sessionId,
+					ip_address: meta.ip,
+					country,
+					browser: meta.browser,
+					device: meta.device,
+					payload: {
+						session_id: data.sessionId,
+						ip_address: meta.ip,
+						country,
+						browser: meta.browser,
+						device: meta.device
+					},
+					read: false,
+					delivered: false
+				});
+			} catch (e) {
+				console.error("notify failed", e);
+			}
+			return { ok: true };
+		}
+		const wasOffline = Date.now() - new Date(existing.last_active).getTime() > VISITOR_RETURN_WINDOW_MS;
+		const sessionUpdate = {
+			last_active: now,
+			ip: meta.ip,
+			country,
+			browser: meta.browser,
+			device: meta.device,
+			user_agent: meta.ua,
+			notified_left: false,
+			...networkMeta
+		};
+		let sessionUpdateRes = await supabaseAdmin.from("sessions").update(sessionUpdate).eq("session_id", data.sessionId);
+		if (sessionUpdateRes.error && /ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(sessionUpdateRes.error.message)) {
+			const { ip_country: _ipCountry, ip_city: _ipCity, asn: _asn, isp: _isp, ...fallbackUpdate } = sessionUpdate;
+			sessionUpdateRes = await supabaseAdmin.from("sessions").update(fallbackUpdate).eq("session_id", data.sessionId);
+		}
+		if (sessionUpdateRes.error) throw sessionUpdateRes.error;
+		if (data.heartbeat) return { ok: true };
+		if (wasOffline || existing.notified_left === true) try {
+			await insertAdminNotification(supabaseAdmin, {
+				type: "visitor",
+				type_detail: "visitor",
+				title: "Visitor Arrived",
+				body: `${meta.ip ?? "unknown"} - ${country ?? "unknown"} - ${meta.device} - ${meta.browser}`,
+				session_id: data.sessionId,
+				ip_address: meta.ip,
+				country,
+				browser: meta.browser,
+				device: meta.device,
+				payload: {
+					type_detail: "visitor",
+					session_id: data.sessionId,
+					ip_address: meta.ip,
+					country,
+					browser: meta.browser,
+					device: meta.device
+				},
+				read: false,
+				delivered: false
+			});
+		} catch (e) {
+			console.error("notify failed", e);
+		}
+	} else if (data.heartbeat) return { ok: true };
+	const visitRecord = {
+		session_id: data.sessionId,
+		path: data.path,
+		ip: meta.ip,
+		country,
+		...networkMeta,
+		browser: meta.browser,
+		os: meta.os,
+		device: meta.device,
+		user_agent: meta.ua,
+		referrer: meta.referrer
+	};
+	let visitInsertRes = await supabaseAdmin.from("visits").insert(visitRecord);
+	if (visitInsertRes.error && /ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(visitInsertRes.error.message)) {
+		const { ip_country: _ipCountry, ip_city: _ipCity, asn: _asn, isp: _isp, ...fallbackVisitRecord } = visitRecord;
+		visitInsertRes = await supabaseAdmin.from("visits").insert(fallbackVisitRecord);
+	}
+	if (visitInsertRes.error) throw visitInsertRes.error;
+	if (!existing) {
+		const sessionRecord = {
+			session_id: data.sessionId,
+			ip: meta.ip,
+			country,
+			...networkMeta,
+			browser: meta.browser,
+			device: meta.device,
+			user_agent: meta.ua,
+			first_visit: now,
+			last_active: now
+		};
+		let sessionInsertRes = await supabaseAdmin.from("sessions").insert(sessionRecord);
+		if (sessionInsertRes.error && /ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(sessionInsertRes.error.message)) {
+			const { ip_country: _ipCountry, ip_city: _ipCity, asn: _asn, isp: _isp, ...fallbackSessionRecord } = sessionRecord;
+			sessionInsertRes = await supabaseAdmin.from("sessions").insert(fallbackSessionRecord);
+		}
+		if (sessionInsertRes.error) throw sessionInsertRes.error;
+		try {
+			await insertAdminNotification(supabaseAdmin, {
+				type: "visitor",
+				type_detail: "visitor",
+				title: "Visitor Arrived",
+				body: `${meta.ip ?? "unknown"} - ${country ?? "unknown"} - ${meta.device} - ${meta.browser}`,
+				session_id: data.sessionId,
+				ip_address: meta.ip,
+				country,
+				browser: meta.browser,
+				device: meta.device,
+				payload: {
+					type_detail: "visitor",
+					session_id: data.sessionId,
+					ip_address: meta.ip,
+					country,
+					browser: meta.browser,
+					device: meta.device
+				},
+				read: false,
+				delivered: false
+			});
+		} catch (e) {
+			console.error("notify failed", e);
+		}
+	}
+	return { ok: true };
+}
+createServerFn({ method: "POST" }).validator((d) => objectType({
+	sessionId: stringType().min(8).max(64),
+	path: stringType().max(500),
+	heartbeat: booleanType().optional()
+}).parse(d)).handler(createSsrRpc("5e7bc6b7985a4c5567ec29c826f97eeb7805c320edefacaaf2df3b19b86050da"));
+createServerFn({ method: "POST" }).validator((d) => objectType({
+	name: stringType().trim().min(1).max(120),
+	email: stringType().trim().email().max(200),
+	message: stringType().trim().min(1).max(5e3)
+}).parse(d)).handler(createSsrRpc("8043f9f461a2e106a6aa3ba0474234bd1598036ef6e2dc8a67dea4ff61dab955"));
+createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(createSsrRpc("6d92e280c68cd3c11aac298fc57f9269dca8d85ae15c9747e0c8a8d46051fccf"));
+createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).handler(createSsrRpc("abd124c618fd11979349d78fa7b5705a4311550c5a02f311710e53685f427a7f"));
+createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(createSsrRpc("5058339e4274bf852ada72847e61fa713d72a2a54e6e0f6d25efda66bc028b9f"));
 function isPublicVisitorPath(path) {
 	try {
 		const pathname = path.startsWith("http") ? new URL(path).pathname : path;
@@ -458,7 +907,7 @@ var Route$18 = createFileRoute("/api/public/mark-extracted")({ server: { handler
 			headers: { "Cache-Control": "no-store" }
 		});
 		const meta = getClientMeta(request);
-		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		const { supabaseAdmin } = await import("./client.server-Cb3GfPp-.mjs");
 		const { data: download, error: downloadError } = await findDownloadByInstallToken$1(supabaseAdmin, installToken);
 		if (downloadError) throw downloadError;
 		if (!download) return new Response("", {
@@ -597,7 +1046,7 @@ var Route$17 = createFileRoute("/api/public/installed")({ server: { handlers: { 
 		const bodySessionId = typeof body?.sessionId === "string" && body.sessionId.length >= 8 && body.sessionId.length <= 64 ? body.sessionId : null;
 		const meta = getClientMeta(request);
 		const installToken = getInstallTokenFromRequest(request, body?.token);
-		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		const { supabaseAdmin } = await import("./client.server-Cb3GfPp-.mjs");
 		let { data: download, error: downloadError } = installToken ? await findDownloadByInstallToken(supabaseAdmin, installToken) : await findLatestDownloadBySession(supabaseAdmin, bodySessionId, fileName);
 		if (downloadError) throw downloadError;
 		if (!download) {
@@ -1157,7 +1606,7 @@ var Route$14 = createFileRoute("/api/me/stats")({ server: { handlers: { GET: asy
 				headers: { "Content-Type": "application/json" }
 			});
 		}
-		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		const { supabaseAdmin } = await import("./client.server-Cb3GfPp-.mjs");
 		(/* @__PURE__ */ new Date(Date.now() - 24 * 36e5)).toISOString();
 		const since5m = (/* @__PURE__ */ new Date(Date.now() - 5 * 6e4)).toISOString();
 		const sinceToday = new Date((/* @__PURE__ */ new Date()).setHours(0, 0, 0, 0)).toISOString();
@@ -1331,7 +1780,7 @@ var Route$11 = createFileRoute("/api/admin/mark-notification-read")({ server: { 
 			status: 400,
 			headers
 		});
-		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		const { supabaseAdmin } = await import("./client.server-Cb3GfPp-.mjs");
 		const res = await supabaseAdmin.from("notifications").update({ read: true }).eq("id", id);
 		if (res.error) return new Response(JSON.stringify(createErrorPayload$8(res.error)), {
 			status: 500,
@@ -1578,7 +2027,7 @@ var Route$7 = createFileRoute("/api/admin/delete-user")({ server: { handlers: { 
 		});
 		let supabaseAdmin;
 		try {
-			supabaseAdmin = (await import("./client.server-CPH4V7T6.mjs").then((n) => n.t)).supabaseAdmin;
+			supabaseAdmin = (await import("./client.server-Cb3GfPp-.mjs")).supabaseAdmin;
 			if (!supabaseAdmin) throw new Error("Supabase admin client unavailable");
 		} catch (err) {
 			console.error("[Delete user] Supabase admin client load failed", err);
@@ -1653,7 +2102,7 @@ var Route$6 = createFileRoute("/api/admin/delete-session")({ server: { handlers:
 			status: 400,
 			headers
 		});
-		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		const { supabaseAdmin } = await import("./client.server-Cb3GfPp-.mjs");
 		await supabaseAdmin.from("visits").delete().eq("session_id", id);
 		await supabaseAdmin.from("downloads").delete().eq("session_id", id);
 		await supabaseAdmin.from("extractions").delete().eq("session_id", id);
@@ -1699,7 +2148,7 @@ var Route$5 = createFileRoute("/api/admin/delete-notification")({ server: { hand
 			status: 400,
 			headers
 		});
-		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		const { supabaseAdmin } = await import("./client.server-Cb3GfPp-.mjs");
 		const res = await supabaseAdmin.from("notifications").delete().eq("id", id);
 		if (res.error) return new Response(JSON.stringify(createErrorPayload$4(res.error)), {
 			status: 500,
@@ -1741,7 +2190,7 @@ var Route$4 = createFileRoute("/api/admin/delete-download")({ server: { handlers
 			status: 400,
 			headers
 		});
-		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		const { supabaseAdmin } = await import("./client.server-Cb3GfPp-.mjs");
 		const res = await supabaseAdmin.from("downloads").delete().eq("id", id);
 		if (res.error) return new Response(JSON.stringify(createErrorPayload$3(res.error)), {
 			status: 500,
@@ -2074,7 +2523,7 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 		let supabaseAdmin;
 		try {
 			console.log("[Dashboard] Importing Supabase admin client");
-			supabaseAdmin = (await import("./client.server-CPH4V7T6.mjs").then((n) => n.t)).supabaseAdmin;
+			supabaseAdmin = (await import("./client.server-Cb3GfPp-.mjs")).supabaseAdmin;
 			if (!supabaseAdmin) throw new Error("Supabase admin client import returned undefined");
 		} catch (importError) {
 			const message = importError instanceof Error ? importError.message : String(importError);
@@ -2345,7 +2794,7 @@ var Route$2 = createFileRoute("/api/admin/clear-notifications")({ server: { hand
 			status: 401,
 			headers
 		});
-		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		const { supabaseAdmin } = await import("./client.server-Cb3GfPp-.mjs");
 		const res = await supabaseAdmin.from("notifications").delete().not("id", "is", null);
 		if (res.error) return new Response(JSON.stringify(createErrorPayload$2(res.error)), {
 			status: 500,
@@ -2383,7 +2832,7 @@ var Route$1 = createFileRoute("/api/admin/clear-history")({ server: { handlers: 
 			status: 401,
 			headers
 		});
-		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		const { supabaseAdmin } = await import("./client.server-Cb3GfPp-.mjs");
 		await clearTable(supabaseAdmin, "notifications");
 		await clearTable(supabaseAdmin, "downloads");
 		await clearTable(supabaseAdmin, "extractions");
@@ -2418,7 +2867,7 @@ var Route = createFileRoute("/api/admin/clear-downloads")({ server: { handlers: 
 			status: 401,
 			headers
 		});
-		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
+		const { supabaseAdmin } = await import("./client.server-Cb3GfPp-.mjs");
 		const res = await supabaseAdmin.from("downloads").delete().not("id", "is", null);
 		if (res.error) return new Response(JSON.stringify(createErrorPayload(res.error)), {
 			status: 500,
@@ -2603,4 +3052,4 @@ var getRouter = () => {
 	});
 };
 //#endregion
-export { getRouter };
+export { getRouter, supabaseAdmin as t };

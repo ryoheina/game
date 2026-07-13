@@ -2,12 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 const items = [
-  { href: "#story", label: "Story" },
-  { href: "#characters", label: "Characters" },
-  { href: "#world", label: "World" },
-  { href: "#features", label: "Features" },
+  { href: "#features", label: "Gameplay" },
+  { href: "#gallery", label: "Gallery" },
+  { href: "#trailer", label: "Trailer" },
   { href: "#download", label: "Download" },
-  { href: "#contact", label: "Contact" },
 ];
 
 export function Nav() {

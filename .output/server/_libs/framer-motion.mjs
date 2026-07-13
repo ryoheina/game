@@ -10587,4 +10587,43 @@ function useMapTransform(inputValue, inputRange, outputMap, options) {
 	return output;
 }
 //#endregion
-export { performance_default as a, AnimatePresence as i, useScroll as n, motion as r, useTransform as t };
+//#region node_modules/framer-motion/dist/es/utils/reduced-motion/use-reduced-motion.mjs
+/**
+* A hook that returns `true` if we should be using reduced motion based on the current device's Reduced Motion setting.
+*
+* This can be used to implement changes to your UI based on Reduced Motion. For instance, replacing motion-sickness inducing
+* `x`/`y` animations with `opacity`, disabling the autoplay of background videos, or turning off parallax motion.
+*
+* It will actively respond to changes and re-render your components with the latest setting.
+*
+* ```jsx
+* export function Sidebar({ isOpen }) {
+*   const shouldReduceMotion = useReducedMotion()
+*   const closedX = shouldReduceMotion ? 0 : "-100%"
+*
+*   return (
+*     <motion.div animate={{
+*       opacity: isOpen ? 1 : 0,
+*       x: isOpen ? 0 : closedX
+*     }} />
+*   )
+* }
+* ```
+*
+* @return boolean
+*
+* @public
+*/
+function useReducedMotion() {
+	/**
+	* Lazy initialisation of prefersReducedMotion
+	*/
+	!hasReducedMotionListener.current && initPrefersReducedMotion();
+	const [shouldReduceMotion] = (0, import_react.useState)(prefersReducedMotion.current);
+	/**
+	* TODO See if people miss automatically updating shouldReduceMotion setting
+	*/
+	return shouldReduceMotion;
+}
+//#endregion
+export { AnimatePresence as a, motion as i, useTransform as n, useScroll as r, useReducedMotion as t };

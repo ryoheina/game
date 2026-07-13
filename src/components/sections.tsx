@@ -1,992 +1,275 @@
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
-import gsap from "gsap";
-import { AssetImg } from "@/components/asset-img";
-import type { ImgKey } from "@/lib/assets";
-import { Particles, Fog } from "./fx";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { ArrowRight, Check, Download as DownloadIcon, Flame, Play, Swords, TowerControl } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Fog, Particles } from "./fx";
 
-function FullBleedVideo({
+type DownloadHandler = () => void;
+
+const reveal = {
+  hidden: { opacity: 0, y: 28 },
+  visible: { opacity: 1, y: 0 },
+};
+const HERO_VIDEOS = ["/hero1.mp4", "/hero2.mp4", "/hero3.mp4", "/hero4.mp4"];
+
+function useNearViewport(rootMargin = "300px") {
+  const ref = useRef<HTMLDivElement>(null);
+  const [near, setNear] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || near) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry?.isIntersecting) return;
+      setNear(true);
+      observer.disconnect();
+    }, { rootMargin });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [near, rootMargin]);
+
+  return { ref, near };
+}
+
+function LazyVideo({
   src,
   className = "",
-  videoClassName = "",
-  eager = false,
+  poster,
+  autoPlay = true,
   controls = false,
 }: {
   src: string;
   className?: string;
-  videoClassName?: string;
-  eager?: boolean;
+  poster?: string;
+  autoPlay?: boolean;
   controls?: boolean;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [shouldLoad, setShouldLoad] = useState(eager);
-
-  useEffect(() => {
-    if (shouldLoad || eager) return;
-    const node = ref.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) return;
-        setShouldLoad(true);
-        observer.disconnect();
-      },
-      { rootMargin: "200px 0px" },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [eager, shouldLoad]);
-
-  return (
-    <div ref={ref} className={`absolute inset-0 overflow-hidden bg-black ${className}`}>
-      {shouldLoad && (
-        <video
-          className={`h-full w-full object-cover ${videoClassName}`}
-          src={src}
-          autoPlay={!controls}
-          muted
-          defaultMuted
-          loop={!controls}
-          playsInline
-          controls={controls}
-          preload={eager ? "auto" : "none"}
-        />
-      )}
-    </div>
-  );
-}
-
-export function Hero() {
-  const ref = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-
-  useEffect(() => {
-    if (!titleRef.current) return;
-
-    // Cinematic title entrance
-    gsap.fromTo(
-      titleRef.current.querySelectorAll("span"),
-      { opacity: 0, y: 50, filter: "blur(20px)" },
-      {
-        opacity: 1,
-        y: 0,
-        filter: "blur(0px)",
-        duration: 1.5,
-        stagger: 0.2,
-        ease: "power4.out",
-        delay: 0.3,
-      }
-    );
-  }, []);
-
-  return (
-    <section ref={ref} className="relative isolate h-[100svh] min-h-[640px] w-full overflow-hidden sm:min-h-[720px]">
-      <motion.div
-        style={{ y, scale }}
-        className="absolute inset-0 z-0"
-      >
-        <FullBleedVideo src="/hero3.mp4" videoClassName="object-[18%_center]" eager />
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 18% 18%, rgba(175, 210, 255, 0.16), transparent 28%), radial-gradient(circle at 84% 18%, rgba(255, 220, 145, 0.12), transparent 26%)",
-          }}
-        />
-        <div className="absolute inset-0 rounded-[50%]" style={{ boxShadow: "inset 0 0 120px rgba(0,0,0,0.18)" }} />
-      </motion.div>
-
-      <Fog className="z-[1]" opacity={0.16} />
-      <div
-        className="pointer-events-none absolute inset-0 z-[3]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 24% 28%, rgba(144, 189, 255, 0.12), transparent 34%), radial-gradient(circle at 76% 20%, rgba(255, 225, 180, 0.08), transparent 30%)",
-        }}
-      />
-      <Particles count={25} color="arcane" className="z-[4]" />
-
-      <motion.div
-        style={{ opacity }}
-        className="relative z-[20] mx-auto flex h-full max-w-7xl flex-col justify-center px-4 pt-24 sm:px-6"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2 }}
-          className="max-w-2xl"
-        >
-          <div className="mb-6 inline-flex max-w-full items-center gap-3 rounded-full glass px-4 py-2 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500 shadow-[0_0_28px_rgba(255,255,255,0.14)]">
-            <span className="h-2 w-2 rounded-full bg-[color:var(--gold)] shadow-lg shadow-[color:var(--gold)]" style={{ animation: "shimmer 2s ease-in-out infinite" }} />
-            <span className="text-xs uppercase tracking-[0.35em] text-[rgba(255,255,255,0.85)]">Chapter I · The Awakening</span>
-          </div>
-          <h1 ref={titleRef} className="display text-5xl leading-[0.92] text-white sm:text-6xl md:text-8xl font-black drop-shadow-[0_0_45px_rgba(255,255,255,0.2)]">
-            <span className="block text-white">Legends</span>
-            <span className="block text-white">of</span>
-            <span className="block text-white">Eternity</span>
-          </h1>
-          <p className="mt-6 max-w-xl text-base text-[rgba(255,255,255,0.85)] sm:mt-8 md:text-xl leading-relaxed font-light drop-shadow-[0_0_20px_rgba(0,0,0,0.24)]">
-            A next-generation 3D multiplayer fantasy RPG. Forge alliances, wield forbidden magic, and stand against the tide of eternal darkness.
-          </p>
-          <div className="mt-10 flex flex-col gap-3 sm:mt-12 sm:flex-row sm:flex-wrap sm:gap-4">
-            <a
-              href="#characters"
-              className="relative inline-flex items-center justify-center rounded-full bg-[#0c1d48]/90 px-6 py-4 text-xs uppercase tracking-[0.18em] text-white shadow-[0_0_30px_rgba(106,151,255,0.25)] border border-[#6e9cff]/50 transition-all duration-500 hover:bg-[#10255e]/95 hover:shadow-[0_0_45px_rgba(106,151,255,0.42)] sm:px-10 sm:text-sm sm:tracking-[0.25em]"
-            >
-              Explore Characters
-            </a>
-          </div>
-        </motion.div>
-
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-[10px] uppercase tracking-[0.5em] text-white/40 animate-pulse">
-          scroll
-          <div className="mx-auto mt-2 h-10 w-px bg-gradient-to-b from-white/50 to-transparent" />
-        </div>
-      </motion.div>
-    </section>
-  );
-}
-
-function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 1, delay, ease: [0.16, 1, 0.3, 1] }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-export function Story() {
-  return (
-    <section id="story" className="relative py-40">
-      <div className="mx-auto max-w-4xl px-6 text-center">
-        <Reveal>
-          <span className="text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]">Prologue</span>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <h2 className="display mt-6 text-5xl leading-tight text-white md:text-7xl">
-            When the last star fell,<br />
-            <span className="text-gradient-arcane">the realms bled light.</span>
-          </h2>
-        </Reveal>
-        <div className="mt-16 space-y-10 text-lg leading-relaxed text-white/70 md:text-xl">
-          <Reveal delay={0.1}>
-            <p>
-              Azrael, the Chosen, was born of storm and prophecy — a blade forged to hold back the endless night.
-            </p>
-          </Reveal>
-          <Reveal delay={0.15}>
-            <p>
-              At his side, <span className="text-white">Lucas</span> — the Light Guardian, brother in all but blood, whose shield has never wavered.
-            </p>
-          </Reveal>
-          <Reveal delay={0.2}>
-            <p>
-              Above them, <span className="text-gradient-gold">Elysia</span>, Goddess of Harmony, weaves the thread that binds destiny to hope.
-            </p>
-          </Reveal>
-          <Reveal delay={0.25}>
-            <p>
-              And beneath the world, <span className="text-[color:var(--ember)]">Zerevok</span> stirs — the Soul Devourer, hunger given form.
-            </p>
-          </Reveal>
-          <Reveal delay={0.3}>
-            <p className="display text-2xl italic text-white md:text-3xl">
-              "The war of light and shadow is not a story. It is a choice — and it is yours."
-            </p>
-          </Reveal>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-type Character = {
-  name: string;
-  title: string;
-  asset: ImgKey;
-  color: "arcane" | "gold" | "ember";
-  power: number;
-  description: string;
-  abilities: string[];
-};
-
-const characters: Character[] = [
-  {
-    name: "Azrael",
-    title: "The Chosen · Champion of Light and Shadow",
-    asset: "azrael",
-    color: "arcane",
-    power: 98,
-    description:
-      "Born from destiny, forged in darkness. Azrael wields Heaven's Requiem — a blade that can cleave both light and shadow.",
-    abilities: ["Luminous Slash", "Shadow Burst", "Celestial Shield", "Dark Vortex", "Ragnarok Strike"],
-  },
-  {
-    name: "Lucas",
-    title: "The Light Guardian · Loyal Brother in Arms",
-    asset: "lucas",
-    color: "gold",
-    power: 88,
-    description:
-      "\"I may not be the strongest in might, but I will always stand by your side.\" Support, defender, unbroken light.",
-    abilities: ["Radiant Shield", "Healing Ray", "Light's Embrace", "Beacon of Hope", "Divine Strike"],
-  },
-  {
-    name: "Elysia",
-    title: "Goddess of Harmony · The Balance",
-    asset: "elysia",
-    color: "gold",
-    power: 100,
-    description:
-      "She sees beyond the veil of light and darkness. Her wisdom heals, her power unites, her grace redeems.",
-    abilities: ["Celestial Bloom", "Divine Presence", "Weave of Fate", "Aegis of Harmony", "Rebirth"],
-  },
-  {
-    name: "Zerevok",
-    title: "The Soul Devourer · End of All Light",
-    asset: "zerevok",
-    color: "ember",
-    power: 96,
-    description:
-      "Born from the void of darkness, Zerevok feeds on souls and spreads despair. None who face him survive.",
-    abilities: ["Soul Reaper", "Dark Eruption", "Void Chains", "Nightmare Swarm", "Realm Collapse"],
-  },
-];
-
-const characterVideos: Record<Character["name"], string> = {
-  Azrael: "/hero3.mp4",
-  Lucas: "/hero1.mp4",
-  Elysia: "/hero2.mp4",
-  Zerevok: "/hero4.mp4",
-};
-
-function CharacterCardMedia({ c }: { c: Character }) {
+  const { ref, near } = useNearViewport();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
-  const [videoReady, setVideoReady] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (!shouldLoadVideo) return;
     const video = videoRef.current;
-    if (!video) return;
-
-    video.muted = true;
-    video.defaultMuted = true;
-    video.loop = true;
-    video.playsInline = true;
-
-    const play = () => video.play().catch(() => {});
-    play();
-    video.addEventListener("canplay", play);
-    document.addEventListener("visibilitychange", play);
-    return () => {
-      video.removeEventListener("canplay", play);
-      document.removeEventListener("visibilitychange", play);
-    };
-  }, [shouldLoadVideo]);
+    if (!video || !near || !autoPlay || reducedMotion) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = Boolean(entry?.isIntersecting);
+      setVisible(isVisible);
+      if (isVisible) video.play().catch(() => undefined);
+      else video.pause();
+    }, { threshold: 0.05 });
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, [autoPlay, near, reducedMotion]);
 
   return (
-    <div
-      className="absolute inset-0 bg-black"
-      onPointerEnter={() => setShouldLoadVideo(true)}
-      onFocus={() => setShouldLoadVideo(true)}
-      onTouchStart={() => setShouldLoadVideo(true)}
-    >
-      <div className="absolute inset-0 scale-110 opacity-70 blur-xl">
-        <AssetImg asset={c.asset} alt="" aria-hidden className="h-full w-full object-cover" />
-      </div>
-      <AssetImg
-        asset={c.asset}
-        alt=""
-        aria-hidden
-        className={`absolute inset-0 h-full w-full object-contain transition-all duration-[900ms] group-hover:scale-[1.02] group-hover:brightness-110 ${videoReady ? "opacity-0" : "opacity-100"}`}
-      />
-      {shouldLoadVideo && (
+    <div ref={ref} className={className}>
+      {near && (
         <video
           ref={videoRef}
-          className={`absolute inset-0 h-full w-full object-contain transition-all duration-[900ms] group-hover:scale-[1.02] group-hover:brightness-110 ${videoReady ? "opacity-100" : "opacity-0"}`}
-          muted
-          defaultMuted
-          loop
+          className="h-full w-full object-cover"
+          src={src}
+          poster={poster}
+          autoPlay={autoPlay && !reducedMotion}
+          muted={autoPlay}
+          defaultMuted={autoPlay}
+          loop={autoPlay}
           playsInline
-          autoPlay
+          controls={controls}
           preload="metadata"
-          onCanPlay={() => setVideoReady(true)}
-        >
-          <source src={characterVideos[c.name]} type="video/mp4" />
-        </video>
+          aria-hidden={autoPlay}
+          data-playing={visible}
+        />
       )}
     </div>
   );
 }
 
-export function Characters({ onOpen }: { onOpen: (c: Character) => void }) {
+function SectionIntro({ eyebrow, title, children }: { eyebrow: string; title: string; children?: ReactNode }) {
   return (
-    <section id="characters" className="relative py-32">
-      <div className="mx-auto max-w-7xl px-6">
-        <Reveal>
-          <div className="mb-16 flex flex-col items-center text-center">
-            <span className="text-xs uppercase tracking-[0.5em] text-[color:var(--gold)] drop-shadow-[0_0_10px_rgba(255,179,0,0.6)]">Cast</span>
-            <h2 className="display mt-4 text-5xl text-white md:text-6xl drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">Champions & Fallen</h2>
-            <p className="mt-4 max-w-xl text-white/60 leading-relaxed">
-              Four souls at the heart of the eternal war. Click any card to see the full dossier.
-            </p>
-          </div>
-        </Reveal>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:gap-6">
-          {characters.map((c, i) => (
-            <Reveal key={c.name} delay={i * 0.08}>
-              <button
-                onClick={() => onOpen(c)}
-                className="group relative block h-[420px] w-full overflow-hidden rounded-2xl text-left glass transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_0_50px_rgba(74,20,140,0.6)] focus:outline-none focus:ring-2 focus:ring-[color:var(--arcane)] backdrop-blur-xl border border-white/10 hover:border-white/30 sm:h-[500px] lg:h-[520px]"
-              >
-                <CharacterCardMedia c={c} />
-                {/* Cinematic lighting overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent group-hover:from-black via-black/40 transition-all duration-500" />
-                
-                {/* Character-specific glow effect */}
-                <div
-                  className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                  style={{
-                    background:
-                      c.color === "ember"
-                        ? "radial-gradient(60% 40% at 50% 100%, oklch(0.66 0.22 40 / 0.6), transparent 70%)"
-                        : c.color === "gold"
-                          ? "radial-gradient(60% 40% at 50% 100%, oklch(0.82 0.14 88 / 0.6), transparent 70%)"
-                          : "radial-gradient(60% 40% at 50% 100%, oklch(0.72 0.19 245 / 0.7), transparent 70%)",
-                  }}
-                />
-
-                {/* Cinematic edge glow */}
-                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" 
-                  style={{
-                    boxShadow: `inset 0 0 40px ${
-                      c.color === "ember" ? "rgba(220, 20, 60, 0.3)" :
-                      c.color === "gold" ? "rgba(255, 179, 0, 0.3)" :
-                      "rgba(74, 20, 140, 0.3)"
-                    }`
-                  }}
-                />
-                
-                <div className="absolute inset-x-0 bottom-0 p-6 z-10">
-                  <div className="text-[10px] uppercase tracking-[0.35em] text-white/60 group-hover:text-white/80 transition-colors">{c.title.split(" · ")[0]}</div>
-                  <h3 className="display mt-2 text-3xl text-white group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all">{c.name}</h3>
-                  <div className="mt-4 flex items-center gap-2">
-                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10 group-hover:bg-white/20">
-                      <div
-                        className="h-full transition-all duration-1000 rounded-full shadow-lg"
-                        style={{
-                          width: `${c.power}%`,
-                          background:
-                            c.color === "ember"
-                              ? "linear-gradient(90deg, oklch(0.66 0.22 40), oklch(0.8 0.2 30))"
-                              : c.color === "gold"
-                                ? "linear-gradient(90deg, oklch(0.82 0.14 88), oklch(0.95 0.12 95))"
-                                : "linear-gradient(90deg, oklch(0.5 0.2 245), oklch(0.85 0.15 220))",
-                          boxShadow:
-                            c.color === "ember"
-                              ? "0 0 20px rgba(220, 20, 60, 0.8)"
-                              : c.color === "gold"
-                                ? "0 0 20px rgba(255, 179, 0, 0.8)"
-                                : "0 0 20px rgba(74, 20, 140, 0.8)",
-                        }}
-                      />
-                    </div>
-                    <span className="text-xs text-white/70 group-hover:text-white transition-colors">{c.power}</span>
-                  </div>
-                </div>
-              </button>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export function CharacterModal({ c, onClose }: { c: Character | null; onClose: () => void }) {
-  useEffect(() => {
-    if (!c) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [c, onClose]);
-
-  if (!c) return null;
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 30, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        onClick={(e) => e.stopPropagation()}
-        className="relative grid max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-2xl glass md:grid-cols-2"
-      >
-        <div className="relative h-72 md:h-auto">
-          <FullBleedVideo src={characterVideos[c.name]} />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent md:bg-gradient-to-r" />
-        </div>
-        <div className="relative overflow-auto p-8 md:p-10">
-          <button
-            onClick={onClose}
-            className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full glass text-white/70 hover:text-white"
-            aria-label="Close"
-          >
-            ×
-          </button>
-          <div className="text-[10px] uppercase tracking-[0.4em] text-[color:var(--gold)]">{c.title}</div>
-          <h3 className="display mt-3 text-5xl text-white">{c.name}</h3>
-          <p className="mt-6 text-white/70">{c.description}</p>
-          <div className="mt-8">
-            <div className="text-xs uppercase tracking-[0.3em] text-white/50">Abilities</div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {c.abilities.map((a) => (
-                <span key={a} className="rounded-full glass px-3 py-1.5 text-xs text-white/80">{a}</span>
-              ))}
-            </div>
-          </div>
-          <div className="mt-8">
-            <div className="text-xs uppercase tracking-[0.3em] text-white/50">Power Level</div>
-            <div className="mt-3 flex items-center gap-3">
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${c.power}%` }}
-                  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                  className="h-full"
-                  style={{ background: "linear-gradient(90deg, var(--arcane), var(--gold))" }}
-                />
-              </div>
-              <span className="text-sm text-white/80">{c.power}/100</span>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+    <motion.div variants={reveal} className="mx-auto max-w-2xl text-center">
+      <p className="text-xs font-semibold uppercase tracking-[0.38em] text-[#e8c86a]">{eyebrow}</p>
+      <h2 className="display mt-4 text-4xl leading-tight text-white sm:text-5xl md:text-6xl">{title}</h2>
+      {children && <p className="mt-5 text-base leading-relaxed text-white/65 sm:text-lg">{children}</p>}
     </motion.div>
   );
 }
 
-export function World() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [-80, 80]);
-
-  const facets = [
-    { title: "Kingdoms of Aldreth", copy: "Iron banners, cathedral spires, and the last free crown." },
-    { title: "Shattered Ruins", copy: "Where forgotten gods sleep beneath collapsed stars." },
-    { title: "The Ashen Mountains", copy: "Peaks kissed by dragonfire, home to the wandering exiles." },
-    { title: "Whisperwood", copy: "Living forests that remember every promise ever broken." },
-  ];
-
+export function DownloadButton({ onDownload, className = "", label = "Download Free" }: { onDownload: DownloadHandler; className?: string; label?: string }) {
+  const reducedMotion = useReducedMotion();
   return (
-    <section id="world" ref={ref} className="relative overflow-hidden py-32">
-      <motion.div style={{ y }} className="absolute inset-0">
-        <AssetImg asset="background" alt="" aria-hidden className="h-[120%] w-full object-cover opacity-40" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
-      </motion.div>
-      <Fog opacity={0.5} />
-      <div className="relative mx-auto max-w-7xl px-6">
-        <Reveal>
-          <span className="text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]">The Realm</span>
-          <h2 className="display mt-4 text-5xl text-white md:text-6xl">A world that breathes</h2>
-        </Reveal>
-        <div className="mt-16 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {facets.map((f, i) => (
-            <Reveal key={f.title} delay={i * 0.08}>
-              <div className="h-full rounded-2xl glass p-6 transition hover:scale-[1.02] hover:glow-blue">
-                <div className="display text-2xl text-white">{f.title}</div>
-                <p className="mt-3 text-sm text-white/60">{f.copy}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export function Battle() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1.05, 1.15, 1.25]);
-  const rot = useTransform(scrollYProgress, [0, 1], [-0.6, 0.6]);
-  const [flash, setFlash] = useState(false);
-  useEffect(() => {
-    const t = setInterval(() => {
-      setFlash(true);
-      setTimeout(() => setFlash(false), 90);
-    }, 4200);
-    return () => clearInterval(t);
-  }, []);
-  return (
-    <section ref={ref} className="relative isolate h-[100svh] min-h-[600px] w-full overflow-hidden">
-      <motion.div style={{ scale, rotate: rot }} className="absolute inset-0">
-        <FullBleedVideo src="/background1.mp4" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/10 to-background/20" />
-      </motion.div>
-      <div
-        className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-100"
-        style={{
-          opacity: flash ? 0.35 : 0,
-          background:
-            "radial-gradient(60% 40% at 60% 30%, rgba(255,255,255,0.18), transparent 70%)",
-          mixBlendMode: "screen",
-        }}
-      />
-      <Particles count={30} color="ember" />
-      <div className="relative z-20 mx-auto flex h-full max-w-6xl items-end px-4 pb-20 sm:px-6 sm:pb-24">
-        <Reveal>
-          <div className="max-w-2xl">
-            <span className="text-xs uppercase tracking-[0.5em] text-[color:var(--ember)]">The Siege</span>
-            <h2 className="display mt-4 text-4xl text-white sm:text-5xl md:text-7xl">Fifty against fifty thousand.</h2>
-            <p className="mt-6 text-white/70 md:text-lg">
-              Real-time massed combat. Elemental storms. Guild-level tactics. Every clash is remembered by the realm.
-            </p>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-export function BattleToFeaturesBreak() {
-  return (
-    <section
-      aria-hidden
-      className="relative isolate min-h-[28svh] overflow-hidden bg-background sm:min-h-[34svh]"
+    <motion.button
+      type="button"
+      onClick={onDownload}
+      onPointerMove={(event) => {
+        const element = event.currentTarget;
+        const bounds = element.getBoundingClientRect();
+        element.style.setProperty("--magnet-x", `${(event.clientX - bounds.left - bounds.width / 2) * 0.08}px`);
+        element.style.setProperty("--magnet-y", `${(event.clientY - bounds.top - bounds.height / 2) * 0.08}px`);
+      }}
+      onPointerLeave={(event) => {
+        event.currentTarget.style.setProperty("--magnet-x", "0px");
+        event.currentTarget.style.setProperty("--magnet-y", "0px");
+      }}
+      whileHover={{ scale: 1.035, x: "var(--magnet-x)", y: "var(--magnet-y)" }}
+      whileTap={{ scale: 0.97 }}
+      className={`group relative isolate inline-flex min-h-14 items-center justify-center gap-3 overflow-hidden rounded-full bg-gradient-to-r from-[#f7de8b] via-[#d9ae45] to-[#9e6b18] px-7 py-4 text-sm font-bold uppercase tracking-[0.16em] text-[#160f05] shadow-[0_0_0_1px_rgba(255,237,170,0.8),0_18px_55px_rgba(218,170,53,0.35)] transition-shadow hover:shadow-[0_0_0_1px_rgba(255,244,190,1),0_22px_70px_rgba(230,185,65,0.55)] ${className}`}
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-[#120606] to-background" />
-      <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/80 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent" />
-      <div className="absolute left-1/2 top-1/2 h-px w-[min(74rem,78vw)] -translate-x-1/2 bg-gradient-to-r from-transparent via-[#f06a3d]/35 to-transparent shadow-[0_0_42px_rgba(240,80,45,0.28)]" />
-      <div className="absolute left-1/2 top-[calc(50%+18px)] h-px w-[min(56rem,64vw)] -translate-x-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-      <Particles count={18} color="ember" className="opacity-70" />
-    </section>
+      {!reducedMotion && <motion.span aria-hidden className="absolute inset-0 -z-10 rounded-full border border-[#fff1ad]" animate={{ scale: [1, 1.18, 1.18], opacity: [0.7, 0, 0] }} transition={{ duration: 1.25, repeat: Infinity, repeatDelay: 4.75 }} />}
+      <span aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_110%,rgba(255,255,255,0.72),transparent_48%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <DownloadIcon className="h-4 w-4" />
+      <span>{label}</span><ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+    </motion.button>
   );
 }
 
-export function Features() {
+function HeroVideoCarousel() {
+  const reducedMotion = useReducedMotion();
+  const [activeVideo, setActiveVideo] = useState(0);
+  const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
+
+  useEffect(() => {
+    if (reducedMotion) return;
+    const interval = window.setInterval(() => setActiveVideo((current) => (current + 1) % HERO_VIDEOS.length), 4500);
+    return () => window.clearInterval(interval);
+  }, [reducedMotion]);
+
+  useEffect(() => {
+    videoRefs.current.forEach((video, index) => {
+      if (!video) return;
+      if (index === activeVideo && !reducedMotion) video.play().catch(() => undefined);
+      else video.pause();
+    });
+  }, [activeVideo, reducedMotion]);
+
+  return <>{HERO_VIDEOS.map((src, index) => <motion.video ref={(node) => { videoRefs.current[index] = node; }} key={src} className="absolute inset-0 h-full w-full object-cover" src={src} autoPlay={index === 0 && !reducedMotion} muted loop playsInline preload="metadata" initial={false} animate={{ opacity: activeVideo === index ? 1 : 0, scale: activeVideo === index ? 1.08 : 1.02 }} transition={{ opacity: { duration: reducedMotion ? 0 : 1.1, ease: "easeInOut" }, scale: { duration: 4.5, ease: "linear" } }} />)}</>;
+}
+
+export function Hero({ onDownload }: { onDownload: DownloadHandler }) {
+  const ref = useRef<HTMLElement>(null);
+  const reducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], [0, reducedMotion ? 0 : 120]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, reducedMotion ? 1 : 1.08]);
+
   return (
-    <section id="features" className="relative h-[100svh] min-h-[560px] w-full overflow-hidden">
-      <FullBleedVideo src="/background1.mp4" />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/35 via-background/5 to-background/50" />
+    <section id="hero" ref={ref} className="relative isolate flex min-h-[720px] min-h-[100svh] items-center overflow-hidden">
+      <motion.div style={{ y, scale }} className="absolute inset-0 -z-10 origin-top">
+        <HeroVideoCarousel />
+      </motion.div>
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(4,4,6,0.91)_0%,rgba(4,4,6,0.58)_45%,rgba(4,4,6,0.24)_100%)]" />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_76%_28%,rgba(230,188,81,0.16),transparent_28%),linear-gradient(0deg,rgba(4,4,6,0.9),transparent_42%)]" />
+      <div aria-hidden className="absolute inset-0 -z-0 bg-[linear-gradient(112deg,transparent_25%,rgba(255,225,140,0.1)_48%,transparent_62%)] opacity-60" />
+      <Fog className="-z-0" opacity={0.12} />
+      <Particles count={18} color="gold" className="-z-0 opacity-70" />
+      <div className="relative mx-auto w-full max-w-7xl px-6 pt-24 sm:px-8">
+        <motion.div initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.13 } } }} className="max-w-3xl">
+          <motion.p variants={reveal} className="text-xs font-bold uppercase tracking-[0.4em] text-[#edd47d]">The next great fantasy RPG</motion.p>
+          <motion.h1 variants={reveal} className="display mt-5 text-5xl leading-[0.92] text-white drop-shadow-[0_10px_35px_rgba(0,0,0,0.8)] sm:text-7xl md:text-8xl lg:text-9xl">
+            Legends of<br /><span className="text-gradient-gold">Eternity</span>
+          </motion.h1>
+          <motion.p variants={reveal} className="mt-7 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl">
+            Battle gigantic bosses, master forbidden magic, and explore a handcrafted dark fantasy kingdom.
+          </motion.p>
+          <motion.div variants={reveal} className="mt-10 flex flex-col gap-4 sm:flex-row">
+            <DownloadButton onDownload={onDownload} />
+            <a href="#trailer" className="inline-flex min-h-14 items-center justify-center gap-3 rounded-full border border-white/25 bg-black/25 px-7 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-md transition hover:border-[#e8c86a]/70 hover:bg-white/10">
+              <Play className="h-4 w-4 fill-current" /> Watch trailer
+            </a>
+          </motion.div>
+          <motion.div variants={reveal} className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm text-white/60">
+            <span>Free to download</span><span>Windows PC</span><span>No account required</span>
+          </motion.div>
+        </motion.div>
+      </div>
     </section>
   );
 }
 
-const stack = [
-  "Unity", "Unreal Engine", "Photon", "Mirror",
-  "Docker", "Kubernetes", "PostgreSQL", "MongoDB",
-  "Redis", "AWS", "Azure", "Google Cloud",
+export function GameplayFeatures() {
+  return <section id="features" className="overflow-hidden">
+    <motion.article initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-10%" }} className="relative isolate flex min-h-[620px] items-end overflow-hidden py-20 sm:min-h-[760px] sm:py-28"><div className="absolute inset-0 -z-20"><LazyVideo src="/play4.mp4" className="h-full w-full" /></div><div className="absolute inset-0 -z-10 bg-[linear-gradient(0deg,rgba(4,4,6,0.94),rgba(4,4,6,0.18)_72%),linear-gradient(90deg,rgba(4,4,6,0.7),transparent_65%)]" /><motion.div variants={reveal} className="mx-auto w-full max-w-7xl px-6 sm:px-8"><p className="text-xs font-bold uppercase tracking-[0.4em] text-[#e8c86a]">I. Discover the world</p><h2 className="display mt-5 max-w-2xl text-4xl leading-tight text-white sm:text-6xl">A kingdom that hides more than it reveals.</h2></motion.div></motion.article>
+    <motion.article initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-10%" }} variants={{ visible: { transition: { staggerChildren: 0.14 } } }} className="mx-auto grid max-w-7xl items-center gap-9 px-6 py-24 sm:px-8 sm:py-32 md:grid-cols-[1.1fr_.9fr] md:gap-16"><motion.div variants={reveal} className="group relative aspect-[16/10] overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl shadow-black/40 transition duration-500 hover:border-[#e8c86a]/55 hover:shadow-[0_18px_60px_rgba(208,160,54,0.18)]"><LazyVideo src="/play1.mp4" className="h-full w-full transition duration-700 group-hover:scale-105" /><div className="pointer-events-none absolute inset-0 bg-[linear-gradient(125deg,transparent_42%,rgba(255,228,144,0.16)_50%,transparent_58%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" /></motion.div><motion.div variants={reveal}><p className="text-xs font-bold uppercase tracking-[0.4em] text-[#e8c86a]">II. Experience combat</p><h2 className="display mt-5 text-4xl leading-tight text-white sm:text-5xl">Every strike is a decision.</h2><p className="mt-5 max-w-md text-lg leading-relaxed text-white/65">Dodge, commit, and make the opening count.</p></motion.div></motion.article>
+    <motion.article initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-10%" }} variants={{ visible: { transition: { staggerChildren: 0.14 } } }} className="relative overflow-hidden bg-[#09080a] py-24 sm:py-32"><div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_25%_50%,rgba(107,72,179,0.3),transparent_30%),radial-gradient(circle_at_75%_50%,rgba(218,174,62,0.13),transparent_28%)]" /><div className="mx-auto grid max-w-7xl items-center gap-10 px-6 sm:px-8 md:grid-cols-2 md:gap-16"><motion.div variants={reveal} className="md:pl-12"><p className="text-xs font-bold uppercase tracking-[0.4em] text-[#e8c86a]">III. Master the forbidden</p><h2 className="display mt-5 text-4xl leading-tight text-white sm:text-5xl">Power changes the shape of the fight.</h2><p className="mt-5 max-w-md text-lg leading-relaxed text-white/65">Call on magic that turns danger into opportunity.</p></motion.div><motion.div variants={reveal} className="group relative aspect-[4/5] max-h-[600px] overflow-hidden rounded-[2rem] border border-[#e8c86a]/20 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.45)]"><LazyVideo src="/play3.mp4" className="h-full w-full transition duration-700 group-hover:scale-105" /><div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" /></motion.div></div></motion.article>
+  </section>;
+}
+
+export function BossShowcase() {
+  return <section className="relative isolate min-h-[580px] overflow-hidden py-24 sm:min-h-[700px] sm:py-32"><div className="absolute inset-0 -z-20"><LazyVideo src="/play2.mp4" className="h-full w-full" /></div><div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(4,4,6,0.92),rgba(4,4,6,0.48),rgba(4,4,6,0.7)),linear-gradient(0deg,rgba(4,4,6,0.88),transparent_55%)]" /><Particles count={16} color="ember" className="-z-0" /><motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={{ visible: { transition: { staggerChildren: 0.12 } } }} className="mx-auto flex min-h-[390px] max-w-7xl flex-col justify-end px-6 sm:px-8"><motion.p variants={reveal} className="text-xs font-bold uppercase tracking-[0.4em] text-[#e9c96b]">The hunt begins</motion.p><motion.h2 variants={reveal} className="display mt-5 max-w-3xl text-4xl leading-tight text-white sm:text-6xl">Face Enemies That Demand Mastery</motion.h2><motion.p variants={reveal} className="mt-5 max-w-xl text-lg leading-relaxed text-white/70">Every boss tests your timing, resolve, and command of forbidden power.</motion.p></motion.div></section>;
+}
+
+const reasons = [
+  [Swords, "Dynamic Combat", "A fast, satisfying combat system with room for mastery."],
+  [TowerControl, "A Fantasy World Worth Exploring", "Lost cities, hidden paths, and grand landscapes around every turn."],
+  [Flame, "Bosses That Demand Courage", "Face unforgettable enemies that turn every victory into a legend."],
 ];
 
-export function Technology() {
+export function WhyPlay() {
   return (
-    <section className="relative py-32">
-      <div className="mx-auto max-w-7xl px-6 text-center">
-        <Reveal>
-          <span className="text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]">Under the hood</span>
-          <h2 className="display mt-4 text-5xl text-white md:text-6xl">A modern arcane stack.</h2>
-        </Reveal>
-        <div className="mt-16 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {stack.map((s, i) => (
-            <Reveal key={s} delay={(i % 6) * 0.05}>
-              <div className="rounded-xl glass px-4 py-6 text-sm text-white/80 transition hover:text-white hover:glow-blue">
-                {s}
-              </div>
-            </Reveal>
+    <section className="relative overflow-hidden border-y border-white/[0.08] bg-black/20 py-24 sm:py-28">
+      <motion.div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_30%,rgba(220,175,66,0.13),transparent_28%),radial-gradient(circle_at_80%_65%,rgba(89,126,210,0.12),transparent_32%)]" animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }} transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }} />
+      <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={{ visible: { transition: { staggerChildren: 0.13 } } }} className="mx-auto max-w-7xl px-6 sm:px-8">
+        <SectionIntro eyebrow="Your legend starts here" title="Why you’ll want to play" />
+        <div className="mt-14 grid gap-6 md:grid-cols-3">
+          {reasons.map(([Icon, title, description]) => {
+            const ReasonIcon = Icon as typeof Swords;
+            return <motion.div key={title as string} variants={reveal} whileHover={{ y: -5, rotateX: 2, rotateY: -2 }} className="group rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.07] to-transparent p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.22)] transition hover:border-[#e8c86a]/40">
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[#e8c86a]/45 bg-[#d8ae45]/10 text-[#ecd174] shadow-[0_0_30px_rgba(218,175,68,0.15)] transition duration-500 group-hover:shadow-[0_0_40px_rgba(218,175,68,0.4)]"><ReasonIcon className="h-6 w-6" /></div>
+              <h3 className="display mt-6 text-2xl text-white">{title as string}</h3><p className="mt-3 leading-relaxed text-white/60">{description as string}</p>
+            </motion.div>;
+          })}
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
+export function GameplayGallery() {
+  return (
+    <section id="gallery" className="py-24 sm:py-32">
+      <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={{ visible: { transition: { staggerChildren: 0.08 } } }} className="mx-auto max-w-7xl px-6 sm:px-8">
+        <SectionIntro eyebrow="See the world in motion" title="A kingdom on the brink" />
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[5, 6, 7, 8, 9, 10].map((number) => (
+            <motion.div variants={reveal} key={number} className="group relative aspect-video overflow-hidden rounded-xl border border-white/10 bg-black transition duration-500 hover:border-[#e8c86a]/60 hover:shadow-[0_0_35px_rgba(218,175,68,0.24)]">
+              <LazyVideo src={`/play${number}.mp4`} className="h-full w-full transition duration-700 group-hover:scale-110" />
+              <div className="pointer-events-none absolute inset-0 grid place-items-center bg-black/0 transition duration-500 group-hover:bg-black/25"><span className="grid h-12 w-12 scale-75 place-items-center rounded-full border border-white/50 bg-black/45 text-white opacity-0 transition duration-500 group-hover:scale-100 group-hover:opacity-100"><Play className="ml-0.5 h-5 w-5 fill-current" /></span></div>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
 
-const gameplayVideos = Array.from({ length: 10 }, (_, index) => `/play${index + 1}.mp4`);
+export function CinematicSeparator({ src }: { src: "/background1.mp4" | "/background2.mp4" }) {
+  return <section aria-hidden className="relative h-40 overflow-hidden border-y border-white/[0.06] sm:h-56"><LazyVideo src={src} className="h-full w-full" /><div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,4,6,0.78),rgba(4,4,6,0.35),rgba(4,4,6,0.78)]" /><div className="absolute inset-0 bg-gradient-to-b from-[#050506] via-transparent to-[#050506]" /></section>;
+}
 
-function GameplayVideoCarousel() {
-  const [active, setActive] = useState(0);
-  const [direction, setDirection] = useState(1);
-
-  const goTo = (nextIndex: number, nextDirection: number) => {
-    setDirection(nextDirection);
-    setActive((nextIndex + gameplayVideos.length) % gameplayVideos.length);
-  };
-
-  const previous = () => goTo(active - 1, -1);
-  const next = () => goTo(active + 1, 1);
-
+export function Trailer({ onDownload }: { onDownload: DownloadHandler }) {
+  const { ref, near } = useNearViewport();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [finished, setFinished] = useState(false);
   return (
-    <div className="mx-auto mt-12 w-full max-w-6xl text-left sm:mt-16">
-      <div className="mb-5 flex flex-col gap-3 text-center sm:mb-6 sm:flex-row sm:items-end sm:justify-between sm:text-left">
-        <div>
-          <div className="text-[10px] uppercase tracking-[0.38em] text-[color:var(--gold)]">Gameplay preview</div>
-          <h3 className="display mt-2 text-3xl leading-tight text-white sm:text-4xl">Watch the battlefield</h3>
-        </div>
-        <div className="text-xs uppercase tracking-[0.26em] text-white/45">
-          {String(active + 1).padStart(2, "0")} / {String(gameplayVideos.length).padStart(2, "0")}
-        </div>
-      </div>
-
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-[0_0_70px_rgba(90,145,255,0.18)]">
-        <div className="relative aspect-video max-h-[72svh] min-h-[210px] w-full sm:min-h-[360px]">
-          <AnimatePresence initial={false} custom={direction} mode="wait">
-            <motion.video
-              key={gameplayVideos[active]}
-              custom={direction}
-              initial={{ x: direction > 0 ? "100%" : "-100%", opacity: 0.35 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: direction > 0 ? "-100%" : "100%", opacity: 0.35 }}
-              transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute inset-0 h-full w-full bg-black object-contain"
-              src={gameplayVideos[active]}
-              muted
-              defaultMuted
-              loop
-              playsInline
-              autoPlay
-              controls
-              preload="metadata"
-            />
-          </AnimatePresence>
-        </div>
-
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/45 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/55 to-transparent" />
-      </div>
-
-      <div className="mt-4 grid grid-cols-2 items-center gap-3 sm:mt-5 sm:grid-cols-[1fr_auto_1fr]">
-        <button
-          type="button"
-          onClick={previous}
-          className="order-1 inline-flex h-12 min-w-0 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-xs uppercase tracking-[0.18em] text-white/80 transition hover:border-white/30 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[color:var(--gold)] sm:order-none sm:h-11 sm:justify-self-start"
-          aria-label="Previous gameplay video"
-        >
-          <ChevronLeft className="h-4 w-4 shrink-0" />
-          <span className="hidden sm:inline">Previous</span>
-        </button>
-
-        <div className="order-3 col-span-2 flex flex-wrap items-center justify-center gap-1.5 sm:order-none sm:col-span-1">
-          {gameplayVideos.map((src, index) => (
-            <button
-              key={src}
-              type="button"
-              onClick={() => goTo(index, index >= active ? 1 : -1)}
-              className={`h-2.5 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-[color:var(--gold)] ${
-                index === active ? "w-7 bg-[color:var(--gold)]" : "w-2.5 bg-white/25 hover:bg-white/45"
-              }`}
-              aria-label={`Show gameplay video ${index + 1}`}
-            />
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={next}
-          className="order-2 inline-flex h-12 min-w-0 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-xs uppercase tracking-[0.18em] text-white/80 transition hover:border-white/30 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[color:var(--gold)] sm:order-none sm:h-11 sm:justify-self-end"
-          aria-label="Next gameplay video"
-        >
-          <span className="hidden sm:inline">Next</span>
-          <ChevronRight className="h-4 w-4 shrink-0" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-export type DownloadProgressState =
-  | { phase: "idle" }
-  | { phase: "loading"; loadedBytes: number; totalBytes: number; percent: number; elapsedSeconds: number }
-  | { phase: "complete"; loadedBytes: number; totalBytes: number; percent: 100; elapsedSeconds: number }
-  | { phase: "error" };
-
-function formatDownloadBytes(bytes: number) {
-  if (!Number.isFinite(bytes) || bytes <= 0) return "0 MB";
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-}
-
-function formatDownloadTime(seconds: number) {
-  if (!Number.isFinite(seconds) || seconds <= 0) return "0s";
-  const whole = Math.round(seconds);
-  const minutes = Math.floor(whole / 60);
-  const rest = whole % 60;
-  return minutes > 0 ? `${minutes}m ${String(rest).padStart(2, "0")}s` : `${rest}s`;
-}
-
-export function Download({ onDownload, status }: { onDownload: () => void; status: DownloadProgressState }) {
-  const started = status.phase === "complete";
-  const loading = status.phase === "loading";
-  const progressPercent = status.phase === "loading" || status.phase === "complete" ? status.percent : 0;
-
-  return (
-    <section id="download" className="relative isolate overflow-hidden py-24 sm:py-32">
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(circle at 50% 42%, rgba(255, 220, 140, 0.16), transparent 22%), radial-gradient(circle at 50% 58%, rgba(76, 142, 255, 0.16), transparent 34%)",
-        }}
-      />
-      <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6">
-        <Reveal>
-          <span className="text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]">Get the build</span>
-          <h2 className="display mt-4 text-4xl leading-tight text-white sm:text-5xl md:text-6xl">Download the game</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-white/60 sm:text-base">
-            Click the sword to begin your Legends of Eternity download.
-          </p>
-        </Reveal>
-
-        <Reveal delay={0.08}>
-          <GameplayVideoCarousel />
-        </Reveal>
-
-        <Reveal delay={0.1}>
-          <div className="mt-14 sm:mt-16">
-            <div className="grid gap-6 sm:grid-cols-4">
-              {[
-                ["Version", "v0.1.0-alpha"],
-                ["Size", "~128 MB"],
-                ["Released", "Jul 10, 2026"],
-                ["Downloads", "Live counter"],
-              ].map(([k, v]) => (
-                <div key={k}>
-                  <div className="text-[10px] uppercase tracking-[0.3em] text-white/40">{k}</div>
-                  <div className="mt-1 text-white">{v}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="relative mx-auto mt-12 grid h-64 w-64 place-items-center sm:h-80 sm:w-80">
-              {[0, 1, 2].map((ring) => (
-                <motion.div
-                  key={ring}
-                  aria-hidden
-                  className="absolute inset-0 rounded-full border border-[color:var(--gold)]/30"
-                  animate={
-                    started
-                      ? { scale: [0.72, 1.28], opacity: [0.75, 0] }
-                      : { scale: [0.88, 1], opacity: [0.25, 0.5, 0.25] }
-                  }
-                  transition={{
-                    duration: started ? 1.1 : 3.2,
-                    repeat: Infinity,
-                    delay: ring * 0.22,
-                    ease: "easeOut",
-                  }}
-                />
-              ))}
-              <motion.button
-                onClick={onDownload}
-                disabled={loading}
-                aria-label="Download Legends of Eternity"
-                className="group relative grid h-40 w-40 place-items-center rounded-full border border-[#f5d88a]/50 bg-black/45 shadow-[0_0_70px_rgba(255,214,120,0.22)] backdrop-blur-xl transition disabled:opacity-70 sm:h-52 sm:w-52"
-                whileHover={{ scale: 1.06, rotate: -2 }}
-                whileTap={{ scale: 0.94, rotate: 6 }}
-                animate={
-                  started
-                    ? {
-                        scale: [1, 1.18, 1],
-                        boxShadow: [
-                          "0 0 50px rgba(255,214,120,0.28)",
-                          "0 0 120px rgba(255,214,120,0.72)",
-                          "0 0 60px rgba(120,170,255,0.44)",
-                        ],
-                      }
-                    : { y: [0, -8, 0] }
-                }
-                transition={{ duration: started ? 0.9 : 3, repeat: started ? 0 : Infinity, ease: "easeInOut" }}
-              >
-                <span className="absolute inset-3 rounded-full bg-gradient-to-b from-white/10 to-transparent" />
-                <motion.img
-                  src="/favicon.ico"
-                  alt=""
-                  className="relative h-24 w-24 object-contain drop-shadow-[0_0_28px_rgba(255,226,150,0.75)] sm:h-32 sm:w-32"
-                  draggable={false}
-                  animate={started ? { rotate: [0, -12, 12, 0], scale: [1, 1.18, 1] } : { rotate: [0, -4, 0, 4, 0] }}
-                  transition={{ duration: started ? 0.85 : 4, repeat: started ? 0 : Infinity, ease: "easeInOut" }}
-                />
-              </motion.button>
-            </div>
-
-            <div className="mx-auto mt-8 max-w-xl">
-              <div className="text-xs uppercase tracking-[0.32em] text-white/50">
-                {loading ? "Downloading..." : started ? "Complete" : status.phase === "error" ? "Download failed" : "Legends of Eternity"}
-              </div>
-              {(loading || started) && (
-                <div className="mt-5 rounded-2xl border border-white/10 bg-black/35 p-4 text-left shadow-[0_0_40px_rgba(120,170,255,0.12)]">
-                  <div className="mb-3 flex items-center justify-between gap-4 text-xs uppercase tracking-[0.18em] text-white/55">
-                    <span>{progressPercent}%</span>
-                    <span>{formatDownloadTime(status.elapsedSeconds)}</span>
-                  </div>
-                  <div className="h-3 overflow-hidden rounded-full bg-white/10">
-                    <motion.div
-                      className="h-full rounded-full bg-gradient-to-r from-[#75d6ff] via-[#ffe08a] to-[#ff8f70] shadow-[0_0_24px_rgba(255,224,138,0.55)]"
-                      initial={false}
-                      animate={{ width: `${progressPercent}%` }}
-                      transition={{ duration: 0.28, ease: "easeOut" }}
-                    />
-                  </div>
-                  <div className="mt-3 flex items-center justify-between gap-4 text-xs text-white/50">
-                    <span>{formatDownloadBytes(status.loadedBytes)}</span>
-                    <span>{status.totalBytes > 0 ? formatDownloadBytes(status.totalBytes) : "Calculating size"}</span>
-                  </div>
-                </div>
-              )}
-              {status.phase === "error" && (
-                <p className="mx-auto mt-4 max-w-md rounded-full border border-[color:var(--ember)]/30 bg-[color:var(--ember)]/10 px-5 py-3 text-sm text-[#ffb39d]">
-                  Please try again.
-                </p>
-              )}
-            </div>
-            {started && (
-              <motion.p
-                initial={{ opacity: 0, y: 12, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                className="mx-auto mt-4 max-w-md rounded-full border border-[color:var(--gold)]/30 bg-[color:var(--gold)]/10 px-5 py-3 text-sm text-[#ffe7a3] shadow-[0_0_40px_rgba(255,214,120,0.16)]"
-              >
-                Complete
-              </motion.p>
-            )}
-          </div>
-        </Reveal>
-      </div>
+    <section id="trailer" className="relative overflow-hidden bg-black py-24 sm:py-32">
+      <Particles count={12} color="gold" className="opacity-50" />
+      <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={{ visible: { transition: { staggerChildren: 0.12 } } }} className="relative mx-auto max-w-6xl px-6 sm:px-8">
+        <SectionIntro eyebrow="The story awaits" title="Watch the cinematic trailer" />
+        <motion.div variants={reveal} ref={ref} className="group relative mt-14 aspect-video overflow-hidden rounded-2xl border border-white/15 bg-[#080808] shadow-[0_30px_90px_rgba(0,0,0,0.6)]">
+          {near && <video ref={videoRef} src="/Final.mp4" className="h-full w-full object-cover" controls={playing} playsInline preload="metadata" onEnded={() => { setPlaying(false); setFinished(true); }} />}
+          {!playing && <button type="button" onClick={() => { setFinished(false); setPlaying(true); requestAnimationFrame(() => videoRef.current?.play().catch(() => setPlaying(false))); }} className="absolute inset-0 grid place-items-center bg-black/20 transition hover:bg-black/5" aria-label="Play cinematic trailer"><motion.span animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 2.8, repeat: Infinity }} className="grid h-20 w-20 place-items-center rounded-full border border-[#f1d981]/80 bg-black/45 pl-1 text-[#f3da7f] shadow-[0_0_45px_rgba(234,194,88,0.4)]"><Play className="h-8 w-8 fill-current" /></motion.span></button>}
+        </motion.div>
+        <AnimatePresence>{finished && <motion.div initial={{ opacity: 0, y: 18, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }} className="mt-12 text-center"><DownloadButton onDownload={onDownload} /></motion.div>}</AnimatePresence>
+      </motion.div>
     </section>
   );
 }
 
-export function FinalVideo() {
-  return (
-    <section id="final-video" className="relative overflow-hidden py-24">
-      <div className="mx-auto max-w-6xl px-6">
-        <Reveal>
-          <div className="relative aspect-video overflow-hidden rounded-2xl border border-white/10 bg-black shadow-[0_0_60px_rgba(120,160,255,0.18)]">
-            <FullBleedVideo src="/Final.mp4" controls />
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-export function Contact({ onSubmit }: { onSubmit: (d: { name: string; email: string; message: string }) => Promise<void> }) {
-  const [state, setState] = useState({ name: "", email: "", message: "" });
-  const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  return (
-    <section id="contact" className="relative py-32">
-      <div className="mx-auto max-w-3xl px-6">
-        <Reveal>
-          <div className="text-center">
-            <span className="text-xs uppercase tracking-[0.5em] text-[color:var(--gold)]">Send a raven</span>
-            <h2 className="display mt-4 text-5xl text-white md:text-6xl">Speak with the studio.</h2>
-          </div>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              setBusy(true);
-              setErr(null);
-              try {
-                await onSubmit(state);
-                setDone(true);
-                setState({ name: "", email: "", message: "" });
-              } catch (e: unknown) {
-                setErr(e instanceof Error ? e.message : "Something went wrong.");
-              } finally {
-                setBusy(false);
-              }
-            }}
-            className="mt-10 space-y-4 rounded-2xl glass p-8"
-          >
-            <div className="grid gap-4 sm:grid-cols-2">
-              <input
-                required maxLength={120}
-                value={state.name}
-                onChange={(e) => setState((s) => ({ ...s, name: e.target.value }))}
-                placeholder="Your name"
-                className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none ring-1 ring-white/10 focus:ring-[color:var(--arcane)]"
-              />
-              <input
-                required type="email" maxLength={200}
-                value={state.email}
-                onChange={(e) => setState((s) => ({ ...s, email: e.target.value }))}
-                placeholder="Your email"
-                className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none ring-1 ring-white/10 focus:ring-[color:var(--arcane)]"
-              />
-            </div>
-            <textarea
-              required rows={5} maxLength={5000}
-              value={state.message}
-              onChange={(e) => setState((s) => ({ ...s, message: e.target.value }))}
-              placeholder="Your message"
-              className="w-full resize-none rounded-xl bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none ring-1 ring-white/10 focus:ring-[color:var(--arcane)]"
-            />
-            <div className="flex items-center justify-between gap-4">
-              <div className="text-sm">
-                {done && <span className="text-[color:var(--gold)]">✓ Message sent to the studio.</span>}
-                {err && <span className="text-[color:var(--ember)]">{err}</span>}
-              </div>
-              <button
-                disabled={busy}
-                className="rounded-full bg-white px-6 py-3 text-xs uppercase tracking-[0.3em] text-black transition hover:scale-[1.02] disabled:opacity-60"
-              >
-                {busy ? "Sending…" : "Send"}
-              </button>
-            </div>
-          </form>
-        </Reveal>
-      </div>
-    </section>
-  );
+export function DownloadSection({ onDownload, status }: { onDownload: DownloadHandler; status: "idle" | "loading" | "complete" | "error" }) {
+  const benefits = ["Free Download", "Windows", "Offline Play", "No Account Required", "Controller Support", "Frequent Updates"];
+  return <section id="download" className="relative isolate overflow-hidden py-24 sm:py-32"><div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_45%,rgba(221,176,66,0.24),transparent_25%),linear-gradient(135deg,#15100a,#050506_55%,#10101a)]" /><Particles count={26} color="gold" className="-z-0" /><motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={{ visible: { transition: { staggerChildren: 0.1 } } }} className="mx-auto max-w-4xl px-6 text-center sm:px-8"><motion.p variants={reveal} className="text-xs font-bold uppercase tracking-[0.4em] text-[#edd47d]">Your journey begins now</motion.p><motion.h2 variants={reveal} className="display mt-5 text-4xl text-white sm:text-6xl">Ready to Begin Your Adventure?</motion.h2><motion.div variants={reveal} className="mx-auto mt-8 grid max-w-2xl gap-3 text-left sm:grid-cols-2">{benefits.map((benefit) => <div key={benefit} className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/20 px-5 py-4 text-white/85"><Check className="h-5 w-5 text-[#ecd174]" />{benefit}</div>)}</motion.div><motion.p variants={reveal} className="mt-7 text-sm text-white/55">Estimated download: 134 MB</motion.p><motion.div variants={reveal} className="mt-5"><DownloadButton onDownload={onDownload} label={status === "loading" ? "Preparing Download" : status === "complete" ? "Download Started" : "Download Free (Windows · 134 MB)"} /></motion.div>{status === "error" && <p className="mt-4 text-sm text-red-300">The download could not be started. Please try again.</p>}</motion.div></section>;
 }
 
 export function Footer() {
-  return (
-    <footer className="relative border-t border-white/5 py-14">
-      <div className="mx-auto flex max-w-7xl flex-col items-center gap-6 px-6 md:flex-row md:justify-between">
-        <div className="flex items-center gap-3">
-          <span
-            className="grid h-9 w-9 place-items-center rounded-md glass glow-blue"
-            style={{ animation: "shimmer 3s ease-in-out infinite" }}
-          >
-            <span className="display text-gradient-gold text-lg">L</span>
-          </span>
-          <div className="display text-sm tracking-[0.35em] text-white/80">LEGENDS OF ETERNITY</div>
-        </div>
-        <div className="flex flex-wrap items-center gap-6 text-xs uppercase tracking-[0.3em] text-white/50">
-          <a href="#" className="hover:text-white">Discord</a>
-          <a href="#" className="hover:text-white">Twitter</a>
-          <a href="#" className="hover:text-white">YouTube</a>
-          <a href="#" className="hover:text-white">Privacy</a>
-          <a href="#" className="hover:text-white">Terms</a>
-        </div>
-        <div className="text-xs text-white/40">© 2026 Legends of Eternity</div>
-      </div>
-    </footer>
-  );
+  return <footer className="border-t border-white/10 bg-black px-6 py-10"><div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 sm:flex-row"><div><p className="display text-lg text-white">LEGENDS OF ETERNITY</p><p className="mt-1 text-sm text-white/45">Your legend begins with a single choice.</p></div><p className="text-xs uppercase tracking-[0.22em] text-white/35">© 2026 Legends of Eternity</p></div></footer>;
 }
