@@ -17,6 +17,7 @@ async function updateDownload(downloadId: string | null, sessionId: string | nul
   if (downloadId) {
     const byId = await supabaseAdmin.from("downloads").update(data).eq("id", downloadId).select("id").maybeSingle();
     if (!byId.error && byId.data?.id) return byId.data.id as string;
+    if (byId.error) console.error("[Download progress] update by id failed", byId.error.message);
   }
 
   if (sessionId) {
@@ -30,9 +31,11 @@ async function updateDownload(downloadId: string | null, sessionId: string | nul
       .maybeSingle();
 
     if (!latest.error && latest.data?.id) {
-      await supabaseAdmin.from("downloads").update(data).eq("id", latest.data.id);
-      return latest.data.id as string;
+      const bySession = await supabaseAdmin.from("downloads").update(data).eq("id", latest.data.id).select("id").maybeSingle();
+      if (!bySession.error && bySession.data?.id) return bySession.data.id as string;
+      if (bySession.error) console.error("[Download progress] update by session failed", bySession.error.message);
     }
+    if (latest.error) console.error("[Download progress] lookup by session failed", latest.error.message);
   }
 
   return null;

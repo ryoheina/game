@@ -4,15 +4,15 @@ import { c as HeadContent, d as createRouter, f as Outlet, g as Link, h as creat
 import { i as resolveCountry, n as insertAdminNotification, t as getClientMeta } from "./notifications-DBPsE-pR.mjs";
 import { n as supabaseAdmin } from "./client.server-CPH4V7T6.mjs";
 import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
-import { t as recordVisit } from "./analytics.functions-DquHcGug.mjs";
+import { t as recordVisit } from "./analytics.functions-DtJsHYe4.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-C4mto8Lq.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-BsRG4oRZ.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-C98Fmh04.css";
+var styles_default = "/assets/styles-BtC-ExSM.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -25,7 +25,7 @@ function reportLovableError(error, context = {}) {
 		severity: "error"
 	});
 }
-function sendVisit(sessionId, path, heartbeat = false) {
+function sendVisit(sessionId, path, heartbeat = false, leaving = false) {
 	return fetch("/api/public/visit", {
 		method: "POST",
 		credentials: "same-origin",
@@ -34,9 +34,23 @@ function sendVisit(sessionId, path, heartbeat = false) {
 		body: JSON.stringify({
 			sessionId,
 			path,
-			heartbeat
+			heartbeat,
+			leaving
 		})
 	});
+}
+function sendLeave(sessionId, path) {
+	const payload = JSON.stringify({
+		sessionId,
+		path,
+		leaving: true
+	});
+	if (navigator.sendBeacon) {
+		const blob = new Blob([payload], { type: "application/json" });
+		return navigator.sendBeacon("/api/public/visit", blob);
+	}
+	sendVisit(sessionId, path, false, true).catch(() => {});
+	return false;
 }
 var HEARTBEAT_INTERVAL_MS = 2e4;
 function shouldTrackVisitorPath(pathname) {
@@ -71,12 +85,21 @@ function useVisitorTracking(pathname) {
 		const onVisible = () => {
 			if (document.visibilityState === "visible") sendHeartbeat();
 		};
+		const onPageHide = () => {
+			const path = heartbeatPathRef.current;
+			if (!shouldTrackVisitorPath(path)) return;
+			const sid = ensureVisitorSession();
+			if (!sid) return;
+			sendLeave(sid, path);
+		};
 		window.addEventListener("focus", sendHeartbeat);
 		document.addEventListener("visibilitychange", onVisible);
+		window.addEventListener("pagehide", onPageHide);
 		return () => {
 			window.clearInterval(heartbeat);
 			window.removeEventListener("focus", sendHeartbeat);
 			document.removeEventListener("visibilitychange", onVisible);
+			window.removeEventListener("pagehide", onPageHide);
 		};
 	}, []);
 }
@@ -244,7 +267,7 @@ function RootComponent() {
 }
 var $$splitComponentImporter$5 = () => import("./me-fuu5GXiX.mjs");
 var Route$25 = createFileRoute("/me")({ component: lazyRouteComponent($$splitComponentImporter$5, "component") });
-var $$splitComponentImporter$4 = () => import("./installed-EYv55OzD.mjs");
+var $$splitComponentImporter$4 = () => import("./installed-4i2_4MDo.mjs");
 var Route$24 = createFileRoute("/installed")({
 	head: () => ({ meta: [{ title: "Legends of Eternity" }, {
 		name: "robots",
@@ -271,7 +294,7 @@ var Route$22 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-CrGDvm4A.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-jDOEfHZx.mjs");
 var Route$21 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -294,7 +317,7 @@ var Route$21 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-DTJfMjJl.mjs");
+var $$splitComponentImporter = () => import("./admin-CJYopLQe.mjs");
 var Route$20 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
@@ -316,6 +339,7 @@ var Route$19 = createFileRoute("/api/public/visit")({ server: { handlers: { POST
 		const sessionId = typeof body?.sessionId === "string" ? body.sessionId : "";
 		const path = typeof body?.path === "string" ? body.path.slice(0, 500) : "/";
 		const heartbeat = body?.heartbeat === true;
+		const leaving = body?.leaving === true;
 		if (sessionId.length < 8 || sessionId.length > 64) return new Response(JSON.stringify({
 			success: false,
 			error: "Invalid session"
@@ -339,7 +363,8 @@ var Route$19 = createFileRoute("/api/public/visit")({ server: { handlers: { POST
 		await recordVisit(request, {
 			sessionId,
 			path,
-			heartbeat
+			heartbeat,
+			leaving
 		});
 		return new Response(JSON.stringify({ success: true }), {
 			status: 200,
@@ -496,56 +521,56 @@ async function findDownloadByInstallToken(supabaseAdmin, token) {
 	};
 	return supabaseAdmin.from("downloads").select("id,session_id,ip,file_name").eq("id", token).maybeSingle();
 }
+async function findLatestDownloadBySession(supabaseAdmin, sessionId, fileName) {
+	if (!sessionId) return {
+		data: null,
+		error: null
+	};
+	let byStartedAt = await supabaseAdmin.from("downloads").select("id,session_id,ip,file_name").eq("session_id", sessionId).eq("file_name", fileName).order("started_at", { ascending: false }).limit(1).maybeSingle();
+	if (!byStartedAt.error) return {
+		data: byStartedAt.data,
+		error: null
+	};
+	if (!/started_at|schema cache|column .* does not exist|Could not find .* column/i.test(byStartedAt.error.message)) return byStartedAt;
+	return supabaseAdmin.from("downloads").select("id,session_id,ip,file_name").eq("session_id", sessionId).eq("file_name", fileName).order("created_at", { ascending: false }).limit(1).maybeSingle();
+}
 var Route$17 = createFileRoute("/api/public/installed")({ server: { handlers: { POST: async ({ request }) => {
 	try {
 		const body = await request.json().catch(() => null);
 		const fileName = typeof body?.file === "string" ? body.file.slice(0, 200) : "LegendsofEternity.exe";
+		const bodySessionId = typeof body?.sessionId === "string" && body.sessionId.length >= 8 && body.sessionId.length <= 64 ? body.sessionId : null;
 		const meta = getClientMeta(request);
 		const installToken = getInstallTokenFromRequest(request, body?.token);
-		if (!installToken) return new Response(JSON.stringify({
-			success: false,
-			error: "Install token required"
-		}), {
-			status: 403,
-			headers: {
-				"content-type": "application/json",
-				"Cache-Control": "no-store"
-			}
-		});
 		const { supabaseAdmin } = await import("./client.server-CPH4V7T6.mjs").then((n) => n.t);
-		const { data: download, error: downloadError } = await findDownloadByInstallToken(supabaseAdmin, installToken);
+		const { data: download, error: downloadError } = installToken ? await findDownloadByInstallToken(supabaseAdmin, installToken) : await findLatestDownloadBySession(supabaseAdmin, bodySessionId, fileName);
 		if (downloadError) throw downloadError;
-		if (!download) return new Response(JSON.stringify({
-			success: false,
-			error: "Invalid install token"
-		}), {
-			status: 403,
-			headers: {
-				"content-type": "application/json",
-				"Cache-Control": "no-store"
-			}
-		});
-		const sessionId = download.session_id;
-		const installedFileName = download.file_name || fileName;
+		const sessionId = download?.session_id || bodySessionId;
+		const installedFileName = download?.file_name || fileName;
 		if (sessionId) await recordVisit(request, {
 			sessionId,
 			path: "/installed"
 		});
 		const installedAt = (/* @__PURE__ */ new Date()).toISOString();
-		let updateByToken = await supabaseAdmin.from("downloads").update({
-			extracted: true,
-			completed: true,
-			completed_at: installedAt,
-			installed_at: installedAt
-		}).eq("id", download.id);
-		if (updateByToken.error && isSchemaMismatch(updateByToken.error)) updateByToken = await supabaseAdmin.from("downloads").update({
+		if (download?.id) {
+			let updateByToken = await supabaseAdmin.from("downloads").update({
+				extracted: true,
+				completed: true,
+				completed_at: installedAt,
+				installed_at: installedAt
+			}).eq("id", download.id);
+			if (updateByToken.error && isSchemaMismatch(updateByToken.error)) updateByToken = await supabaseAdmin.from("downloads").update({
+				extracted: true,
+				completed: true,
+				completed_at: installedAt
+			}).eq("id", download.id);
+			if (updateByToken.error) throw updateByToken.error;
+		} else if (sessionId) await supabaseAdmin.from("downloads").update({
 			extracted: true,
 			completed: true,
 			completed_at: installedAt
-		}).eq("id", download.id);
-		if (updateByToken.error) throw updateByToken.error;
+		}).eq("session_id", sessionId).eq("file_name", installedFileName);
 		await supabaseAdmin.from("extractions").insert({
-			download_id: download.id,
+			download_id: download?.id ?? null,
 			session_id: sessionId,
 			ip: meta.ip,
 			device: meta.device,
@@ -563,7 +588,7 @@ var Route$17 = createFileRoute("/api/public/installed")({ server: { handlers: { 
 			device: meta.device,
 			filename: installedFileName,
 			payload: {
-				download_id: download.id,
+				download_id: download?.id ?? null,
 				session_id: sessionId,
 				ip_address: meta.ip,
 				file_name: installedFileName,
@@ -601,13 +626,16 @@ async function updateDownload(downloadId, sessionId, data) {
 	if (downloadId) {
 		const byId = await supabaseAdmin.from("downloads").update(data).eq("id", downloadId).select("id").maybeSingle();
 		if (!byId.error && byId.data?.id) return byId.data.id;
+		if (byId.error) console.error("[Download progress] update by id failed", byId.error.message);
 	}
 	if (sessionId) {
 		const latest = await supabaseAdmin.from("downloads").select("id").eq("session_id", sessionId).eq("file_name", PUBLIC_ARCHIVE_NAME$1).order("started_at", { ascending: false }).limit(1).maybeSingle();
 		if (!latest.error && latest.data?.id) {
-			await supabaseAdmin.from("downloads").update(data).eq("id", latest.data.id);
-			return latest.data.id;
+			const bySession = await supabaseAdmin.from("downloads").update(data).eq("id", latest.data.id).select("id").maybeSingle();
+			if (!bySession.error && bySession.data?.id) return bySession.data.id;
+			if (bySession.error) console.error("[Download progress] update by session failed", bySession.error.message);
 		}
+		if (latest.error) console.error("[Download progress] lookup by session failed", latest.error.message);
 	}
 	return null;
 }
@@ -1655,10 +1683,22 @@ function logAdminRouteFailure(error, context = {}) {
 		error
 	});
 }
-function computeStatus(lastActive) {
+function getStatusInfo(session) {
+	if (session.notified_left === true) return {
+		status: "offline",
+		reason: "Explicit page leave signal received"
+	};
+	const lastActive = session.last_active;
 	const last = new Date(lastActive).getTime();
-	if (Number.isNaN(last)) return "offline";
-	return Date.now() - last <= ONLINE_WINDOW_MS ? "online" : "offline";
+	if (Number.isNaN(last)) return {
+		status: "offline",
+		reason: "Invalid last_active timestamp"
+	};
+	const ageMs = Date.now() - last;
+	return {
+		status: ageMs <= ONLINE_WINDOW_MS ? "online" : "offline",
+		reason: ageMs <= ONLINE_WINDOW_MS ? `Heartbeat seen within ${Math.round(ONLINE_WINDOW_MS / 6e4)} minutes` : `No heartbeat for ${Math.round(ageMs / 6e4)} minutes`
+	};
 }
 function notificationIsUnread(notification) {
 	return notification.read !== true;
@@ -1985,13 +2025,25 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 		}))]);
 		console.log(`[Dashboard] Network clusters built: ${networkClusters.length}`);
 		const installedSessionIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.session_id).filter(Boolean), ...extractions.map((extraction) => extraction.session_id).filter(Boolean)]);
-		const onlineSessions = sessions.map((session) => ({
-			...session,
-			installed: installedSessionIds.has(session.session_id),
-			status: computeStatus(session.last_active),
-			last_active_time: session.last_active,
-			first_visit_time: session.first_visit
-		}));
+		const installedDownloadIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.id).filter(Boolean), ...extractions.map((extraction) => extraction.download_id).filter(Boolean)]);
+		for (const extraction of extractions) {
+			if (extraction.session_id) installedSessionIds.add(extraction.session_id);
+			if (!extraction.session_id && extraction.download_id) {
+				const matchingDownload = downloads.find((download) => download.id === extraction.download_id);
+				if (matchingDownload?.session_id) installedSessionIds.add(matchingDownload.session_id);
+			}
+		}
+		const onlineSessions = sessions.map((session) => {
+			const statusInfo = getStatusInfo(session);
+			return {
+				...session,
+				installed: installedSessionIds.has(session.session_id),
+				status: statusInfo.status,
+				status_reason: statusInfo.reason,
+				last_active_time: session.last_active,
+				first_visit_time: session.first_visit
+			};
+		});
 		const enhancedDownloads = downloads.map((download) => {
 			const downloadedBytes = Number(download.downloaded_bytes || 0);
 			const totalBytes = Number(download.total_bytes || 0);
@@ -2001,7 +2053,7 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 				...download,
 				completed: inferredComplete,
 				progress_percent: inferredComplete ? 100 : progressPercent,
-				installed: download.extracted === true,
+				installed: download.extracted === true || installedDownloadIds.has(download.id) || installedSessionIds.has(download.session_id),
 				status: inferredComplete ? "completed" : "in_progress"
 			};
 		});

@@ -10,6 +10,7 @@ type VisitPayload = {
   sessionId: string;
   path: string;
   heartbeat?: boolean;
+  leaving?: boolean;
 };
 
 const VISITOR_RETURN_WINDOW_MS = 30 * 60 * 1000;
@@ -48,10 +49,58 @@ export async function recordVisit(request: Request | null, data: VisitPayload) {
 
   const { data: existing } = await supabaseAdmin
     .from("sessions")
-    .select("session_id,last_active")
+    .select("session_id,last_active,notified_left")
     .eq("session_id", data.sessionId)
     .maybeSingle();
   if (existing) {
+    if (data.leaving) {
+      const leaveUpdate = {
+        last_active: now,
+        ip: meta.ip,
+        country,
+        browser: meta.browser,
+        device: meta.device,
+        user_agent: meta.ua,
+        notified_left: true,
+        ...networkMeta,
+      };
+      let leaveUpdateRes = await supabaseAdmin
+        .from("sessions")
+        .update(leaveUpdate)
+        .eq("session_id", data.sessionId);
+      if (leaveUpdateRes.error && /ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(leaveUpdateRes.error.message)) {
+        const { ip_country: _ipCountry, ip_city: _ipCity, asn: _asn, isp: _isp, ...fallbackLeaveUpdate } = leaveUpdate;
+        leaveUpdateRes = await supabaseAdmin
+          .from("sessions")
+          .update(fallbackLeaveUpdate)
+          .eq("session_id", data.sessionId);
+      }
+      if (leaveUpdateRes.error) throw leaveUpdateRes.error;
+
+      if (existing.notified_left !== true) {
+        try {
+          await insertAdminNotification(supabaseAdmin, {
+            type: "visitor_left",
+            type_detail: "visitor",
+            title: "Visitor Left",
+            body: `${meta.ip ?? "unknown"} - ${country ?? "unknown"} - ${meta.device} - ${meta.browser}`,
+            session_id: data.sessionId,
+            ip_address: meta.ip,
+            country,
+            browser: meta.browser,
+            device: meta.device,
+            payload: { session_id: data.sessionId, ip_address: meta.ip, country, browser: meta.browser, device: meta.device },
+            read: false,
+            delivered: false,
+          });
+        } catch (e) {
+          console.error("notify failed", e);
+        }
+      }
+
+      return { ok: true };
+    }
+
     const wasOffline = Date.now() - new Date(existing.last_active as string).getTime() > VISITOR_RETURN_WINDOW_MS;
     const sessionUpdate = {
       last_active: now,
@@ -76,7 +125,7 @@ export async function recordVisit(request: Request | null, data: VisitPayload) {
     }
     if (sessionUpdateRes.error) throw sessionUpdateRes.error;
     if (data.heartbeat) return { ok: true };
-    if (wasOffline) {
+    if (wasOffline || existing.notified_left === true) {
       try {
         await insertAdminNotification(supabaseAdmin, {
           type: "visitor",

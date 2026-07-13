@@ -1,7 +1,7 @@
 import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/installed-EYv55OzD.js
+//#region node_modules/.nitro/vite/services/ssr/assets/installed-4i2_4MDo.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function Installed() {
@@ -15,17 +15,21 @@ function Installed() {
 		} catch {}
 		const sessionId = validIncomingSid || ensureVisitorSession();
 		const token = params.get("token");
-		fetch("/api/public/installed", {
+		const payload = JSON.stringify({
+			sessionId,
+			token,
+			file: params.get("file") || "LegendsofEternity.exe"
+		});
+		const reportInstalled = () => fetch("/api/public/installed", {
 			method: "POST",
 			credentials: "same-origin",
 			keepalive: true,
 			headers: { "content-type": "application/json" },
-			body: JSON.stringify({
-				sessionId,
-				token,
-				file: params.get("file") || "LegendsofEternity.exe"
-			})
-		}).catch(() => {});
+			body: payload
+		});
+		reportInstalled().catch(() => {
+			window.setTimeout(() => reportInstalled().catch(() => {}), 1200);
+		});
 	}, []);
 	(0, import_react.useEffect)(() => {
 		const video = videoRef.current;

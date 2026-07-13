@@ -25,6 +25,7 @@ export const Route = createFileRoute("/api/public/visit")({
           const sessionId = typeof body?.sessionId === "string" ? body.sessionId : "";
           const path = typeof body?.path === "string" ? body.path.slice(0, 500) : "/";
           const heartbeat = body?.heartbeat === true;
+          const leaving = body?.leaving === true;
 
           if (sessionId.length < 8 || sessionId.length > 64) {
             return new Response(JSON.stringify({ success: false, error: "Invalid session" }), {
@@ -40,7 +41,7 @@ export const Route = createFileRoute("/api/public/visit")({
             });
           }
 
-          await recordVisit(request, { sessionId, path, heartbeat });
+          await recordVisit(request, { sessionId, path, heartbeat, leaving });
           return new Response(JSON.stringify({ success: true }), {
             status: 200,
             headers: { "content-type": "application/json", "Cache-Control": "no-store" },

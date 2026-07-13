@@ -2,7 +2,7 @@ import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow } from "./fx-CW4x6DdP.mjs";
 import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-DTJfMjJl.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-CJYopLQe.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function useAdminNotifications(initial = []) {
@@ -609,6 +609,10 @@ function Admin() {
 												}),
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 													className: "px-2 py-2",
+													children: "Status reason"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+													className: "px-2 py-2",
 													children: "Last active"
 												}),
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
@@ -659,6 +663,10 @@ function Admin() {
 															className: `rounded-full px-2 py-1 text-xs ${d.status === "online" ? "bg-emerald-500/15 text-emerald-300" : "bg-white/5 text-white/50"}`,
 															children: d.status
 														})
+													}),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+														className: "max-w-[220px] px-2 py-2 text-xs text-white/50",
+														children: d.status_reason ?? "—"
 													}),
 													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 														className: "px-2 py-2",

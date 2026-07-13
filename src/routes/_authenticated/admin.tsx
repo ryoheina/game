@@ -337,6 +337,7 @@ function Admin() {
                     <th className="px-2 py-2">OS</th>
                     <th className="px-2 py-2">Install</th>
                     <th className="px-2 py-2">Status</th>
+                    <th className="px-2 py-2">Status reason</th>
                     <th className="px-2 py-2">Last active</th>
                     <th className="px-2 py-2">First visit</th>
                     <th className="px-2 py-2">Actions</th>
@@ -361,6 +362,7 @@ function Admin() {
                           {d.status}
                         </span>
                       </td>
+                      <td className="max-w-[220px] px-2 py-2 text-xs text-white/50">{d.status_reason ?? "—"}</td>
                       <td className="px-2 py-2">{new Date(d.last_active).toLocaleTimeString()}</td>
                       <td className="px-2 py-2">{new Date(d.first_visit).toLocaleTimeString()}</td>
                       <td className="px-2 py-2">

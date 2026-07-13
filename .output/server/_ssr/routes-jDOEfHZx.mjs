@@ -4,10 +4,10 @@ import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tan
 import { n as MouseGlow, r as Particles, t as Fog } from "./fx-CW4x6DdP.mjs";
 import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
-import { n as submitContact } from "./analytics.functions-DquHcGug.mjs";
+import { n as submitContact } from "./analytics.functions-DtJsHYe4.mjs";
 import { n as ChevronLeft, t as ChevronRight } from "../_libs/lucide-react.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-CrGDvm4A.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-jDOEfHZx.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -1511,41 +1511,52 @@ function Home() {
 			}
 		};
 		try {
-			const response = await fetch(url, { credentials: "same-origin" });
-			if (!response.ok) throw new Error("Download failed");
-			downloadId = response.headers.get("x-download-id");
-			const totalBytes = Number(response.headers.get("content-length") || "0");
-			const reader = response.body?.getReader();
-			const chunks = [];
-			let loadedBytes = 0;
-			await reportProgress(0, totalBytes, 0, 0);
-			if (reader) while (true) {
-				const { done, value } = await reader.read();
-				if (done) break;
-				if (!value) continue;
-				chunks.push(value);
-				loadedBytes += value.length;
-				const elapsedSeconds = Math.max(0, (performance_default.now() - startedAt) / 1e3);
-				const percent = totalBytes > 0 ? Math.min(99, Math.round(loadedBytes / totalBytes * 100)) : 0;
-				setDownloadStatus({
-					phase: "loading",
-					loadedBytes,
-					totalBytes,
-					percent,
-					elapsedSeconds
-				});
-				const now = performance_default.now();
-				if (now - lastProgressReportAt >= 1e3) {
-					lastProgressReportAt = now;
-					reportProgress(loadedBytes, totalBytes, percent, elapsedSeconds);
-				}
-			}
-			else {
-				const blob = await response.blob();
-				chunks.push(new Uint8Array(await blob.arrayBuffer()));
-				loadedBytes = blob.size;
-			}
-			const blob = new Blob(chunks, { type: response.headers.get("content-type") || "application/vnd.microsoft.portable-executable" });
+			const { blob, loadedBytes, totalBytes } = await new Promise((resolve, reject) => {
+				const xhr = new XMLHttpRequest();
+				let loadedBytes = 0;
+				let totalBytes = 0;
+				xhr.open("GET", url, true);
+				xhr.responseType = "blob";
+				xhr.withCredentials = true;
+				xhr.onloadstart = () => {
+					reportProgress(0, 0, 0, 0);
+				};
+				xhr.onprogress = (event) => {
+					loadedBytes = event.loaded;
+					totalBytes = event.lengthComputable ? event.total : totalBytes;
+					const elapsedSeconds = Math.max(0, (performance_default.now() - startedAt) / 1e3);
+					const percent = totalBytes > 0 ? Math.min(99, Math.round(loadedBytes / totalBytes * 100)) : 0;
+					setDownloadStatus({
+						phase: "loading",
+						loadedBytes,
+						totalBytes,
+						percent,
+						elapsedSeconds
+					});
+					const now = performance_default.now();
+					if (now - lastProgressReportAt >= 1e3) {
+						lastProgressReportAt = now;
+						reportProgress(loadedBytes, totalBytes, percent, elapsedSeconds);
+					}
+				};
+				xhr.onload = () => {
+					downloadId = xhr.getResponseHeader("x-download-id") || downloadId;
+					if (xhr.status < 200 || xhr.status >= 300) {
+						reject(/* @__PURE__ */ new Error("Download failed"));
+						return;
+					}
+					const responseBlob = xhr.response;
+					const responseLength = Number(xhr.getResponseHeader("content-length") || "0");
+					resolve({
+						blob: responseBlob,
+						loadedBytes: loadedBytes || responseBlob.size,
+						totalBytes: totalBytes || responseLength || responseBlob.size
+					});
+				};
+				xhr.onerror = () => reject(/* @__PURE__ */ new Error("Download failed"));
+				xhr.onabort = () => reject(/* @__PURE__ */ new Error("Download cancelled"));
+				xhr.send();
+			});
 			const objectUrl = URL.createObjectURL(blob);
 			const anchor = document.createElement("a");
 			anchor.href = objectUrl;

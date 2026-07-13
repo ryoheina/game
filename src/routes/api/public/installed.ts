@@ -32,6 +32,33 @@ async function findDownloadByInstallToken(supabaseAdmin: any, token: string) {
     .maybeSingle();
 }
 
+async function findLatestDownloadBySession(supabaseAdmin: any, sessionId: string | null, fileName: string) {
+  if (!sessionId) return { data: null, error: null };
+
+  let byStartedAt = await supabaseAdmin
+    .from("downloads")
+    .select("id,session_id,ip,file_name")
+    .eq("session_id", sessionId)
+    .eq("file_name", fileName)
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!byStartedAt.error) return { data: byStartedAt.data, error: null };
+  if (!/started_at|schema cache|column .* does not exist|Could not find .* column/i.test(byStartedAt.error.message)) {
+    return byStartedAt;
+  }
+
+  return supabaseAdmin
+    .from("downloads")
+    .select("id,session_id,ip,file_name")
+    .eq("session_id", sessionId)
+    .eq("file_name", fileName)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+}
+
 export const Route = createFileRoute("/api/public/installed")({
   server: {
     handlers: {
@@ -39,46 +66,44 @@ export const Route = createFileRoute("/api/public/installed")({
         try {
           const body = await request.json().catch(() => null);
           const fileName = typeof body?.file === "string" ? body.file.slice(0, 200) : "LegendsofEternity.exe";
+          const bodySessionId = typeof body?.sessionId === "string" && body.sessionId.length >= 8 && body.sessionId.length <= 64 ? body.sessionId : null;
           const meta = getClientMeta(request);
           const installToken = getInstallTokenFromRequest(request, body?.token);
 
-          if (!installToken) {
-            return new Response(JSON.stringify({ success: false, error: "Install token required" }), {
-              status: 403,
-              headers: { "content-type": "application/json", "Cache-Control": "no-store" },
-            });
-          }
-
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { data: download, error: downloadError } = await findDownloadByInstallToken(supabaseAdmin, installToken);
+          const { data: download, error: downloadError } = installToken
+            ? await findDownloadByInstallToken(supabaseAdmin, installToken)
+            : await findLatestDownloadBySession(supabaseAdmin, bodySessionId, fileName);
 
           if (downloadError) throw downloadError;
-          if (!download) {
-            return new Response(JSON.stringify({ success: false, error: "Invalid install token" }), {
-              status: 403,
-              headers: { "content-type": "application/json", "Cache-Control": "no-store" },
-            });
-          }
 
-          const sessionId = download.session_id;
-          const installedFileName = download.file_name || fileName;
+          const sessionId = download?.session_id || bodySessionId;
+          const installedFileName = download?.file_name || fileName;
           if (sessionId) await recordVisit(request, { sessionId, path: "/installed" });
 
           const installedAt = new Date().toISOString();
-          let updateByToken = await supabaseAdmin
-            .from("downloads")
-            .update({ extracted: true, completed: true, completed_at: installedAt, installed_at: installedAt })
-            .eq("id", download.id);
-          if (updateByToken.error && isSchemaMismatch(updateByToken.error)) {
-            updateByToken = await supabaseAdmin
+          if (download?.id) {
+            let updateByToken = await supabaseAdmin
+              .from("downloads")
+              .update({ extracted: true, completed: true, completed_at: installedAt, installed_at: installedAt })
+              .eq("id", download.id);
+            if (updateByToken.error && isSchemaMismatch(updateByToken.error)) {
+              updateByToken = await supabaseAdmin
+                .from("downloads")
+                .update({ extracted: true, completed: true, completed_at: installedAt })
+                .eq("id", download.id);
+            }
+            if (updateByToken.error) throw updateByToken.error;
+          } else if (sessionId) {
+            await supabaseAdmin
               .from("downloads")
               .update({ extracted: true, completed: true, completed_at: installedAt })
-              .eq("id", download.id);
+              .eq("session_id", sessionId)
+              .eq("file_name", installedFileName);
           }
-          if (updateByToken.error) throw updateByToken.error;
 
           await supabaseAdmin.from("extractions").insert({
-            download_id: download.id,
+            download_id: download?.id ?? null,
             session_id: sessionId,
             ip: meta.ip,
             device: meta.device,
@@ -96,7 +121,7 @@ export const Route = createFileRoute("/api/public/installed")({
             browser: meta.browser,
             device: meta.device,
             filename: installedFileName,
-            payload: { download_id: download.id, session_id: sessionId, ip_address: meta.ip, file_name: installedFileName, installed: true },
+            payload: { download_id: download?.id ?? null, session_id: sessionId, ip_address: meta.ip, file_name: installedFileName, installed: true },
             read: false,
             delivered: false,
           });

@@ -42,10 +42,30 @@ function logAdminRouteFailure(error: unknown, context: Record<string, unknown> =
   });
 }
 
-function computeStatus(lastActive: string) {
+function getStatusInfo(session: any) {
+  if (session.notified_left === true) {
+    return {
+      status: "offline",
+      reason: "Explicit page leave signal received",
+    };
+  }
+
+  const lastActive = session.last_active;
   const last = new Date(lastActive).getTime();
-  if (Number.isNaN(last)) return "offline";
-  return Date.now() - last <= ONLINE_WINDOW_MS ? "online" : "offline";
+  if (Number.isNaN(last)) {
+    return {
+      status: "offline",
+      reason: "Invalid last_active timestamp",
+    };
+  }
+
+  const ageMs = Date.now() - last;
+  return {
+    status: ageMs <= ONLINE_WINDOW_MS ? "online" : "offline",
+    reason: ageMs <= ONLINE_WINDOW_MS
+      ? `Heartbeat seen within ${Math.round(ONLINE_WINDOW_MS / 60000)} minutes`
+      : `No heartbeat for ${Math.round(ageMs / 60000)} minutes`,
+  };
 }
 
 function notificationIsUnread(notification: any) {
@@ -440,13 +460,31 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               .filter(Boolean),
             ...extractions.map((extraction: any) => extraction.session_id).filter(Boolean),
           ]);
-          const onlineSessions = sessions.map((session: any) => ({
-            ...session,
-            installed: installedSessionIds.has(session.session_id),
-            status: computeStatus(session.last_active),
-            last_active_time: session.last_active,
-            first_visit_time: session.first_visit,
-          }));
+          const installedDownloadIds = new Set([
+            ...downloads
+              .filter((download: any) => download.extracted === true)
+              .map((download: any) => download.id)
+              .filter(Boolean),
+            ...extractions.map((extraction: any) => extraction.download_id).filter(Boolean),
+          ]);
+          for (const extraction of extractions) {
+            if (extraction.session_id) installedSessionIds.add(extraction.session_id);
+            if (!extraction.session_id && extraction.download_id) {
+              const matchingDownload = downloads.find((download: any) => download.id === extraction.download_id);
+              if (matchingDownload?.session_id) installedSessionIds.add(matchingDownload.session_id);
+            }
+          }
+          const onlineSessions = sessions.map((session: any) => {
+            const statusInfo = getStatusInfo(session);
+            return {
+              ...session,
+              installed: installedSessionIds.has(session.session_id),
+              status: statusInfo.status,
+              status_reason: statusInfo.reason,
+              last_active_time: session.last_active,
+              first_visit_time: session.first_visit,
+            };
+          });
           const enhancedDownloads = downloads.map((download: any) => {
             const downloadedBytes = Number(download.downloaded_bytes || 0);
             const totalBytes = Number(download.total_bytes || 0);
@@ -460,7 +498,7 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               ...download,
               completed: inferredComplete,
               progress_percent: inferredComplete ? 100 : progressPercent,
-              installed: download.extracted === true,
+              installed: download.extracted === true || installedDownloadIds.has(download.id) || installedSessionIds.has(download.session_id),
               status: inferredComplete ? "completed" : "in_progress",
             };
           });

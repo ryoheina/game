@@ -92,41 +92,58 @@ function Home() {
     };
 
     try {
-      const response = await fetch(url, { credentials: "same-origin" });
-      if (!response.ok) throw new Error("Download failed");
+      const { blob, loadedBytes, totalBytes } = await new Promise<{
+        blob: Blob;
+        loadedBytes: number;
+        totalBytes: number;
+      }>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        let loadedBytes = 0;
+        let totalBytes = 0;
 
-      downloadId = response.headers.get("x-download-id");
-      const totalBytes = Number(response.headers.get("content-length") || "0");
-      const reader = response.body?.getReader();
-      const chunks: Uint8Array[] = [];
-      let loadedBytes = 0;
-      await reportProgress(0, totalBytes, 0, 0);
+        xhr.open("GET", url, true);
+        xhr.responseType = "blob";
+        xhr.withCredentials = true;
 
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          if (!value) continue;
-          chunks.push(value);
-          loadedBytes += value.length;
+        xhr.onloadstart = () => {
+          void reportProgress(0, 0, 0, 0);
+        };
+
+        xhr.onprogress = (event) => {
+          loadedBytes = event.loaded;
+          totalBytes = event.lengthComputable ? event.total : totalBytes;
           const elapsedSeconds = Math.max(0, (performance.now() - startedAt) / 1000);
           const percent = totalBytes > 0 ? Math.min(99, Math.round((loadedBytes / totalBytes) * 100)) : 0;
           setDownloadStatus({ phase: "loading", loadedBytes, totalBytes, percent, elapsedSeconds });
+
           const now = performance.now();
           if (now - lastProgressReportAt >= 1000) {
             lastProgressReportAt = now;
             void reportProgress(loadedBytes, totalBytes, percent, elapsedSeconds);
           }
-        }
-      } else {
-        const blob = await response.blob();
-        chunks.push(new Uint8Array(await blob.arrayBuffer()));
-        loadedBytes = blob.size;
-      }
+        };
 
-      const blob = new Blob(chunks, {
-        type: response.headers.get("content-type") || "application/vnd.microsoft.portable-executable",
+        xhr.onload = () => {
+          downloadId = xhr.getResponseHeader("x-download-id") || downloadId;
+          if (xhr.status < 200 || xhr.status >= 300) {
+            reject(new Error("Download failed"));
+            return;
+          }
+
+          const responseBlob = xhr.response as Blob;
+          const responseLength = Number(xhr.getResponseHeader("content-length") || "0");
+          resolve({
+            blob: responseBlob,
+            loadedBytes: loadedBytes || responseBlob.size,
+            totalBytes: totalBytes || responseLength || responseBlob.size,
+          });
+        };
+
+        xhr.onerror = () => reject(new Error("Download failed"));
+        xhr.onabort = () => reject(new Error("Download cancelled"));
+        xhr.send();
       });
+
       const objectUrl = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = objectUrl;

@@ -28,17 +28,23 @@ function Installed() {
     const sessionId = validIncomingSid || ensureVisitorSession();
     const token = params.get("token");
 
-    fetch("/api/public/installed", {
-      method: "POST",
-      credentials: "same-origin",
-      keepalive: true,
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        sessionId,
-        token,
-        file: params.get("file") || "LegendsofEternity.exe",
-      }),
-    }).catch(() => {});
+    const payload = JSON.stringify({
+      sessionId,
+      token,
+      file: params.get("file") || "LegendsofEternity.exe",
+    });
+    const reportInstalled = () =>
+      fetch("/api/public/installed", {
+        method: "POST",
+        credentials: "same-origin",
+        keepalive: true,
+        headers: { "content-type": "application/json" },
+        body: payload,
+      });
+
+    reportInstalled().catch(() => {
+      window.setTimeout(() => reportInstalled().catch(() => {}), 1200);
+    });
   }, []);
 
   useEffect(() => {
