@@ -15,6 +15,7 @@ function Admin() {
   const [sessions, setSessions] = useState<any[]>([]);
   const [sessionsPage, setSessionsPage] = useState(1);
   const [downloads, setDownloads] = useState<any[]>([]);
+  const [networkClusters, setNetworkClusters] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [latestAlert, setLatestAlert] = useState<any>(null);
   const { notifications, setNotifications, markRead, remove, clearAll } = useAdminNotifications([]);
@@ -67,6 +68,7 @@ function Admin() {
           if (!mounted) return true;
           setSessions([]);
           setDownloads([]);
+          setNetworkClusters([]);
           setStats(null);
           setNotifications([]);
           return true;
@@ -76,6 +78,7 @@ function Admin() {
         if (!mounted) return true;
         setSessions(data.sessions || []);
         setDownloads(data.downloads || []);
+        setNetworkClusters(data.networkClusters || []);
         setStats(data.stats || null);
         const nextNotifications = data.notifications || [];
         setNotifications(nextNotifications);
@@ -109,6 +112,7 @@ function Admin() {
         if (!mounted) return false;
         setSessions([]);
         setDownloads([]);
+        setNetworkClusters([]);
         setStats(null);
         setNotifications([]);
         return false;
@@ -143,6 +147,7 @@ function Admin() {
 
       setSessions([]);
       setDownloads([]);
+      setNetworkClusters([]);
       setStats(null);
       setNotifications([]);
       setSessionsPage(1);
@@ -389,6 +394,67 @@ function Admin() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className="overflow-x-auto rounded-3xl bg-white/5 p-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h3 className="text-lg font-medium">Network behavior clusters</h3>
+                  <p className="mt-1 max-w-2xl text-xs text-white/50">
+                    Groups are based on /24 subnet, ASN when available, country, city when available, and a 1-hour time window. This does not identify a person.
+                  </p>
+                </div>
+                <div className="text-xs uppercase tracking-[0.22em] text-white/40">
+                  {networkClusters.length} cluster{networkClusters.length === 1 ? "" : "s"}
+                </div>
+              </div>
+
+              {networkClusters.length === 0 ? (
+                <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-white/50">
+                  No possible related VPN/network activity detected.
+                </div>
+              ) : (
+                <table className="mt-4 w-full table-auto text-left text-sm text-white/80">
+                  <thead>
+                    <tr>
+                      <th className="px-2 py-2">Network cluster</th>
+                      <th className="px-2 py-2">Safe label</th>
+                      <th className="px-2 py-2">Subnet</th>
+                      <th className="px-2 py-2">ASN</th>
+                      <th className="px-2 py-2">Country</th>
+                      <th className="px-2 py-2">City</th>
+                      <th className="px-2 py-2">Time range</th>
+                      <th className="px-2 py-2">Confidence</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {networkClusters.map((cluster) => (
+                      <tr key={cluster.network_cluster_id} className="border-t border-white/5 text-white/70">
+                        <td className="px-2 py-2 font-mono text-xs">{cluster.network_cluster_id}</td>
+                        <td className="max-w-md px-2 py-2">
+                          <div className="rounded-2xl border border-blue-400/20 bg-blue-500/10 px-3 py-2 text-blue-100">
+                            {cluster.safe_label || `Possible related VPN/network activity: [${(cluster.ip_list || []).join(", ")}]`}
+                          </div>
+                        </td>
+                        <td className="px-2 py-2 font-mono text-xs">{cluster.subnet_24 || "—"}</td>
+                        <td className="px-2 py-2">{cluster.asn && cluster.asn !== "unknown" ? cluster.asn : "—"}</td>
+                        <td className="px-2 py-2">{cluster.country && cluster.country !== "unknown" ? cluster.country : "—"}</td>
+                        <td className="px-2 py-2">{cluster.city && cluster.city !== "unknown" ? cluster.city : "—"}</td>
+                        <td className="px-2 py-2 whitespace-nowrap">
+                          {cluster.first_seen ? new Date(cluster.first_seen).toLocaleTimeString() : "—"}
+                          {" - "}
+                          {cluster.last_seen ? new Date(cluster.last_seen).toLocaleTimeString() : "—"}
+                        </td>
+                        <td className="px-2 py-2">
+                          <span className="rounded-full bg-white/10 px-2 py-1 text-xs text-white/70">
+                            {cluster.cluster_confidence ?? 0}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
 
             <div className="overflow-x-auto rounded-3xl bg-white/5 p-4">

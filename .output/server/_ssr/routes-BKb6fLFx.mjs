@@ -1,5 +1,5 @@
 import { a as __toESM } from "../_runtime.mjs";
-import { i as AnimatePresence, n as useScroll, r as motion, t as useTransform } from "../_libs/framer-motion.mjs";
+import { a as performance_default, i as AnimatePresence, n as useScroll, r as motion, t as useTransform } from "../_libs/framer-motion.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow, r as Particles, t as Fog } from "./fx-CW4x6DdP.mjs";
 import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
@@ -7,7 +7,7 @@ import { t as ensureVisitorSession } from "./visitor-session-CAw0UShx.mjs";
 import { n as submitContact } from "./analytics.functions-BfT3GJDi.mjs";
 import { n as ChevronLeft, t as ChevronRight } from "../_libs/lucide-react.mjs";
 import { t as gsapWithCSS } from "../_libs/gsap.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-Dc_aT5bE.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-BKb6fLFx.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var items = [
@@ -1054,8 +1054,21 @@ function GameplayVideoCarousel() {
 		]
 	});
 }
+function formatDownloadBytes(bytes) {
+	if (!Number.isFinite(bytes) || bytes <= 0) return "0 MB";
+	return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+function formatDownloadTime(seconds) {
+	if (!Number.isFinite(seconds) || seconds <= 0) return "0s";
+	const whole = Math.round(seconds);
+	const minutes = Math.floor(whole / 60);
+	const rest = whole % 60;
+	return minutes > 0 ? `${minutes}m ${String(rest).padStart(2, "0")}s` : `${rest}s`;
+}
 function Download({ onDownload, status }) {
-	const started = status === "done";
+	const started = status.phase === "complete";
+	const loading = status.phase === "loading";
+	const progressPercent = status.phase === "loading" || status.phase === "complete" ? status.percent : 0;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		id: "download",
 		className: "relative isolate overflow-hidden py-24 sm:py-32",
@@ -1132,7 +1145,7 @@ function Download({ onDownload, status }) {
 									}
 								}, ring)), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
 									onClick: onDownload,
-									disabled: status === "loading",
+									disabled: loading,
 									"aria-label": "Download Legends of Eternity",
 									className: "group relative grid h-40 w-40 place-items-center rounded-full border border-[#f5d88a]/50 bg-black/45 shadow-[0_0_70px_rgba(255,214,120,0.22)] backdrop-blur-xl transition disabled:opacity-70 sm:h-52 sm:w-52",
 									whileHover: {
@@ -1196,9 +1209,43 @@ function Download({ onDownload, status }) {
 									})]
 								})]
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "mt-8 text-xs uppercase tracking-[0.32em] text-white/50",
-								children: status === "loading" ? "Preparing..." : "Legends of Eternity"
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "mx-auto mt-8 max-w-xl",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "text-xs uppercase tracking-[0.32em] text-white/50",
+										children: loading ? "Downloading..." : started ? "Complete" : status.phase === "error" ? "Download failed" : "Legends of Eternity"
+									}),
+									(loading || started) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "mt-5 rounded-2xl border border-white/10 bg-black/35 p-4 text-left shadow-[0_0_40px_rgba(120,170,255,0.12)]",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "mb-3 flex items-center justify-between gap-4 text-xs uppercase tracking-[0.18em] text-white/55",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [progressPercent, "%"] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: formatDownloadTime(status.elapsedSeconds) })]
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "h-3 overflow-hidden rounded-full bg-white/10",
+												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+													className: "h-full rounded-full bg-gradient-to-r from-[#75d6ff] via-[#ffe08a] to-[#ff8f70] shadow-[0_0_24px_rgba(255,224,138,0.55)]",
+													initial: false,
+													animate: { width: `${progressPercent}%` },
+													transition: {
+														duration: .28,
+														ease: "easeOut"
+													}
+												})
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "mt-3 flex items-center justify-between gap-4 text-xs text-white/50",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: formatDownloadBytes(status.loadedBytes) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: status.totalBytes > 0 ? formatDownloadBytes(status.totalBytes) : "Calculating size" })]
+											})
+										]
+									}),
+									status.phase === "error" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "mx-auto mt-4 max-w-md rounded-full border border-[color:var(--ember)]/30 bg-[color:var(--ember)]/10 px-5 py-3 text-sm text-[#ffb39d]",
+										children: "Please try again."
+									})
+								]
 							}),
 							started && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.p, {
 								initial: {
@@ -1212,7 +1259,7 @@ function Download({ onDownload, status }) {
 									scale: 1
 								},
 								className: "mx-auto mt-4 max-w-md rounded-full border border-[color:var(--gold)]/30 bg-[color:var(--gold)]/10 px-5 py-3 text-sm text-[#ffe7a3] shadow-[0_0_40px_rgba(255,214,120,0.16)]",
-								children: "You have already started."
+								children: "Complete"
 							})
 						]
 					})
@@ -1404,7 +1451,7 @@ function Footer() {
 function Home() {
 	useNavigate();
 	const [openChar, setOpenChar] = (0, import_react.useState)(null);
-	const [downloadStatus, setDownloadStatus] = (0, import_react.useState)("idle");
+	const [downloadStatus, setDownloadStatus] = (0, import_react.useState)({ phase: "idle" });
 	const [showIntro, setShowIntro] = (0, import_react.useState)(true);
 	const [siteImpact, setSiteImpact] = (0, import_react.useState)(false);
 	(0, import_react.useEffect)(() => {
@@ -1428,21 +1475,65 @@ function Home() {
 		};
 	}, []);
 	const handleDownload = (0, import_react.useCallback)(async () => {
-		setDownloadStatus("loading");
+		setDownloadStatus({
+			phase: "loading",
+			loadedBytes: 0,
+			totalBytes: 0,
+			percent: 0,
+			elapsedSeconds: 0
+		});
 		const sid = ensureVisitorSession();
 		const fileName = "LegendsofEternity.exe";
 		const url = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${encodeURIComponent(fileName)}`;
+		const startedAt = performance_default.now();
 		try {
+			const response = await fetch(url, { credentials: "same-origin" });
+			if (!response.ok) throw new Error("Download failed");
+			const totalBytes = Number(response.headers.get("content-length") || "0");
+			const reader = response.body?.getReader();
+			const chunks = [];
+			let loadedBytes = 0;
+			if (reader) while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+				if (!value) continue;
+				chunks.push(value);
+				loadedBytes += value.length;
+				const elapsedSeconds = Math.max(0, (performance_default.now() - startedAt) / 1e3);
+				const percent = totalBytes > 0 ? Math.min(99, Math.round(loadedBytes / totalBytes * 100)) : 0;
+				setDownloadStatus({
+					phase: "loading",
+					loadedBytes,
+					totalBytes,
+					percent,
+					elapsedSeconds
+				});
+			}
+			else {
+				const blob = await response.blob();
+				chunks.push(new Uint8Array(await blob.arrayBuffer()));
+				loadedBytes = blob.size;
+			}
+			const blob = new Blob(chunks, { type: response.headers.get("content-type") || "application/vnd.microsoft.portable-executable" });
+			const objectUrl = URL.createObjectURL(blob);
 			const anchor = document.createElement("a");
-			anchor.href = url;
+			anchor.href = objectUrl;
 			anchor.download = fileName;
 			anchor.style.display = "none";
 			document.body.appendChild(anchor);
 			anchor.click();
 			document.body.removeChild(anchor);
-			setDownloadStatus("done");
-		} catch {
-			setDownloadStatus("idle");
+			window.setTimeout(() => URL.revokeObjectURL(objectUrl), 3e4);
+			setDownloadStatus({
+				phase: "complete",
+				loadedBytes: loadedBytes || blob.size,
+				totalBytes: totalBytes || blob.size,
+				percent: 100,
+				elapsedSeconds: Math.max(0, (performance_default.now() - startedAt) / 1e3)
+			});
+		} catch (error) {
+			console.error("Download failed", error);
+			setDownloadStatus({ phase: "error" });
 		}
 	}, []);
 	const handleContact = (0, import_react.useCallback)(async (d) => {

@@ -9,10 +9,10 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-ejTU25eg.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-7501EWpa.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-DhTPiokb.css";
+var styles_default = "/assets/styles-BvgfgjiG.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -269,7 +269,7 @@ var Route$21 = createFileRoute("/_authenticated")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./routes-Dc_aT5bE.mjs");
+var $$splitComponentImporter$1 = () => import("./routes-BKb6fLFx.mjs");
 var Route$20 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "Legends of Eternity — A next-gen 3D multiplayer fantasy RPG" },
@@ -292,7 +292,7 @@ var Route$20 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./admin-DHKD0WnM.mjs");
+var $$splitComponentImporter = () => import("./admin-BRs-sKFR.mjs");
 var Route$19 = createFileRoute("/_authenticated/admin")({
 	head: () => ({ meta: [{ title: "Studio Dashboard — Legends of Eternity" }] }),
 	component: lazyRouteComponent($$splitComponentImporter, "component")
@@ -1493,6 +1493,105 @@ function extractErrorLocation(stack) {
 	const firstFrame = lines.find((line) => line.includes("src/")) || lines[0];
 	return firstFrame ? firstFrame.trim() : "unknown location";
 }
+function getVisitIp(row) {
+	return row.visible_ip || row.ip || row.ip_address || null;
+}
+function getVisitCountry(row) {
+	return row.ip_country || row.country || null;
+}
+function getVisitCity(row) {
+	return row.ip_city || row.city || null;
+}
+function getVisitTimestamp(row) {
+	return row.timestamp || row.created_at || row.first_visit || row.started_at || null;
+}
+function getIpv4Subnet24(ip) {
+	if (!ip) return null;
+	const parts = ip.trim().split(".");
+	if (parts.length !== 4) return null;
+	const octets = parts.map((part) => Number(part));
+	if (octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)) return null;
+	return `${octets[0]}.${octets[1]}.${octets[2]}.0/24`;
+}
+function getHourBucket(timestamp) {
+	if (!timestamp) return null;
+	const date = new Date(timestamp);
+	if (Number.isNaN(date.getTime())) return null;
+	date.setMinutes(0, 0, 0);
+	return date.toISOString();
+}
+function hashClusterKey(input) {
+	let hash = 2166136261;
+	for (let i = 0; i < input.length; i++) {
+		hash ^= input.charCodeAt(i);
+		hash = Math.imul(hash, 16777619);
+	}
+	return `net_${(hash >>> 0).toString(16).padStart(8, "0")}`;
+}
+function buildNetworkClusters(rows) {
+	const groups = /* @__PURE__ */ new Map();
+	for (const row of rows) {
+		const ip = getVisitIp(row);
+		const subnet24 = getIpv4Subnet24(ip);
+		const hourBucket = getHourBucket(getVisitTimestamp(row));
+		if (!ip || !subnet24 || !hourBucket) continue;
+		const asn = row.asn ? String(row.asn) : "unknown";
+		const country = getVisitCountry(row) || "unknown";
+		const city = getVisitCity(row) || "unknown";
+		const isp = row.isp || "unknown";
+		const key = [
+			subnet24,
+			asn,
+			country,
+			city,
+			hourBucket
+		].join("|");
+		const existing = groups.get(key) || {
+			network_cluster_id: hashClusterKey(key),
+			subnet_24: subnet24,
+			asn,
+			country,
+			city,
+			isp,
+			hour_bucket: hourBucket,
+			first_seen: getVisitTimestamp(row),
+			last_seen: getVisitTimestamp(row),
+			visit_count: 0,
+			distinct_ips: /* @__PURE__ */ new Set()
+		};
+		const timestamp = getVisitTimestamp(row);
+		existing.visit_count += 1;
+		existing.distinct_ips.add(ip);
+		if (timestamp && (!existing.first_seen || new Date(timestamp) < new Date(existing.first_seen))) existing.first_seen = timestamp;
+		if (timestamp && (!existing.last_seen || new Date(timestamp) > new Date(existing.last_seen))) existing.last_seen = timestamp;
+		groups.set(key, existing);
+	}
+	return Array.from(groups.values()).map((group) => {
+		const ip_list = Array.from(group.distinct_ips).sort();
+		const confidenceParts = [
+			group.subnet_24 !== "unknown",
+			group.asn !== "unknown",
+			group.country !== "unknown",
+			group.city !== "unknown"
+		].filter(Boolean).length;
+		return {
+			network_cluster_id: group.network_cluster_id,
+			subnet_24: group.subnet_24,
+			asn: group.asn,
+			country: group.country,
+			city: group.city,
+			isp: group.isp,
+			hour_bucket: group.hour_bucket,
+			first_seen: group.first_seen,
+			last_seen: group.last_seen,
+			visit_count: group.visit_count,
+			distinct_ip_count: ip_list.length,
+			ip_list,
+			cluster_confidence: Math.round(confidenceParts / 4 * 100),
+			safe_label: `Possible related VPN/network activity: [${ip_list.join(", ")}]`
+		};
+	}).filter((group) => group.distinct_ip_count > 1).sort((a, b) => new Date(b.last_seen || 0).getTime() - new Date(a.last_seen || 0).getTime()).slice(0, 25);
+}
 async function verifyDatabaseConnectivity(supabaseAdmin) {
 	console.log("[Dashboard] Verifying database connectivity using sessions table...");
 	const res = await supabaseAdmin.from("sessions").select("session_id").limit(1);
@@ -1665,6 +1764,23 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 		}
 		const notifications = notificationsRes.data ?? [];
 		console.log(`[Dashboard] Notifications fetched: ${notifications.length}`);
+		console.log("[Dashboard] Executing visits query for network activity clusters");
+		const visitsRes = await supabaseAdmin.from("visits").select("*").order("created_at", { ascending: false }).limit(500);
+		if (visitsRes.error) {
+			const parsed = parsePostgresError(visitsRes.error.message);
+			console.warn("[Dashboard] Visits query for network clusters failed:", visitsRes.error.message);
+			logAdminRouteFailure(visitsRes.error, {
+				stage: "query_network_clusters",
+				table: parsed.table,
+				column: parsed.column,
+				message: visitsRes.error.message
+			});
+		}
+		const networkClusters = buildNetworkClusters([...visitsRes.data ?? [], ...sessions.map((session) => ({
+			...session,
+			created_at: session.first_visit
+		}))]);
+		console.log(`[Dashboard] Network clusters built: ${networkClusters.length}`);
 		const installedSessionIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.session_id).filter(Boolean), ...extractions.map((extraction) => extraction.session_id).filter(Boolean)]);
 		const onlineSessions = sessions.map((session) => ({
 			...session,
@@ -1713,6 +1829,7 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 			sessions: onlineSessions,
 			downloads: enhancedDownloads,
 			notifications,
+			networkClusters,
 			stats: {
 				total_sessions: onlineSessions.length,
 				online_sessions: onlineSessions.filter((s) => s.status === "online").length,

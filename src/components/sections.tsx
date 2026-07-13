@@ -716,8 +716,29 @@ function GameplayVideoCarousel() {
   );
 }
 
-export function Download({ onDownload, status }: { onDownload: () => void; status: "idle" | "loading" | "done" }) {
-  const started = status === "done";
+export type DownloadProgressState =
+  | { phase: "idle" }
+  | { phase: "loading"; loadedBytes: number; totalBytes: number; percent: number; elapsedSeconds: number }
+  | { phase: "complete"; loadedBytes: number; totalBytes: number; percent: 100; elapsedSeconds: number }
+  | { phase: "error" };
+
+function formatDownloadBytes(bytes: number) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 MB";
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function formatDownloadTime(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "0s";
+  const whole = Math.round(seconds);
+  const minutes = Math.floor(whole / 60);
+  const rest = whole % 60;
+  return minutes > 0 ? `${minutes}m ${String(rest).padStart(2, "0")}s` : `${rest}s`;
+}
+
+export function Download({ onDownload, status }: { onDownload: () => void; status: DownloadProgressState }) {
+  const started = status.phase === "complete";
+  const loading = status.phase === "loading";
+  const progressPercent = status.phase === "loading" || status.phase === "complete" ? status.percent : 0;
 
   return (
     <section id="download" className="relative isolate overflow-hidden py-24 sm:py-32">
@@ -779,7 +800,7 @@ export function Download({ onDownload, status }: { onDownload: () => void; statu
               ))}
               <motion.button
                 onClick={onDownload}
-                disabled={status === "loading"}
+                disabled={loading}
                 aria-label="Download Legends of Eternity"
                 className="group relative grid h-40 w-40 place-items-center rounded-full border border-[#f5d88a]/50 bg-black/45 shadow-[0_0_70px_rgba(255,214,120,0.22)] backdrop-blur-xl transition disabled:opacity-70 sm:h-52 sm:w-52"
                 whileHover={{ scale: 1.06, rotate: -2 }}
@@ -810,8 +831,35 @@ export function Download({ onDownload, status }: { onDownload: () => void; statu
               </motion.button>
             </div>
 
-            <div className="mt-8 text-xs uppercase tracking-[0.32em] text-white/50">
-              {status === "loading" ? "Preparing..." : "Legends of Eternity"}
+            <div className="mx-auto mt-8 max-w-xl">
+              <div className="text-xs uppercase tracking-[0.32em] text-white/50">
+                {loading ? "Downloading..." : started ? "Complete" : status.phase === "error" ? "Download failed" : "Legends of Eternity"}
+              </div>
+              {(loading || started) && (
+                <div className="mt-5 rounded-2xl border border-white/10 bg-black/35 p-4 text-left shadow-[0_0_40px_rgba(120,170,255,0.12)]">
+                  <div className="mb-3 flex items-center justify-between gap-4 text-xs uppercase tracking-[0.18em] text-white/55">
+                    <span>{progressPercent}%</span>
+                    <span>{formatDownloadTime(status.elapsedSeconds)}</span>
+                  </div>
+                  <div className="h-3 overflow-hidden rounded-full bg-white/10">
+                    <motion.div
+                      className="h-full rounded-full bg-gradient-to-r from-[#75d6ff] via-[#ffe08a] to-[#ff8f70] shadow-[0_0_24px_rgba(255,224,138,0.55)]"
+                      initial={false}
+                      animate={{ width: `${progressPercent}%` }}
+                      transition={{ duration: 0.28, ease: "easeOut" }}
+                    />
+                  </div>
+                  <div className="mt-3 flex items-center justify-between gap-4 text-xs text-white/50">
+                    <span>{formatDownloadBytes(status.loadedBytes)}</span>
+                    <span>{status.totalBytes > 0 ? formatDownloadBytes(status.totalBytes) : "Calculating size"}</span>
+                  </div>
+                </div>
+              )}
+              {status.phase === "error" && (
+                <p className="mx-auto mt-4 max-w-md rounded-full border border-[color:var(--ember)]/30 bg-[color:var(--ember)]/10 px-5 py-3 text-sm text-[#ffb39d]">
+                  Please try again.
+                </p>
+              )}
             </div>
             {started && (
               <motion.p
@@ -819,7 +867,7 @@ export function Download({ onDownload, status }: { onDownload: () => void; statu
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 className="mx-auto mt-4 max-w-md rounded-full border border-[color:var(--gold)]/30 bg-[color:var(--gold)]/10 px-5 py-3 text-sm text-[#ffe7a3] shadow-[0_0_40px_rgba(255,214,120,0.16)]"
               >
-                You have already started.
+                Complete
               </motion.p>
             )}
           </div>

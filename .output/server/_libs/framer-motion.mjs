@@ -10587,4 +10587,4 @@ function useMapTransform(inputValue, inputRange, outputMap, options) {
 	return output;
 }
 //#endregion
-export { AnimatePresence as i, useScroll as n, motion as r, useTransform as t };
+export { performance_default as a, AnimatePresence as i, useScroll as n, motion as r, useTransform as t };

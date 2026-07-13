@@ -2,7 +2,7 @@ import { a as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { n as MouseGlow } from "./fx-CW4x6DdP.mjs";
 import { _ as useNavigate, g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-DHKD0WnM.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-BRs-sKFR.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function useAdminNotifications(initial = []) {
@@ -208,6 +208,7 @@ function Admin() {
 	const [sessions, setSessions] = (0, import_react.useState)([]);
 	const [sessionsPage, setSessionsPage] = (0, import_react.useState)(1);
 	const [downloads, setDownloads] = (0, import_react.useState)([]);
+	const [networkClusters, setNetworkClusters] = (0, import_react.useState)([]);
 	const [stats, setStats] = (0, import_react.useState)(null);
 	const [latestAlert, setLatestAlert] = (0, import_react.useState)(null);
 	const { notifications, setNotifications, markRead, remove, clearAll } = useAdminNotifications([]);
@@ -261,6 +262,7 @@ function Admin() {
 					if (!mounted) return true;
 					setSessions([]);
 					setDownloads([]);
+					setNetworkClusters([]);
 					setStats(null);
 					setNotifications([]);
 					return true;
@@ -269,6 +271,7 @@ function Admin() {
 				if (!mounted) return true;
 				setSessions(data.sessions || []);
 				setDownloads(data.downloads || []);
+				setNetworkClusters(data.networkClusters || []);
 				setStats(data.stats || null);
 				const nextNotifications = data.notifications || [];
 				setNotifications(nextNotifications);
@@ -299,6 +302,7 @@ function Admin() {
 				if (!mounted) return false;
 				setSessions([]);
 				setDownloads([]);
+				setNetworkClusters([]);
 				setStats(null);
 				setNotifications([]);
 				return false;
@@ -335,6 +339,7 @@ function Admin() {
 			}
 			setSessions([]);
 			setDownloads([]);
+			setNetworkClusters([]);
 			setStats(null);
 			setNotifications([]);
 			setSessionsPage(1);
@@ -704,6 +709,111 @@ function Admin() {
 													})
 												]
 											}, d.session_id)) })]
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "overflow-x-auto rounded-3xl bg-white/5 p-4",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+												className: "text-lg font-medium",
+												children: "Network behavior clusters"
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+												className: "mt-1 max-w-2xl text-xs text-white/50",
+												children: "Groups are based on /24 subnet, ASN when available, country, city when available, and a 1-hour time window. This does not identify a person."
+											})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "text-xs uppercase tracking-[0.22em] text-white/40",
+												children: [
+													networkClusters.length,
+													" cluster",
+													networkClusters.length === 1 ? "" : "s"
+												]
+											})]
+										}), networkClusters.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "mt-4 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-white/50",
+											children: "No possible related VPN/network activity detected."
+										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
+											className: "mt-4 w-full table-auto text-left text-sm text-white/80",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+													className: "px-2 py-2",
+													children: "Network cluster"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+													className: "px-2 py-2",
+													children: "Safe label"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+													className: "px-2 py-2",
+													children: "Subnet"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+													className: "px-2 py-2",
+													children: "ASN"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+													className: "px-2 py-2",
+													children: "Country"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+													className: "px-2 py-2",
+													children: "City"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+													className: "px-2 py-2",
+													children: "Time range"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+													className: "px-2 py-2",
+													children: "Confidence"
+												})
+											] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: networkClusters.map((cluster) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+												className: "border-t border-white/5 text-white/70",
+												children: [
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+														className: "px-2 py-2 font-mono text-xs",
+														children: cluster.network_cluster_id
+													}),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+														className: "max-w-md px-2 py-2",
+														children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+															className: "rounded-2xl border border-blue-400/20 bg-blue-500/10 px-3 py-2 text-blue-100",
+															children: cluster.safe_label || `Possible related VPN/network activity: [${(cluster.ip_list || []).join(", ")}]`
+														})
+													}),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+														className: "px-2 py-2 font-mono text-xs",
+														children: cluster.subnet_24 || "—"
+													}),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+														className: "px-2 py-2",
+														children: cluster.asn && cluster.asn !== "unknown" ? cluster.asn : "—"
+													}),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+														className: "px-2 py-2",
+														children: cluster.country && cluster.country !== "unknown" ? cluster.country : "—"
+													}),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+														className: "px-2 py-2",
+														children: cluster.city && cluster.city !== "unknown" ? cluster.city : "—"
+													}),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+														className: "px-2 py-2 whitespace-nowrap",
+														children: [
+															cluster.first_seen ? new Date(cluster.first_seen).toLocaleTimeString() : "—",
+															" - ",
+															cluster.last_seen ? new Date(cluster.last_seen).toLocaleTimeString() : "—"
+														]
+													}),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+														className: "px-2 py-2",
+														children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+															className: "rounded-full bg-white/10 px-2 py-1 text-xs text-white/70",
+															children: [cluster.cluster_confidence ?? 0, "%"]
+														})
+													})
+												]
+											}, cluster.network_cluster_id)) })]
 										})]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {

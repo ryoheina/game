@@ -7,6 +7,7 @@ import {
   Hero, Story, Characters, CharacterModal, World, Battle,
   BattleToFeaturesBreak, Technology, Download, Contact, FinalVideo, Footer,
 } from "@/components/sections";
+import type { DownloadProgressState } from "@/components/sections";
 import { submitContact } from "@/lib/analytics.functions";
 import { ensureVisitorSession } from "@/lib/visitor-session";
 
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/")({
 function Home() {
   const navigate = useNavigate();
   const [openChar, setOpenChar] = useState<Parameters<typeof CharacterModal>[0]["c"]>(null);
-  const [downloadStatus, setDownloadStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [downloadStatus, setDownloadStatus] = useState<DownloadProgressState>({ phase: "idle" });
   const [showIntro, setShowIntro] = useState(true);
   const [siteImpact, setSiteImpact] = useState(false);
 
@@ -52,23 +53,61 @@ function Home() {
   }, []);
 
   const handleDownload = useCallback(async () => {
-    setDownloadStatus("loading");
+    setDownloadStatus({ phase: "loading", loadedBytes: 0, totalBytes: 0, percent: 0, elapsedSeconds: 0 });
     const sid = ensureVisitorSession();
     const fileName = "LegendsofEternity.exe";
     const url = `/api/public/download?sid=${encodeURIComponent(sid)}&file=${encodeURIComponent(fileName)}`;
+    const startedAt = performance.now();
 
     try {
+      const response = await fetch(url, { credentials: "same-origin" });
+      if (!response.ok) throw new Error("Download failed");
+
+      const totalBytes = Number(response.headers.get("content-length") || "0");
+      const reader = response.body?.getReader();
+      const chunks: Uint8Array[] = [];
+      let loadedBytes = 0;
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (!value) continue;
+          chunks.push(value);
+          loadedBytes += value.length;
+          const elapsedSeconds = Math.max(0, (performance.now() - startedAt) / 1000);
+          const percent = totalBytes > 0 ? Math.min(99, Math.round((loadedBytes / totalBytes) * 100)) : 0;
+          setDownloadStatus({ phase: "loading", loadedBytes, totalBytes, percent, elapsedSeconds });
+        }
+      } else {
+        const blob = await response.blob();
+        chunks.push(new Uint8Array(await blob.arrayBuffer()));
+        loadedBytes = blob.size;
+      }
+
+      const blob = new Blob(chunks, {
+        type: response.headers.get("content-type") || "application/vnd.microsoft.portable-executable",
+      });
+      const objectUrl = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
-      anchor.href = url;
+      anchor.href = objectUrl;
       anchor.download = fileName;
       anchor.style.display = "none";
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 30_000);
 
-      setDownloadStatus("done");
-    } catch {
-      setDownloadStatus("idle");
+      setDownloadStatus({
+        phase: "complete",
+        loadedBytes: loadedBytes || blob.size,
+        totalBytes: totalBytes || blob.size,
+        percent: 100,
+        elapsedSeconds: Math.max(0, (performance.now() - startedAt) / 1000),
+      });
+    } catch (error) {
+      console.error("Download failed", error);
+      setDownloadStatus({ phase: "error" });
     }
   }, []);
 

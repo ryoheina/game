@@ -54,6 +54,7 @@ type DashboardSuccessResponse = {
   sessions: any[];
   downloads: any[];
   notifications: any[];
+  networkClusters: any[];
   stats: {
     total_sessions: number;
     online_sessions: number;
@@ -144,6 +145,116 @@ function extractErrorLocation(stack?: string) {
   const lines = stack.split("\n").slice(1);
   const firstFrame = lines.find((line) => line.includes("src/")) || lines[0];
   return firstFrame ? firstFrame.trim() : "unknown location";
+}
+
+function getVisitIp(row: any) {
+  return row.visible_ip || row.ip || row.ip_address || null;
+}
+
+function getVisitCountry(row: any) {
+  return row.ip_country || row.country || null;
+}
+
+function getVisitCity(row: any) {
+  return row.ip_city || row.city || null;
+}
+
+function getVisitTimestamp(row: any) {
+  return row.timestamp || row.created_at || row.first_visit || row.started_at || null;
+}
+
+function getIpv4Subnet24(ip: string | null) {
+  if (!ip) return null;
+  const parts = ip.trim().split(".");
+  if (parts.length !== 4) return null;
+  const octets = parts.map((part) => Number(part));
+  if (octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)) return null;
+  return `${octets[0]}.${octets[1]}.${octets[2]}.0/24`;
+}
+
+function getHourBucket(timestamp: string | null) {
+  if (!timestamp) return null;
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return null;
+  date.setMinutes(0, 0, 0);
+  return date.toISOString();
+}
+
+function hashClusterKey(input: string) {
+  let hash = 2166136261;
+  for (let i = 0; i < input.length; i++) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `net_${(hash >>> 0).toString(16).padStart(8, "0")}`;
+}
+
+function buildNetworkClusters(rows: any[]) {
+  const groups = new Map<string, any>();
+
+  for (const row of rows) {
+    const ip = getVisitIp(row);
+    const subnet24 = getIpv4Subnet24(ip);
+    const hourBucket = getHourBucket(getVisitTimestamp(row));
+    if (!ip || !subnet24 || !hourBucket) continue;
+
+    const asn = row.asn ? String(row.asn) : "unknown";
+    const country = getVisitCountry(row) || "unknown";
+    const city = getVisitCity(row) || "unknown";
+    const isp = row.isp || "unknown";
+    const key = [subnet24, asn, country, city, hourBucket].join("|");
+    const existing = groups.get(key) || {
+      network_cluster_id: hashClusterKey(key),
+      subnet_24: subnet24,
+      asn,
+      country,
+      city,
+      isp,
+      hour_bucket: hourBucket,
+      first_seen: getVisitTimestamp(row),
+      last_seen: getVisitTimestamp(row),
+      visit_count: 0,
+      distinct_ips: new Set<string>(),
+    };
+
+    const timestamp = getVisitTimestamp(row);
+    existing.visit_count += 1;
+    existing.distinct_ips.add(ip);
+    if (timestamp && (!existing.first_seen || new Date(timestamp) < new Date(existing.first_seen))) existing.first_seen = timestamp;
+    if (timestamp && (!existing.last_seen || new Date(timestamp) > new Date(existing.last_seen))) existing.last_seen = timestamp;
+    groups.set(key, existing);
+  }
+
+  return Array.from(groups.values())
+    .map((group) => {
+      const ip_list = Array.from(group.distinct_ips).sort();
+      const confidenceParts = [
+        group.subnet_24 !== "unknown",
+        group.asn !== "unknown",
+        group.country !== "unknown",
+        group.city !== "unknown",
+      ].filter(Boolean).length;
+
+      return {
+        network_cluster_id: group.network_cluster_id,
+        subnet_24: group.subnet_24,
+        asn: group.asn,
+        country: group.country,
+        city: group.city,
+        isp: group.isp,
+        hour_bucket: group.hour_bucket,
+        first_seen: group.first_seen,
+        last_seen: group.last_seen,
+        visit_count: group.visit_count,
+        distinct_ip_count: ip_list.length,
+        ip_list,
+        cluster_confidence: Math.round((confidenceParts / 4) * 100),
+        safe_label: `Possible related VPN/network activity: [${ip_list.join(", ")}]`,
+      };
+    })
+    .filter((group) => group.distinct_ip_count > 1)
+    .sort((a, b) => new Date(b.last_seen || 0).getTime() - new Date(a.last_seen || 0).getTime())
+    .slice(0, 25);
 }
 
 async function verifyDatabaseConnectivity(supabaseAdmin: any) {
@@ -302,6 +413,23 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           const notifications: any[] = notificationsRes.data ?? [];
           console.log(`[Dashboard] Notifications fetched: ${notifications.length}`);
 
+          console.log("[Dashboard] Executing visits query for network activity clusters");
+          const visitsRes = await supabaseAdmin.from("visits").select("*").order("created_at", { ascending: false }).limit(500);
+          if (visitsRes.error) {
+            const parsed = parsePostgresError(visitsRes.error.message);
+            console.warn("[Dashboard] Visits query for network clusters failed:", visitsRes.error.message);
+            logAdminRouteFailure(visitsRes.error, { stage: "query_network_clusters", table: parsed.table, column: parsed.column, message: visitsRes.error.message });
+          }
+          const visits: any[] = visitsRes.data ?? [];
+          const networkClusters = buildNetworkClusters([
+            ...visits,
+            ...sessions.map((session: any) => ({
+              ...session,
+              created_at: session.first_visit,
+            })),
+          ]);
+          console.log(`[Dashboard] Network clusters built: ${networkClusters.length}`);
+
           // ===== STEP 6: PROCESS RESULTS =====
           const installedSessionIds = new Set([
             ...downloads
@@ -362,6 +490,7 @@ export const Route = createFileRoute("/api/admin/dashboard")({
             sessions: onlineSessions,
             downloads: enhancedDownloads,
             notifications,
+            networkClusters,
             stats: {
               total_sessions: onlineSessions.length,
               online_sessions: onlineSessions.filter((s: any) => s.status === "online").length,
