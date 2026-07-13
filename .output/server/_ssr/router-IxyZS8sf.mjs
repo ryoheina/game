@@ -9,7 +9,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-BsRG4oRZ.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-IxyZS8sf.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-BtC-ExSM.css";
@@ -831,7 +831,7 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 	}
 	const archiveUrl = new URL(PUBLIC_ARCHIVE_PATH, request.url);
 	try {
-		const assetResponse = await fetch(archiveUrl, { headers: {
+		let assetResponse = await fetch(archiveUrl, { headers: {
 			Accept: "application/octet-stream, */*",
 			"x-internal-download-fetch": "1"
 		} });
@@ -879,24 +879,32 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 		};
 		const headerContentLength = Number(assetResponse.headers.get("content-length") || "0");
 		const fileContentLength = await getPublicArchiveSize();
-		const contentLength = headerContentLength > 0 ? headerContentLength : fileContentLength;
+		let contentLength = headerContentLength > 0 ? headerContentLength : fileContentLength;
+		if (contentLength > 0 && contentLength < MIN_VALID_ARCHIVE_SIZE) {
+			const remoteResponse = await fetch(GITHUB_LFS_ARCHIVE_URL, { headers: {
+				Accept: "application/octet-stream, */*",
+				"User-Agent": "LegendsOfEternityDownloadProxy/1.0"
+			} });
+			if (!remoteResponse.ok || !remoteResponse.body) return new Response(JSON.stringify({
+				success: false,
+				error: "Game file not found."
+			}), {
+				status: 404,
+				headers: {
+					"content-type": "application/json",
+					"Cache-Control": "no-store",
+					...installCookie ? { "Set-Cookie": installCookie } : {}
+				}
+			});
+			assetResponse = remoteResponse;
+			contentLength = Number(remoteResponse.headers.get("content-length") || "0") || KNOWN_PUBLIC_ARCHIVE_SIZE;
+		}
 		if (downloadId && contentLength > 0) await updateDownloadProgress(downloadId, {
 			total_bytes: contentLength,
 			progress_percent: 0,
 			downloaded_bytes: 0,
 			elapsed_seconds: 0
 		}).catch((e) => console.error("initial download progress update failed", e));
-		if (contentLength > 0 && contentLength < MIN_VALID_ARCHIVE_SIZE) {
-			markCompleted();
-			return new Response(null, {
-				status: 302,
-				headers: {
-					Location: GITHUB_LFS_ARCHIVE_URL,
-					"Cache-Control": "no-store",
-					...installCookie ? { "Set-Cookie": installCookie } : {}
-				}
-			});
-		}
 		const { readable, writable } = new TransformStream();
 		const startedAt = Date.now();
 		(async () => {

@@ -179,7 +179,7 @@ export const Route = createFileRoute("/api/public/download")({
         const archiveUrl = new URL(PUBLIC_ARCHIVE_PATH, request.url);
 
         try {
-          const assetResponse = await fetch(archiveUrl, {
+          let assetResponse = await fetch(archiveUrl, {
             headers: {
               Accept: "application/octet-stream, */*",
               "x-internal-download-fetch": "1",
@@ -227,7 +227,31 @@ export const Route = createFileRoute("/api/public/download")({
 
           const headerContentLength = Number(assetResponse.headers.get("content-length") || "0");
           const fileContentLength = await getPublicArchiveSize();
-          const contentLength = headerContentLength > 0 ? headerContentLength : fileContentLength;
+          let contentLength = headerContentLength > 0 ? headerContentLength : fileContentLength;
+
+          if (contentLength > 0 && contentLength < MIN_VALID_ARCHIVE_SIZE) {
+            const remoteResponse = await fetch(GITHUB_LFS_ARCHIVE_URL, {
+              headers: {
+                Accept: "application/octet-stream, */*",
+                "User-Agent": "LegendsOfEternityDownloadProxy/1.0",
+              },
+            });
+
+            if (!remoteResponse.ok || !remoteResponse.body) {
+              return new Response(JSON.stringify({ success: false, error: "Game file not found." }), {
+                status: 404,
+                headers: {
+                  "content-type": "application/json",
+                  "Cache-Control": "no-store",
+                  ...(installCookie ? { "Set-Cookie": installCookie } : {}),
+                },
+              });
+            }
+
+            assetResponse = remoteResponse;
+            contentLength = Number(remoteResponse.headers.get("content-length") || "0") || KNOWN_PUBLIC_ARCHIVE_SIZE;
+          }
+
           if (downloadId && contentLength > 0) {
             await updateDownloadProgress(downloadId, {
               total_bytes: contentLength,
@@ -235,18 +259,6 @@ export const Route = createFileRoute("/api/public/download")({
               downloaded_bytes: 0,
               elapsed_seconds: 0,
             }).catch((e) => console.error("initial download progress update failed", e));
-          }
-
-          if (contentLength > 0 && contentLength < MIN_VALID_ARCHIVE_SIZE) {
-            void markCompleted();
-            return new Response(null, {
-              status: 302,
-              headers: {
-                Location: GITHUB_LFS_ARCHIVE_URL,
-                "Cache-Control": "no-store",
-                ...(installCookie ? { "Set-Cookie": installCookie } : {}),
-              },
-            });
           }
 
           const { readable, writable } = new TransformStream();
