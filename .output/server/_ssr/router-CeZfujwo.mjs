@@ -9,7 +9,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-CBkugXuj.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-CeZfujwo.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-BtC-ExSM.css";
@@ -1977,6 +1977,15 @@ function getInstallEventTime(event) {
 function getInstallEventFile(event) {
 	return normalizeFileName(event.file_name || event.filename || event.payload?.file_name);
 }
+function getVisitPath(event) {
+	const path = event.path || event.pathname || event.url || event.payload?.path;
+	if (typeof path !== "string") return "";
+	try {
+		return path.startsWith("http") ? new URL(path).pathname : path;
+	} catch {
+		return path;
+	}
+}
 function installEventMatchesDownload(event, download) {
 	if (getInstallEventFile(event) !== normalizeFileName(download.file_name)) return false;
 	if (event.download_id && download.id && event.download_id === download.id) return true;
@@ -2174,7 +2183,8 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 				message: visitsRes.error.message
 			});
 		}
-		const networkClusters = buildNetworkClusters([...visitsRes.data ?? [], ...sessions.map((session) => ({
+		const visits = visitsRes.data ?? [];
+		const networkClusters = buildNetworkClusters([...visits, ...sessions.map((session) => ({
 			...session,
 			created_at: session.first_visit
 		}))]);
@@ -2194,12 +2204,24 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 			...extractions.map((extraction) => extraction.ip).filter(Boolean),
 			...notifications.filter((notification) => notification.type === "installed" || notification.title === "Game Installed").map((notification) => notification.ip_address || notification.payload?.ip_address).filter(Boolean)
 		]);
-		const installedEvents = [...extractions, ...notifications.filter((notification) => notification.type === "installed" || notification.title === "Game Installed").map((notification) => ({
-			...notification,
-			file_name: notification.filename || notification.payload?.file_name,
-			download_id: notification.payload?.download_id,
-			ip: notification.ip_address || notification.payload?.ip_address
-		}))];
+		const installedVisitEvents = visits.filter((visit) => getVisitPath(visit) === "/installed");
+		for (const visit of installedVisitEvents) {
+			if (visit.session_id) installedSessionIds.add(visit.session_id);
+			if (visit.ip) installedIps.add(visit.ip);
+		}
+		const installedEvents = [
+			...extractions,
+			...installedVisitEvents.map((visit) => ({
+				...visit,
+				file_name: "LegendsofEternity.exe"
+			})),
+			...notifications.filter((notification) => notification.type === "installed" || notification.title === "Game Installed").map((notification) => ({
+				...notification,
+				file_name: notification.filename || notification.payload?.file_name,
+				download_id: notification.payload?.download_id,
+				ip: notification.ip_address || notification.payload?.ip_address
+			}))
+		];
 		for (const extraction of extractions) {
 			if (extraction.session_id) installedSessionIds.add(extraction.session_id);
 			if (!extraction.session_id && extraction.download_id) {

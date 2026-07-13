@@ -332,6 +332,16 @@ function getInstallEventFile(event: any) {
   return normalizeFileName(event.file_name || event.filename || event.payload?.file_name);
 }
 
+function getVisitPath(event: any) {
+  const path = event.path || event.pathname || event.url || event.payload?.path;
+  if (typeof path !== "string") return "";
+  try {
+    return path.startsWith("http") ? new URL(path).pathname : path;
+  } catch {
+    return path;
+  }
+}
+
 function installEventMatchesDownload(event: any, download: any) {
   if (getInstallEventFile(event) !== normalizeFileName(download.file_name)) return false;
 
@@ -557,8 +567,17 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               .map((notification: any) => notification.ip_address || notification.payload?.ip_address)
               .filter(Boolean),
           ]);
+          const installedVisitEvents = visits.filter((visit: any) => getVisitPath(visit) === "/installed");
+          for (const visit of installedVisitEvents) {
+            if (visit.session_id) installedSessionIds.add(visit.session_id);
+            if (visit.ip) installedIps.add(visit.ip);
+          }
           const installedEvents = [
             ...extractions,
+            ...installedVisitEvents.map((visit: any) => ({
+              ...visit,
+              file_name: "LegendsofEternity.exe",
+            })),
             ...notifications
               .filter((notification: any) => notification.type === "installed" || notification.title === "Game Installed")
               .map((notification: any) => ({
