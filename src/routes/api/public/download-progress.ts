@@ -80,45 +80,28 @@ async function updateDownload(downloadId: string | null, sessionId: string | nul
 async function insertFallbackDownload(request: Request, sessionId: string | null, data: Record<string, unknown>) {
   const meta = getClientMeta(request);
   const country = meta.country ?? (await resolveCountry(request.headers, meta.ip));
-  const now = new Date().toISOString();
-  const baseRecord = {
+  const minimalRecord = {
     file_name: PUBLIC_ARCHIVE_NAME,
-    session_id: sessionId,
     ip: meta.ip,
     country,
     browser: meta.browser,
     os: meta.os,
-    device: meta.device,
     user_agent: meta.ua,
-    started_at: now,
-    ...data,
   };
 
-  let record: Record<string, unknown> = { ...baseRecord };
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    const result = await supabaseAdmin.from("downloads").insert(record).select("id").maybeSingle();
-    if (!result.error) return result.data?.id ?? null;
+  const result = await supabaseAdmin.from("downloads").insert(minimalRecord).select("id").maybeSingle();
+  if (result.error) throw result.error;
 
-    const message = result.error.message;
-    if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(message)) {
-      delete record.downloaded_bytes;
-      delete record.total_bytes;
-      delete record.progress_percent;
-      delete record.elapsed_seconds;
-      continue;
-    }
-    if (/session_id|device|started_at|completed|completed_at/i.test(message)) {
-      delete record.session_id;
-      delete record.device;
-      delete record.started_at;
-      delete record.completed;
-      delete record.completed_at;
-      continue;
-    }
-    throw result.error;
+  const id = result.data?.id ?? null;
+  if (id) {
+    await updateDownloadById(id, {
+      session_id: sessionId,
+      device: meta.device,
+      started_at: new Date().toISOString(),
+      ...data,
+    });
   }
-
-  return null;
+  return id;
 }
 
 export const Route = createFileRoute("/api/public/download-progress")({

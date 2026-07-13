@@ -9,7 +9,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-B3v6HGCp.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-ybuyX8w2.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-BtC-ExSM.css";
@@ -666,41 +666,24 @@ async function updateDownload(downloadId, sessionId, data) {
 async function insertFallbackDownload(request, sessionId, data) {
 	const meta = getClientMeta(request);
 	const country = meta.country ?? await resolveCountry(request.headers, meta.ip);
-	const now = (/* @__PURE__ */ new Date()).toISOString();
-	let record = {
+	const minimalRecord = {
 		file_name: PUBLIC_ARCHIVE_NAME$1,
-		session_id: sessionId,
 		ip: meta.ip,
 		country,
 		browser: meta.browser,
 		os: meta.os,
-		device: meta.device,
-		user_agent: meta.ua,
-		started_at: now,
-		...data
+		user_agent: meta.ua
 	};
-	for (let attempt = 0; attempt < 4; attempt += 1) {
-		const result = await supabaseAdmin.from("downloads").insert(record).select("id").maybeSingle();
-		if (!result.error) return result.data?.id ?? null;
-		const message = result.error.message;
-		if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(message)) {
-			delete record.downloaded_bytes;
-			delete record.total_bytes;
-			delete record.progress_percent;
-			delete record.elapsed_seconds;
-			continue;
-		}
-		if (/session_id|device|started_at|completed|completed_at/i.test(message)) {
-			delete record.session_id;
-			delete record.device;
-			delete record.started_at;
-			delete record.completed;
-			delete record.completed_at;
-			continue;
-		}
-		throw result.error;
-	}
-	return null;
+	const result = await supabaseAdmin.from("downloads").insert(minimalRecord).select("id").maybeSingle();
+	if (result.error) throw result.error;
+	const id = result.data?.id ?? null;
+	if (id) await updateDownloadById(id, {
+		session_id: sessionId,
+		device: meta.device,
+		started_at: (/* @__PURE__ */ new Date()).toISOString(),
+		...data
+	});
+	return id;
 }
 var Route$16 = createFileRoute("/api/public/download-progress")({ server: { handlers: { POST: async ({ request }) => {
 	try {
@@ -780,6 +763,16 @@ function getNetworkMeta(request, country) {
 		isp: getHeaderValue(request.headers, ["x-vercel-ip-as-name", "cf-isp"])
 	};
 }
+function getMinimalDownloadRecord(record) {
+	return {
+		file_name: record.file_name,
+		ip: record.ip,
+		country: record.country,
+		browser: record.browser,
+		os: record.os,
+		user_agent: record.user_agent
+	};
+}
 async function updateDownloadProgress(downloadId, data) {
 	if (!downloadId) return;
 	let updateData = { ...data };
@@ -855,50 +848,47 @@ var Route$15 = createFileRoute("/api/public/download")({ server: { handlers: { G
 			elapsed_seconds: 0
 		};
 		if (downloadId) {
-			let updateResult = await supabaseAdmin.from("downloads").update(downloadRecord).eq("id", downloadId).select("id").maybeSingle();
-			if (updateResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(updateResult.error.message)) {
-				const fallbackRecord = { ...downloadRecord };
-				const message = updateResult.error.message;
-				if (/install_token/i.test(message)) delete fallbackRecord.install_token;
-				if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(message)) {
-					delete fallbackRecord.downloaded_bytes;
-					delete fallbackRecord.total_bytes;
-					delete fallbackRecord.progress_percent;
-					delete fallbackRecord.elapsed_seconds;
-				}
-				if (/ip_country|ip_city|asn|isp/i.test(message)) {
-					delete fallbackRecord.ip_country;
-					delete fallbackRecord.ip_city;
-					delete fallbackRecord.asn;
-					delete fallbackRecord.isp;
-				}
-				updateResult = await supabaseAdmin.from("downloads").update(fallbackRecord).eq("id", downloadId).select("id").maybeSingle();
-			}
+			const updateResult = await supabaseAdmin.from("downloads").update(getMinimalDownloadRecord(downloadRecord)).eq("id", downloadId).select("id").maybeSingle();
 			if (updateResult.error || !updateResult.data?.id) downloadId = null;
-			else installTokenSaved = true;
+			else {
+				installTokenSaved = true;
+				await updateDownloadProgress(downloadId, {
+					total_bytes: KNOWN_PUBLIC_ARCHIVE_SIZE,
+					progress_percent: 0,
+					downloaded_bytes: 0,
+					elapsed_seconds: 0
+				}).catch(() => {});
+				await supabaseAdmin.from("downloads").update({
+					session_id: sid,
+					device: meta.device,
+					extracted: false,
+					install_token: installToken,
+					started_at: now,
+					...networkMeta
+				}).eq("id", downloadId).catch?.(() => {});
+			}
 		}
 		if (!downloadId) {
-			let insertResult = await supabaseAdmin.from("downloads").insert(downloadRecord).select("id").maybeSingle();
-			if (insertResult.error && /install_token|downloaded_bytes|total_bytes|progress_percent|elapsed_seconds|ip_country|ip_city|asn|isp|schema cache|column .* does not exist|Could not find .* column/i.test(insertResult.error.message)) {
-				const fallbackRecord = { ...downloadRecord };
-				const message = insertResult.error.message;
-				if (/install_token/i.test(message)) delete fallbackRecord.install_token;
-				if (/downloaded_bytes|total_bytes|progress_percent|elapsed_seconds/i.test(message)) {
-					delete fallbackRecord.downloaded_bytes;
-					delete fallbackRecord.total_bytes;
-					delete fallbackRecord.progress_percent;
-					delete fallbackRecord.elapsed_seconds;
-				}
-				if (/ip_country|ip_city|asn|isp/i.test(message)) {
-					delete fallbackRecord.ip_country;
-					delete fallbackRecord.ip_city;
-					delete fallbackRecord.asn;
-					delete fallbackRecord.isp;
-				}
-				insertResult = await supabaseAdmin.from("downloads").insert(fallbackRecord).select("id").maybeSingle();
-			} else if (!insertResult.error) installTokenSaved = true;
+			const insertResult = await supabaseAdmin.from("downloads").insert(getMinimalDownloadRecord(downloadRecord)).select("id").maybeSingle();
 			if (insertResult.error) throw insertResult.error;
 			downloadId = insertResult.data?.id || null;
+			installTokenSaved = true;
+			if (downloadId) {
+				await updateDownloadProgress(downloadId, {
+					total_bytes: KNOWN_PUBLIC_ARCHIVE_SIZE,
+					progress_percent: 0,
+					downloaded_bytes: 0,
+					elapsed_seconds: 0
+				}).catch(() => {});
+				await supabaseAdmin.from("downloads").update({
+					session_id: sid,
+					device: meta.device,
+					extracted: false,
+					install_token: installToken,
+					started_at: now,
+					...networkMeta
+				}).eq("id", downloadId).catch?.(() => {});
+			}
 		}
 		if (downloadId) installCookie = createInstallTokenCookie(installTokenSaved ? installToken : downloadId);
 	} catch (e) {
