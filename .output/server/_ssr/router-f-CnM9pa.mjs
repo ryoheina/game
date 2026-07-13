@@ -9,7 +9,7 @@ import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import processModule from "node:process";
 import { Buffer } from "node:buffer";
 import crypto$1 from "node:crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-B3RgDUPM.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-f-CnM9pa.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-BtC-ExSM.css";
@@ -506,7 +506,7 @@ function isUuid$1(value) {
 	return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 function isSchemaMismatch(error) {
-	return /install_token|installed_at|schema cache|column .* does not exist|Could not find .* column/i.test(error?.message || "");
+	return /install_token|installed_at|file_name|device|schema cache|column .* does not exist|Could not find .* column/i.test(error?.message || "");
 }
 async function findDownloadByInstallToken(supabaseAdmin, token) {
 	const byInstallToken = await supabaseAdmin.from("downloads").select("id,session_id,ip,file_name,install_token").eq("install_token", token).maybeSingle();
@@ -539,13 +539,22 @@ async function findLatestDownloadByIp(supabaseAdmin, ip, fileName) {
 		data: null,
 		error: null
 	};
-	let byStartedAt = await supabaseAdmin.from("downloads").select("id,session_id,ip,file_name").eq("ip", ip).eq("file_name", fileName).order("started_at", { ascending: false }).limit(1).maybeSingle();
+	let byStartedAt = await supabaseAdmin.from("downloads").select("id,session_id,ip,file_name").eq("ip", ip).order("started_at", { ascending: false }).limit(1).maybeSingle();
 	if (!byStartedAt.error) return {
 		data: byStartedAt.data,
 		error: null
 	};
 	if (!/started_at|schema cache|column .* does not exist|Could not find .* column/i.test(byStartedAt.error.message)) return byStartedAt;
-	return supabaseAdmin.from("downloads").select("id,session_id,ip,file_name").eq("ip", ip).eq("file_name", fileName).order("created_at", { ascending: false }).limit(1).maybeSingle();
+	return supabaseAdmin.from("downloads").select("id,session_id,ip,file_name").eq("ip", ip).order("created_at", { ascending: false }).limit(1).maybeSingle();
+}
+async function insertExtraction(supabaseAdmin, data) {
+	let result = await supabaseAdmin.from("extractions").insert(data);
+	if (!result.error || !isSchemaMismatch(result.error)) return result;
+	const fallback = { ...data };
+	delete fallback.file_name;
+	delete fallback.device;
+	result = await supabaseAdmin.from("extractions").insert(fallback);
+	return result;
 }
 var Route$17 = createFileRoute("/api/public/installed")({ server: { handlers: { POST: async ({ request }) => {
 	try {
@@ -562,17 +571,6 @@ var Route$17 = createFileRoute("/api/public/installed")({ server: { handlers: { 
 			if (byIp.error) throw byIp.error;
 			download = byIp.data;
 		}
-		if (!download?.id) return new Response(JSON.stringify({
-			success: false,
-			error: "No matching download found for install event."
-		}), {
-			status: 202,
-			headers: {
-				"content-type": "application/json",
-				"Cache-Control": "no-store",
-				"Set-Cookie": clearInstallTokenCookie()
-			}
-		});
 		const sessionId = download?.session_id || bodySessionId;
 		const installedFileName = download?.file_name || fileName;
 		if (sessionId) await recordVisit(request, {
@@ -580,30 +578,33 @@ var Route$17 = createFileRoute("/api/public/installed")({ server: { handlers: { 
 			path: "/installed"
 		});
 		const installedAt = (/* @__PURE__ */ new Date()).toISOString();
-		let updateByToken = await supabaseAdmin.from("downloads").update({
-			extracted: true,
-			completed: true,
-			completed_at: installedAt,
-			installed_at: installedAt
-		}).eq("id", download.id);
-		if (updateByToken.error && isSchemaMismatch(updateByToken.error)) updateByToken = await supabaseAdmin.from("downloads").update({
-			extracted: true,
-			completed: true,
-			completed_at: installedAt
-		}).eq("id", download.id);
-		if (updateByToken.error) throw updateByToken.error;
-		await supabaseAdmin.from("extractions").insert({
-			download_id: download.id,
+		if (download?.id) {
+			let updateByToken = await supabaseAdmin.from("downloads").update({
+				extracted: true,
+				completed: true,
+				completed_at: installedAt,
+				installed_at: installedAt
+			}).eq("id", download.id);
+			if (updateByToken.error && isSchemaMismatch(updateByToken.error)) updateByToken = await supabaseAdmin.from("downloads").update({
+				extracted: true,
+				completed: true,
+				completed_at: installedAt
+			}).eq("id", download.id);
+			if (updateByToken.error) throw updateByToken.error;
+		}
+		const extractionResult = await insertExtraction(supabaseAdmin, {
+			download_id: download?.id ?? null,
 			session_id: sessionId,
 			ip: meta.ip,
 			device: meta.device,
 			file_name: installedFileName
 		});
+		if (extractionResult.error) throw extractionResult.error;
 		await insertAdminNotification(supabaseAdmin, {
 			type: "installed",
 			type_detail: "installed",
 			title: "Game Installed",
-			body: `${sessionId ? sessionId.slice(0, 8) : "unknown"} - ${installedFileName}`,
+			body: `${sessionId ? sessionId.slice(0, 8) : meta.ip || "unknown"} - ${installedFileName}`,
 			session_id: sessionId,
 			ip_address: meta.ip,
 			country: meta.country,
@@ -615,7 +616,8 @@ var Route$17 = createFileRoute("/api/public/installed")({ server: { handlers: { 
 				session_id: sessionId,
 				ip_address: meta.ip,
 				file_name: installedFileName,
-				installed: true
+				installed: true,
+				matched_download: Boolean(download?.id)
 			},
 			read: false,
 			delivered: false
@@ -2119,8 +2121,16 @@ var Route$3 = createFileRoute("/api/admin/dashboard")({ server: { handlers: { GE
 			created_at: session.first_visit
 		}))]);
 		console.log(`[Dashboard] Network clusters built: ${networkClusters.length}`);
-		const installedSessionIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.session_id).filter(Boolean), ...extractions.map((extraction) => extraction.session_id).filter(Boolean)]);
-		const installedDownloadIds = /* @__PURE__ */ new Set([...downloads.filter((download) => download.extracted === true).map((download) => download.id).filter(Boolean), ...extractions.map((extraction) => extraction.download_id).filter(Boolean)]);
+		const installedSessionIds = /* @__PURE__ */ new Set([
+			...downloads.filter((download) => download.extracted === true).map((download) => download.session_id).filter(Boolean),
+			...extractions.map((extraction) => extraction.session_id).filter(Boolean),
+			...notifications.filter((notification) => notification.type === "installed" || notification.title === "Game Installed").map((notification) => notification.session_id || notification.payload?.session_id).filter(Boolean)
+		]);
+		const installedDownloadIds = /* @__PURE__ */ new Set([
+			...downloads.filter((download) => download.extracted === true).map((download) => download.id).filter(Boolean),
+			...extractions.map((extraction) => extraction.download_id).filter(Boolean),
+			...notifications.filter((notification) => notification.type === "installed" || notification.title === "Game Installed").map((notification) => notification.payload?.download_id).filter(Boolean)
+		]);
 		const installedIps = /* @__PURE__ */ new Set([
 			...downloads.filter((download) => download.extracted === true).map((download) => download.ip).filter(Boolean),
 			...extractions.map((extraction) => extraction.ip).filter(Boolean),

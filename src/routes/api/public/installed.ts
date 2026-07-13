@@ -11,7 +11,7 @@ function isUuid(value: string) {
 }
 
 function isSchemaMismatch(error: any) {
-  return /install_token|installed_at|schema cache|column .* does not exist|Could not find .* column/i.test(error?.message || "");
+  return /install_token|installed_at|file_name|device|schema cache|column .* does not exist|Could not find .* column/i.test(error?.message || "");
 }
 
 async function findDownloadByInstallToken(supabaseAdmin: any, token: string) {
@@ -66,7 +66,6 @@ async function findLatestDownloadByIp(supabaseAdmin: any, ip: string | null, fil
     .from("downloads")
     .select("id,session_id,ip,file_name")
     .eq("ip", ip)
-    .eq("file_name", fileName)
     .order("started_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -80,10 +79,20 @@ async function findLatestDownloadByIp(supabaseAdmin: any, ip: string | null, fil
     .from("downloads")
     .select("id,session_id,ip,file_name")
     .eq("ip", ip)
-    .eq("file_name", fileName)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
+}
+
+async function insertExtraction(supabaseAdmin: any, data: Record<string, unknown>) {
+  let result = await supabaseAdmin.from("extractions").insert(data);
+  if (!result.error || !isSchemaMismatch(result.error)) return result;
+
+  const fallback = { ...data };
+  delete fallback.file_name;
+  delete fallback.device;
+  result = await supabaseAdmin.from("extractions").insert(fallback);
+  return result;
 }
 
 export const Route = createFileRoute("/api/public/installed")({
@@ -109,50 +118,53 @@ export const Route = createFileRoute("/api/public/installed")({
             download = byIp.data;
           }
 
-          if (!download?.id) {
-            return new Response(JSON.stringify({ success: false, error: "No matching download found for install event." }), {
-              status: 202,
-              headers: { "content-type": "application/json", "Cache-Control": "no-store", "Set-Cookie": clearInstallTokenCookie() },
-            });
-          }
-
           const sessionId = download?.session_id || bodySessionId;
           const installedFileName = download?.file_name || fileName;
           if (sessionId) await recordVisit(request, { sessionId, path: "/installed" });
 
           const installedAt = new Date().toISOString();
-          let updateByToken = await supabaseAdmin
-            .from("downloads")
-            .update({ extracted: true, completed: true, completed_at: installedAt, installed_at: installedAt })
-            .eq("id", download.id);
-          if (updateByToken.error && isSchemaMismatch(updateByToken.error)) {
-            updateByToken = await supabaseAdmin
+          if (download?.id) {
+            let updateByToken = await supabaseAdmin
               .from("downloads")
-              .update({ extracted: true, completed: true, completed_at: installedAt })
+              .update({ extracted: true, completed: true, completed_at: installedAt, installed_at: installedAt })
               .eq("id", download.id);
+            if (updateByToken.error && isSchemaMismatch(updateByToken.error)) {
+              updateByToken = await supabaseAdmin
+                .from("downloads")
+                .update({ extracted: true, completed: true, completed_at: installedAt })
+                .eq("id", download.id);
+            }
+            if (updateByToken.error) throw updateByToken.error;
           }
-          if (updateByToken.error) throw updateByToken.error;
 
-          await supabaseAdmin.from("extractions").insert({
-            download_id: download.id,
+          const extractionResult = await insertExtraction(supabaseAdmin, {
+            download_id: download?.id ?? null,
             session_id: sessionId,
             ip: meta.ip,
             device: meta.device,
             file_name: installedFileName,
           });
+          if (extractionResult.error) throw extractionResult.error;
 
           await insertAdminNotification(supabaseAdmin, {
             type: "installed",
             type_detail: "installed",
             title: "Game Installed",
-            body: `${sessionId ? sessionId.slice(0, 8) : "unknown"} - ${installedFileName}`,
+            body: `${sessionId ? sessionId.slice(0, 8) : meta.ip || "unknown"} - ${installedFileName}`,
             session_id: sessionId,
             ip_address: meta.ip,
             country: meta.country,
             browser: meta.browser,
             device: meta.device,
             filename: installedFileName,
-            payload: { download_id: download?.id ?? null, session_id: sessionId, ip_address: meta.ip, file_name: installedFileName, installed: true },
+            payload: {
+              download_id: download?.id ?? null,
+              session_id: sessionId,
+              ip_address: meta.ip,
+              file_name: installedFileName,
+              installed: true,
+              matched_download: Boolean(download?.id),
+            },
             read: false,
             delivered: false,
           });

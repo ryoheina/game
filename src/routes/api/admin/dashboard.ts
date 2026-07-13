@@ -498,6 +498,10 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               .map((download: any) => download.session_id)
               .filter(Boolean),
             ...extractions.map((extraction: any) => extraction.session_id).filter(Boolean),
+            ...notifications
+              .filter((notification: any) => notification.type === "installed" || notification.title === "Game Installed")
+              .map((notification: any) => notification.session_id || notification.payload?.session_id)
+              .filter(Boolean),
           ]);
           const installedDownloadIds = new Set([
             ...downloads
@@ -505,6 +509,10 @@ export const Route = createFileRoute("/api/admin/dashboard")({
               .map((download: any) => download.id)
               .filter(Boolean),
             ...extractions.map((extraction: any) => extraction.download_id).filter(Boolean),
+            ...notifications
+              .filter((notification: any) => notification.type === "installed" || notification.title === "Game Installed")
+              .map((notification: any) => notification.payload?.download_id)
+              .filter(Boolean),
           ]);
           const installedIps = new Set([
             ...downloads
