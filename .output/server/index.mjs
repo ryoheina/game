@@ -64,19 +64,19 @@ var public_assets_data_default = {
 		"size": 2332950,
 		"path": "../public/game1.png"
 	},
-	"/hero4.mp4": {
-		"type": "video/mp4",
-		"etag": "\"21650c-8nUVWn8bdCSR5DDpb4VVhIiCdFs\"",
-		"mtime": "2026-07-09T16:30:11.000Z",
-		"size": 2188556,
-		"path": "../public/hero4.mp4"
-	},
 	"/game3.png": {
 		"type": "image/png",
 		"etag": "\"26612d-e1fd+PEpVzvuzXAZZrs36ZT4bEc\"",
 		"mtime": "2026-07-06T10:39:51.873Z",
 		"size": 2515245,
 		"path": "../public/game3.png"
+	},
+	"/hero4.mp4": {
+		"type": "video/mp4",
+		"etag": "\"21650c-8nUVWn8bdCSR5DDpb4VVhIiCdFs\"",
+		"mtime": "2026-07-09T16:30:11.000Z",
+		"size": 2188556,
+		"path": "../public/hero4.mp4"
 	},
 	"/play10.mp4": {
 		"type": "video/mp4",
@@ -106,19 +106,19 @@ var public_assets_data_default = {
 		"size": 2540053,
 		"path": "../public/play5.mp4"
 	},
-	"/AZRAEL.png": {
-		"type": "image/png",
-		"etag": "\"28ef86-IC8QMM4enbaZRfvGlQOkyQeFbGk\"",
-		"mtime": "2026-07-06T10:39:51.756Z",
-		"size": 2682758,
-		"path": "../public/AZRAEL.png"
-	},
 	"/play7.mp4": {
 		"type": "video/mp4",
 		"etag": "\"26f4b2-Cui64ZzEmtBtqvAUwTdNgB1xg8M\"",
 		"mtime": "2026-07-11T19:33:46.585Z",
 		"size": 2553010,
 		"path": "../public/play7.mp4"
+	},
+	"/AZRAEL.png": {
+		"type": "image/png",
+		"etag": "\"28ef86-IC8QMM4enbaZRfvGlQOkyQeFbGk\"",
+		"mtime": "2026-07-06T10:39:51.756Z",
+		"size": 2682758,
+		"path": "../public/AZRAEL.png"
 	},
 	"/Background.png": {
 		"type": "image/png",
@@ -165,7 +165,7 @@ var public_assets_data_default = {
 	"/assets/admin-Bpj72KNy.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"6d9d-sMWQ1etzO0/vyPnWUDmxeQNJqXg\"",
-		"mtime": "2026-07-13T16:53:46.209Z",
+		"mtime": "2026-07-14T10:01:45.265Z",
 		"size": 28061,
 		"path": "../public/assets/admin-Bpj72KNy.js"
 	},
@@ -179,7 +179,7 @@ var public_assets_data_default = {
 	"/assets/auth-Dp94kY3U.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"a21-PxdvtxYtaO8dbxM+opsdUEExnUA\"",
-		"mtime": "2026-07-13T16:53:46.211Z",
+		"mtime": "2026-07-14T10:01:45.267Z",
 		"size": 2593,
 		"path": "../public/assets/auth-Dp94kY3U.js"
 	},
@@ -190,61 +190,54 @@ var public_assets_data_default = {
 		"size": 3985597,
 		"path": "../public/background2.mp4"
 	},
-	"/assets/client-BgbAX7Dh.js": {
-		"type": "text/javascript; charset=utf-8",
-		"etag": "\"31a24-kdiLSeYf7Npbp+DFjikhbHutLWs\"",
-		"mtime": "2026-07-13T16:53:46.214Z",
-		"size": 203300,
-		"path": "../public/assets/client-BgbAX7Dh.js"
-	},
 	"/assets/fx-CGwUS9qe.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"81c-KGAjSMQ5RTLe0WjhzWsHpKPYTN0\"",
-		"mtime": "2026-07-13T16:53:46.216Z",
+		"mtime": "2026-07-14T10:01:45.270Z",
 		"size": 2076,
 		"path": "../public/assets/fx-CGwUS9qe.js"
 	},
-	"/assets/index-tv1bIFPI.js": {
+	"/assets/client-BgbAX7Dh.js": {
 		"type": "text/javascript; charset=utf-8",
-		"etag": "\"5345a-y60TxZFtyJeNQ6d6eDX7QhUczhc\"",
-		"mtime": "2026-07-13T16:53:46.206Z",
-		"size": 341082,
-		"path": "../public/assets/index-tv1bIFPI.js"
+		"etag": "\"31a24-kdiLSeYf7Npbp+DFjikhbHutLWs\"",
+		"mtime": "2026-07-14T10:01:45.269Z",
+		"size": 203300,
+		"path": "../public/assets/client-BgbAX7Dh.js"
 	},
 	"/assets/installed-B5Qg79Ut.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"62a-UDSSAuPEmm7KahwvPS1PaTMFsj8\"",
-		"mtime": "2026-07-13T16:53:46.218Z",
+		"mtime": "2026-07-14T10:01:45.271Z",
 		"size": 1578,
 		"path": "../public/assets/installed-B5Qg79Ut.js"
+	},
+	"/assets/index-tv1bIFPI.js": {
+		"type": "text/javascript; charset=utf-8",
+		"etag": "\"5345a-y60TxZFtyJeNQ6d6eDX7QhUczhc\"",
+		"mtime": "2026-07-14T10:01:45.264Z",
+		"size": 341082,
+		"path": "../public/assets/index-tv1bIFPI.js"
 	},
 	"/assets/jsx-runtime-D8nDyRPw.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"2210-qrBAUPDOR8ROKpBVNEla8AGnGKU\"",
-		"mtime": "2026-07-13T16:53:46.220Z",
+		"mtime": "2026-07-14T10:01:45.273Z",
 		"size": 8720,
 		"path": "../public/assets/jsx-runtime-D8nDyRPw.js"
 	},
 	"/assets/me-Di_MdLF7.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"d65-WVWQqzBZNAzZ/w6QJYZxUj14x2I\"",
-		"mtime": "2026-07-13T16:53:46.222Z",
+		"mtime": "2026-07-14T10:01:45.274Z",
 		"size": 3429,
 		"path": "../public/assets/me-Di_MdLF7.js"
 	},
 	"/assets/route-DwB9Up5-.js": {
 		"type": "text/javascript; charset=utf-8",
 		"etag": "\"8d-ouatW5bWTNVO5IclxMkaSrPFZi4\"",
-		"mtime": "2026-07-13T16:53:46.223Z",
+		"mtime": "2026-07-14T10:01:45.275Z",
 		"size": 141,
 		"path": "../public/assets/route-DwB9Up5-.js"
-	},
-	"/assets/routes-BZ4lm8dv.js": {
-		"type": "text/javascript; charset=utf-8",
-		"etag": "\"25be8-uoQ+Ha9BXqrpuq2aqy+egcAXBBM\"",
-		"mtime": "2026-07-13T16:53:46.225Z",
-		"size": 154600,
-		"path": "../public/assets/routes-BZ4lm8dv.js"
 	},
 	"/Final.mp4": {
 		"type": "video/mp4",
@@ -253,10 +246,17 @@ var public_assets_data_default = {
 		"size": 4654077,
 		"path": "../public/Final.mp4"
 	},
+	"/assets/routes-BZ4lm8dv.js": {
+		"type": "text/javascript; charset=utf-8",
+		"etag": "\"25be8-uoQ+Ha9BXqrpuq2aqy+egcAXBBM\"",
+		"mtime": "2026-07-14T10:01:45.277Z",
+		"size": 154600,
+		"path": "../public/assets/routes-BZ4lm8dv.js"
+	},
 	"/assets/styles-DvNaDs7S.css": {
 		"type": "text/css; charset=utf-8",
 		"etag": "\"195d3-ncjBV9cqSiy+xQSia4bm3YgfwTg\"",
-		"mtime": "2026-07-13T16:53:46.227Z",
+		"mtime": "2026-07-14T10:01:45.278Z",
 		"size": 103891,
 		"path": "../public/assets/styles-DvNaDs7S.css"
 	},
@@ -267,19 +267,19 @@ var public_assets_data_default = {
 		"size": 3013257,
 		"path": "../public/play8.mp4"
 	},
-	"/ZEREVOK.png": {
-		"type": "image/png",
-		"etag": "\"23cf27-dd4lHKipIKmwumTzFWIB7LtoWTc\"",
-		"mtime": "2026-07-06T10:39:51.819Z",
-		"size": 2346791,
-		"path": "../public/ZEREVOK.png"
-	},
 	"/play9.mp4": {
 		"type": "video/mp4",
 		"etag": "\"287b98-Q3zv7fM0mugJmgEiMusbWQVqXO0\"",
 		"mtime": "2026-07-11T19:33:43.696Z",
 		"size": 2653080,
 		"path": "../public/play9.mp4"
+	},
+	"/ZEREVOK.png": {
+		"type": "image/png",
+		"etag": "\"23cf27-dd4lHKipIKmwumTzFWIB7LtoWTc\"",
+		"mtime": "2026-07-06T10:39:51.819Z",
+		"size": 2346791,
+		"path": "../public/ZEREVOK.png"
 	},
 	"/LegendsofEternity.exe": {
 		"type": "application/octet-stream",
@@ -324,11 +324,11 @@ var findRouteRules = /* @__PURE__ */ (() => {
 		return r;
 	};
 })();
-var _lazy_xgfCtg = defineLazyEventHandler(() => import("./_chunks/ssr-renderer.mjs"));
+var _lazy_GPJrZ0 = defineLazyEventHandler(() => import("./_chunks/ssr-renderer.mjs"));
 var findRoute = /* @__PURE__ */ (() => {
 	const data = {
 		route: "/**",
-		handler: _lazy_xgfCtg
+		handler: _lazy_GPJrZ0
 	};
 	return ((_m, p) => {
 		return {
